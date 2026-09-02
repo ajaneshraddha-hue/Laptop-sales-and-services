@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lapro Solutions - IT Procurement, Hardware & Repair Services</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Custom CSS for print layouts and animations -->
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Animation for active modals */
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* GST Invoice Printing Layout rules */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-invoice, #printable-invoice * {
+        visibility: visible;
+      }
+      #printable-invoice {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- Lapro Solutions Main Header -->
+  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+    <!-- Main Header Bar -->
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex justify-between items-center gap-4">
+      <!-- Lapro Solutions Brand Logo -->
+      <div onclick="appState.setView('home')" class="flex items-center gap-3 cursor-pointer select-none shrink-0 group">
+        <div class="w-10 h-10 bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-500/20 border border-blue-400/30 group-hover:scale-105 transition duration-200">
+          <span class="font-black text-lg tracking-wider">LS</span>
+        </div>
+        <div>
+          <div class="flex items-center tracking-tight font-black text-xl text-slate-900">
+            <span>LAPRO</span><span class="text-blue-600 ml-1">SOLUTIONS</span>
+          </div>
+          <span class="text-[9.5px] text-slate-500 font-semibold tracking-wide block -mt-0.5 uppercase">IT Procurement & Hardware Services</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-xl hidden md:block">
+        <form id="search-form" onsubmit="handleGlobalSearch(event)" class="relative">
+          <input type="text" id="search-input" placeholder="Search laptops, desktops, servers, parts, specs..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 rounded-full px-5 py-2 pr-10 focus:outline-none focus:border-blue-600 focus:bg-white transition text-xs shadow-inner">
+          <button type="submit" class="absolute right-3.5 top-2.5 text-slate-500 hover:text-blue-600 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Shortcuts: LP Coins, Cart, Wishlist, Sign In -->
+      <div class="flex items-center gap-3 select-none">
+        <!-- LP Coins Loyalty Badge -->
+        <div class="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-black text-[10px] shadow-sm cursor-pointer hover:bg-amber-200 transition" title="Lapro Reward Coins (LP COINS)">
+          <span class="text-amber-700 font-black">LP</span>
+        </div>
+
+        <!-- Cart Icon Button -->
+        <button onclick="appState.setView('cart')" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Shopping Cart">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-slate-900 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white">0</span>
+        </button>
+
+        <!-- Wishlist Icon Button -->
+        <button onclick="appState.setView('profile', { tab: 'wishlist' })" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Wishlist">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          <span id="wishlist-badge" class="absolute -top-1 -right-1 bg-blue-600 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white">0</span>
+        </button>
+
+        <!-- Notifications -->
+        <div class="relative">
+          <button onclick="toggleNotificationsMenu(event)" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Notifications">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white hidden">0</span>
+          </button>
+
+          <!-- Notifications Dropdown Overlay Menu -->
+          <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
+            <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center">
+              <span class="font-bold text-sm text-slate-900">Notifications</span>
+              <div class="flex gap-2">
+                <button onclick="appState.markAllNotificationsRead()" class="text-xs text-blue-600 hover:underline">Mark read</button>
+                <span class="text-slate-300">|</span>
+                <button onclick="appState.clearNotifications()" class="text-xs text-red-500 hover:underline">Clear</button>
+              </div>
+            </div>
+            <div id="notif-items" class="max-h-60 overflow-y-auto">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth state button (Sign in Pill for Customer / Admin indicator) -->
+        <div id="auth-header-btn" class="select-none">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu Categories Row with Working Dropdowns for All Categories -->
+    <nav class="bg-white border-t border-slate-200 px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-none">
+      <div class="max-w-7xl mx-auto flex items-center gap-5 text-[13px] font-semibold text-slate-700">
+        
+        <!-- Crazy Deals (Featured Orange Item) -->
+        <button onclick="appState.setView('catalog', { category: 'Crazy Deals', subcategory: 'All' })" class="text-[#FF6B00] hover:text-orange-700 font-bold transition flex items-center gap-1 text-sm tracking-tight shrink-0" data-view="crazy-deals">
+          <span>🔥 Crazy Deals</span>
+        </button>
+
+        <!-- Desktops Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Desktops', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="desktops">
+            Desktops <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Desktops</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'Mini PCs')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Mini & Tiny PCs</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'All-in-One Desktops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">All-in-One Desktops</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'Gaming Desktops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gaming Desktops</button>
+          </div>
+        </div>
+
+        <!-- Laptops Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Laptops', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="laptops">
+            Laptops <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Laptops</button>
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'Business Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Business Laptops (Latitude / ThinkPad)</button>
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'Gaming Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gaming Laptops (ROG / IdeaPad)</button>
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'MacBooks')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Apple MacBooks (M1/M2)</button>
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'Consumer Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Consumer & Student Laptops</button>
+          </div>
+        </div>
+        
+        <!-- Accessories Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Accessories', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="accessories">
+            Accessories <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Accessories</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Backpacks & Cases')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Backpacks & Cases</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Keyboards & Mouse')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Keyboards & Mouse Combos</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Docking Stations')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Universal Docking Stations</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Laptop Accessories')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Cooling Pads & Stands</button>
+          </div>
+        </div>
+
+        <!-- Peripherals Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Peripherals', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="peripherals">
+            Peripherals <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Peripherals</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Monitors')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Monitors & Displays</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Headphones')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Wireless Headsets</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Speakers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Speaker Systems</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Printers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Laser & Inkjet Printers</button>
+          </div>
+        </div>
+
+        <!-- Storages Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Storages', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="storages">
+            Storages <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-44 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Storages', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Storages</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'SSD')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">NVMe & SATA SSDs</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'HDD')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Internal Hard Drives</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'External Storage')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Portable SSDs & Flash</button>
+          </div>
+        </div>
+        
+        <!-- Networking Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Networking', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="networking">
+            Networking <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Networking', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Networking</button>
+            <button onclick="appState.setSubcategoryFilter('Networking', 'Routers & Access Points')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Routers & Access Points</button>
+            <button onclick="appState.setSubcategoryFilter('Networking', 'Gigabit Switches')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gigabit & PoE Switches</button>
+          </div>
+        </div>
+
+        <!-- Consumables Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Consumables', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="consumables">
+            Consumables <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-44 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Consumables', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Consumables</button>
+            <button onclick="appState.setSubcategoryFilter('Consumables', 'Cartridges & Toners')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Cartridges & Toners</button>
+          </div>
+        </div>
+
+        <!-- Servers & Workstations Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Servers & Workstations', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="servers">
+            Servers & Workstations <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Servers & Workstations</button>
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Tower Servers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Tower & Rack Servers</button>
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Workstation CPUs')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Precision & Z-Workstations</button>
+          </div>
+        </div>
+
+        <!-- Software's Dropdown -->
+        <div class="relative inline-block group">
+          <button onclick="appState.setView('catalog', { category: 'Software\'s', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="softwares">
+            Software's <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          </button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Software</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Operating Systems')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Windows 11 Pro Licenses</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Office Suite')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Microsoft Office Lifetime</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Security Software')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Antivirus & Cyber Security</button>
+          </div>
+        </div>
+
+        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="hover:text-blue-600 transition text-sm font-bold">+</button>
+
+        <!-- Services & Repair Tab (Kept Intact) -->
+        <button onclick="appState.setView('service')" class="ml-auto text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3.5 py-1.5 rounded-full border border-blue-200 transition text-xs shrink-0 shadow-sm" data-view="service">
+          <span>🛠️</span> Services & Repair
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Mobile Search Bar -->
+  <div class="bg-white p-3 md:hidden shadow-inner border-b border-slate-200 flex">
+    <form onsubmit="handleGlobalSearch(event)" class="relative w-full">
+      <input type="text" id="mobile-search-input" placeholder="Search Lapro catalog..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 rounded-full px-4 py-2 pr-10 focus:outline-none focus:border-blue-600 transition text-xs">
+      <button type="submit" class="absolute right-3 top-2.5 text-slate-400">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto p-4 md:py-8">
+    <!-- Dynamic View loaded by app.js -->
+    <div class="flex items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+    </div>
+  </main>
+
+  <!-- Float Comparison Bar -->
+  <div id="compare-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white rounded-xl shadow-2xl p-4 flex gap-4 items-center border border-slate-700 z-30 transition translate-y-24 opacity-0 scale-95 duration-300">
+    <div class="text-sm">
+      <span class="font-bold text-yellow-400 block">Compare Laptops</span>
+      <span class="text-xs text-slate-400" id="compare-count">0 of 3 selected</span>
+    </div>
+    <div class="flex gap-2" id="compare-thumbnails">
+      <!-- Populated by JS -->
+    </div>
+    <div class="flex gap-2">
+      <button onclick="openComparisonModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-4 rounded-lg shadow-lg transition">Compare Now</button>
+      <button onclick="clearComparison()" class="text-slate-400 hover:text-white transition text-xs">Clear</button>
+    </div>
+  </div>
+
+  <!-- Comparison Modal Dialog -->
+  <div id="compare-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[85vh] flex flex-col shadow-2xl fade-in overflow-hidden">
+      <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
+        <h3 class="text-xl font-bold">Laptop Specifications Comparison</h3>
+        <button onclick="closeComparisonModal()" class="text-slate-200 hover:text-white p-1 hover:bg-slate-800 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 overflow-auto flex-1" id="compare-table-container">
+        <!-- Render Comparison Grid by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER AUTH MODAL (LOGIN / REGISTER) - Strictly Customer Only -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 fade-in relative border border-slate-100">
+      <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Customer Portal Header -->
+      <div class="mb-4 text-center">
+        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base mx-auto mb-2 shadow-md">LS</div>
+        <h3 class="font-extrabold text-lg text-slate-900">Customer Account</h3>
+        <p class="text-xs text-slate-500">Sign in to track orders, manage doorstep repairs & checkout</p>
+      </div>
+
+      <!-- Toggle Customer Login vs Register vs Admin Portal tabs -->
+      <div class="flex border-b border-slate-200 mb-5 text-xs">
+        <button id="tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2.5 text-center border-b-2 border-blue-600 font-bold text-blue-600">Customer Login</button>
+        <button id="tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-slate-400 font-medium hover:text-slate-600">New Register</button>
+        <button id="tab-admin" onclick="toggleAuthTab('admin')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-purple-700 font-bold hover:text-purple-900 flex items-center justify-center gap-1">🔒 Admin Portal</button>
+      </div>
+
+      <!-- Customer Login Form -->
+      <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
+          <input type="email" id="login-email" required placeholder="e.g. amit.sharma@gmail.com" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+          <input type="password" id="login-pass" required placeholder="Enter password" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer">
+            <input type="checkbox" checked class="rounded text-blue-600 focus:ring-blue-600"> Remember me
+          </label>
+          <a href="javascript:void(0)" onclick="alert('Password reset link has been dispatched to your registered email.')" class="text-blue-600 hover:underline">Forgot Password?</a>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Sign In</button>
+        
+        <div class="text-center pt-2 space-y-1">
+          <p class="text-[11px] text-slate-400">Demo Customer: <span class="font-mono text-slate-600">amit.sharma@gmail.com / password123</span></p>
+        </div>
+      </form>
+
+      <!-- Admin Login Form inside Modal -->
+      <form id="form-admin-modal" onsubmit="handleAdminModalLoginSubmit(event)" class="space-y-4 hidden">
+        <div class="bg-slate-900 text-white p-3.5 rounded-xl border border-slate-700 text-xs mb-3">
+          <span class="text-cyan-400 font-bold block mb-0.5">Authorized Store Administrator</span>
+          <p class="text-[11px] text-slate-300">Enter private admin credentials to manage products, stock & orders.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin Email Address</label>
+          <input type="email" id="modal-admin-email" value="admin@laprosolutions.com" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600 font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Master Admin Password</label>
+          <input type="password" id="modal-admin-pass" value="LaproAdminSecure2026!" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600">
+        </div>
+        <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">
+          🔒 Login to Admin Dashboard
+        </button>
+      </form>
+
+      <!-- Customer Register Form -->
+      <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name</label>
+          <input type="text" id="reg-name" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
+          <input type="email" id="reg-email" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. ramesh.kumar@gmail.com">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
+          <input type="tel" id="reg-phone" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. +91 98765 43210">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+          <input type="password" id="reg-pass" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="Create strong password">
+        </div>
+        <div class="flex items-center gap-1.5 text-xs py-1">
+          <input type="checkbox" id="reg-consent" required class="rounded text-blue-600">
+          <span class="text-slate-600">I agree to the <button type="button" onclick="appState.setView('privacy'); closeAuthModal();" class="underline hover:text-blue-700">Terms & Privacy Policy</button></span>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Create Customer Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-sm mt-auto border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Col 1: About Brand -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white border border-blue-400 font-bold shadow-inner text-sm">
+            LS
+          </div>
+          <span class="text-lg font-bold text-white tracking-tight">LAPRO SOLUTIONS</span>
+        </div>
+        <p class="text-xs leading-relaxed text-slate-400">Your trusted partner for certified IT hardware, enterprise procurement, genuine accessories, and certified doorstep laptop diagnostics & repair services.</p>
+        <!-- Trust badge icons row -->
+        <div class="flex flex-wrap gap-2 pt-2">
+          <span class="bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded px-2.5 py-1 font-medium flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 100% Genuine</span>
+          <span class="bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded px-2.5 py-1 font-medium flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Onsite Warranty</span>
+        </div>
+      </div>
+
+      <!-- Col 2: Services -->
+      <div>
+        <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Diagnostic & Repairs</h4>
+        <ul class="space-y-2 text-xs">
+          <li><button onclick="appState.setView('service')" class="hover:text-white transition">Display & Touch Panel Replacement</button></li>
+          <li><button onclick="appState.setView('service')" class="hover:text-white transition">Motherboard Chip-Level Repair</button></li>
+          <li><button onclick="appState.setView('service')" class="hover:text-white transition">Battery & Power Adapter Diagnostics</button></li>
+          <li><button onclick="appState.setView('service')" class="hover:text-white transition">High-Speed RAM & NVMe SSD Upgrades</button></li>
+          <li><button onclick="appState.setView('service')" class="hover:text-white transition">OS Installation & Enterprise Support</button></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Support Links -->
+      <div>
+        <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Customer Support</h4>
+        <ul class="space-y-2 text-xs">
+          <li><button onclick="appState.setView('orders')" class="hover:text-white transition">Track Purchase Order</button></li>
+          <li><button onclick="appState.setView('service-history')" class="hover:text-white transition">Track Service Ticket</button></li>
+          <li><button onclick="appState.setView('faq')" class="hover:text-white transition">Frequently Asked Questions (FAQ)</button></li>
+          <li><button onclick="appState.setView('about')" class="hover:text-white transition">About Lapro Solutions</button></li>
+          <li><button onclick="appState.setView('contact')" class="hover:text-white transition">Help Center & Service Centers</button></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Private Admin Portal & Office Info -->
+      <div class="space-y-4">
+        <h4 class="text-white font-bold uppercase tracking-wider text-xs">Enterprise & Administration</h4>
+        <p class="text-xs text-slate-400">Head Office: <br><strong class="text-slate-200">Lapro Solutions Tech Park, Sector 4, Bangalore - 560102</strong></p>
+        
+        <!-- Discreet Private Admin Portal Link (Not visible in normal top customer menus) -->
+        <div class="pt-2 border-t border-slate-800">
+          <button onclick="appState.setView('admin-login')" class="text-[11px] text-slate-500 hover:text-slate-300 flex items-center gap-1.5 transition py-1">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>Authorized Admin Portal</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Badges & Copyright Row -->
+    <div class="bg-slate-950 py-5 px-4 border-t border-slate-900">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+        <div>
+          <span>© 2026 Lapro Solutions. All rights reserved. </span>
+          <button onclick="appState.setView('privacy')" class="hover:text-white underline transition ml-2">Privacy & Compliance</button>
+        </div>
+        <div class="flex items-center gap-3 opacity-70">
+          <span class="text-slate-500 text-[11px]">100% Secured Payment & GST Invoicing:</span>
+          <span class="font-bold tracking-widest text-[9px] border border-slate-700 rounded px-1.5 py-0.5 text-slate-400">UPI</span>
+          <span class="font-bold tracking-widest text-[9px] border border-slate-700 rounded px-1.5 py-0.5 text-slate-400">CARDS</span>
+          <span class="font-bold tracking-widest text-[9px] border border-slate-700 rounded px-1.5 py-0.5 text-slate-400">GST ITC</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Loaded Javascript Modules -->
+  <script src="products.js"></script>
+  <script src="state.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
