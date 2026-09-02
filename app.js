@@ -1542,6 +1542,25 @@ function setAdminTab(tab) {
   }
 }
 
+// Admin order status update + instant tab refresh
+function adminUpdateOrder(orderId, newStatus) {
+  appState.updateOrderStatus(orderId, newStatus);
+  // Refresh the orders tab so status badge and dropdown update immediately
+  const contentEl = document.getElementById("admin-tab-content");
+  if (contentEl) {
+    contentEl.innerHTML = renderAdminTabContent("orders", appState.state);
+  }
+}
+
+// Admin ticket status update + instant tab refresh
+function adminUpdateTicket(ticketId, newStatus) {
+  appState.updateTicketStatus(ticketId, newStatus);
+  const contentEl = document.getElementById("admin-tab-content");
+  if (contentEl) {
+    contentEl.innerHTML = renderAdminTabContent("tickets", appState.state);
+  }
+}
+
 function renderAdminTabContent(tab, state) {
   const products = appState.getProducts();
   const orders = state.orders || [];
@@ -1602,45 +1621,110 @@ function renderAdminTabContent(tab, state) {
   }
 
   if (tab === "orders") {
+    const statusColor = {
+      confirmed: "bg-blue-100 text-blue-700",
+      packed: "bg-yellow-100 text-yellow-700",
+      shipped: "bg-indigo-100 text-indigo-700",
+      out_for_delivery: "bg-orange-100 text-orange-700",
+      delivered: "bg-green-100 text-green-700",
+      cancelled: "bg-red-100 text-red-700"
+    };
+
     return `
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100">
-          <h3 class="font-extrabold text-sm text-slate-900">Customer Purchase Orders (${orders.length})</h3>
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">📦 Customer Purchase Orders</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">${orders.length} total orders — all placed by customers are visible here</p>
+          </div>
+          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full">${orders.length} Orders</span>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
-              <tr>
-                <th class="p-3">Order ID</th>
-                <th class="p-3">Customer</th>
-                <th class="p-3">Items Purchased</th>
-                <th class="p-3">Total Amount</th>
-                <th class="p-3">Current Status</th>
-                <th class="p-3 text-right">Update Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              ${orders.map(o => `
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="p-3 font-mono font-bold text-slate-900">${o.id}<br><span class="text-[10px] text-slate-400">${o.date}</span></td>
-                  <td class="p-3 font-semibold text-slate-800">${o.customerName || 'Customer'}<br><span class="text-[10px] text-slate-400 font-mono">${o.customerEmail || ''}</span></td>
-                  <td class="p-3 text-slate-600">${o.items.map(i => `${i.quantity}x ${i.name}`).join("<br>")}</td>
-                  <td class="p-3 font-bold text-teal-700">₹ ${o.totals.total.toLocaleString('en-IN')}</td>
-                  <td class="p-3"><span class="bg-blue-100 text-blue-700 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">${o.status}</span></td>
-                  <td class="p-3 text-right">
-                    <select onchange="appState.updateOrderStatus('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded p-1 text-[11px] font-semibold">
-                      <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                      <option value="packed" ${o.status === 'packed' ? 'selected' : ''}>Packed</option>
-                      <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                      <option value="out_for_delivery" ${o.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
-                      <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+
+        ${orders.length === 0 ? `
+          <div class="p-12 text-center text-slate-400">
+            <div class="text-4xl mb-3">📭</div>
+            <p class="font-bold text-slate-600">No orders yet</p>
+            <p class="text-xs mt-1">Orders placed by customers will appear here instantly.</p>
+          </div>
+        ` : `
+          <div class="divide-y divide-slate-100">
+            ${orders.map(o => {
+              const badge = statusColor[o.status] || "bg-slate-100 text-slate-600";
+              return `
+                <div class="p-4 hover:bg-slate-50 transition">
+                  <!-- Order Header Row -->
+                  <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-black text-sm text-slate-900 font-mono">${o.id}</span>
+                        <span class="${badge} text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">${o.status.replace(/_/g,' ')}</span>
+                        ${o.paymentMethod ? `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">${o.paymentMethod}</span>` : ''}
+                      </div>
+                      <div class="text-[11px] text-slate-400 mt-0.5">
+                        🕐 ${o.date} ${o.time || ''} &nbsp;|&nbsp; Invoice: <span class="font-mono">${o.invoiceId || '—'}</span>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xl font-black text-teal-700">₹ ${o.totals.total.toLocaleString('en-IN')}</div>
+                      <div class="text-[10px] text-slate-400">Incl. GST ₹${o.totals.tax ? o.totals.tax.toFixed(0) : '0'}</div>
+                    </div>
+                  </div>
+
+                  <!-- Customer + Address -->
+                  <div class="flex flex-wrap gap-4 mb-3">
+                    <div class="bg-slate-50 rounded-xl p-3 flex-1 min-w-[180px]">
+                      <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Customer</div>
+                      <div class="font-bold text-xs text-slate-800">${o.customerName || 'Customer'}</div>
+                      <div class="text-[11px] text-slate-500 font-mono">${o.customerEmail || ''}</div>
+                    </div>
+                    ${o.address ? `
+                      <div class="bg-slate-50 rounded-xl p-3 flex-1 min-w-[200px]">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">📍 Delivery Address</div>
+                        <div class="font-bold text-xs text-slate-800">${o.address.name}</div>
+                        <div class="text-[11px] text-slate-500">${o.address.line}, ${o.address.city}, ${o.address.state} — ${o.address.pin}</div>
+                        <div class="text-[11px] text-slate-500">${o.address.phone}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+
+                  <!-- Ordered Items -->
+                  <div class="mb-3">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Ordered Items (${o.items.length})</div>
+                    <div class="space-y-2">
+                      ${o.items.map(item => `
+                        <div class="flex items-center gap-3 bg-white border border-slate-100 rounded-xl p-2">
+                          ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shrink-0">` : `<div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 text-xs shrink-0">📦</div>`}
+                          <div class="flex-1 min-w-0">
+                            <div class="font-bold text-xs text-slate-800 line-clamp-1">${item.name}</div>
+                            <div class="text-[10px] text-slate-400">${item.brand} &nbsp;·&nbsp; Qty: ${item.quantity}</div>
+                          </div>
+                          <div class="text-right shrink-0">
+                            <div class="font-bold text-xs text-teal-700">₹ ${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                            <div class="text-[10px] text-slate-400">@ ₹${item.price.toLocaleString('en-IN')} each</div>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <!-- Status Update -->
+                  <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
+                    <span class="text-[11px] font-bold text-slate-500">Update Delivery Status:</span>
+                    <select onchange="adminUpdateOrder('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500">
+                      <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ Confirmed</option>
+                      <option value="packed" ${o.status==='packed'?'selected':''}>📦 Packed</option>
+                      <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
+                      <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>🛵 Out for Delivery</option>
+                      <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
+                      <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
                     </select>
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
+                    ${o.trackingId ? `<span class="text-[10px] text-slate-400 font-mono ml-auto">Track: ${o.trackingId}</span>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
       </div>
     `;
   }
