@@ -1460,7 +1460,7 @@ function renderAdminDashboardView(container, state) {
     <!-- Top Admin Bar -->
     <div class="bg-slate-950 text-white rounded-3xl p-6 shadow-xl mb-6 border border-slate-800 flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-blue-500 rounded-xl flex items-center justify-center font-black text-base shadow-md">LS</div>
+        <img src="lapro-logo.png" alt="Lapro" class="w-10 h-10 object-contain rounded-xl" style="background:#000;padding:2px;">
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-black text-lg text-white">Lapro Admin Console</h1>
