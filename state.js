@@ -1,5 +1,5 @@
 // Global State Management for Lapro Solutions SPA
-const STATE_KEY = "lapro_solutions_state_v6";
+const STATE_KEY = "lapro_solutions_state_v8";
 
 const DEFAULT_STATE = {
   currentUser: null, // Customer auth session
@@ -118,18 +118,18 @@ const DEFAULT_STATE = {
     { id: "notif-1", text: "⚡ Welcome to Lapro Solutions! Genuine hardware & doorstep repair services.", time: "Just now", read: false }
   ],
   compareList: [],
-  currentView: "catalog",
+  currentView: "home",
   currentProduct: null,
   currentTicket: null,
   currentOrder: null,
   activeFilters: { 
     search: "", 
-    category: "Crazy Deals", 
+    category: "Desktops", 
     subcategory: "All",
     brand: "All", 
     price: 200000, 
     processor: "All", 
-    screenSize: "All",
+    screenSize: "All", 
     os: "All",
     sort: "featured",
     viewMode: "list" 
@@ -137,7 +137,6 @@ const DEFAULT_STATE = {
   couponApplied: null,
   searchQuery: "",
   categories: [
-    { id: "cat-0", name: "Crazy Deals", active: true },
     { id: "cat-1", name: "Desktops", active: true },
     { id: "cat-2", name: "Laptops", active: true },
     { id: "cat-3", name: "Accessories", active: true },

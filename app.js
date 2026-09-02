@@ -360,8 +360,8 @@ function renderHomeView(container, state) {
           </p>
 
           <div class="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
-            <button onclick="appState.setView('catalog', { category: 'Crazy Deals', subcategory: 'All' })" class="bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-orange-600/30 transition flex items-center gap-2">
-              <span>🔥</span> SHOP CRAZY DEALS
+            <button onclick="appState.setView('catalog', { category: 'Desktops', subcategory: 'All' })" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
+              <span>🖥️</span> SHOP DESKTOPS
             </button>
             <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
               EXPLORE CATALOG
@@ -410,7 +410,6 @@ function renderHomeView(container, state) {
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
         ${[
-          { name: "Crazy Deals", icon: "🔥", cat: "Crazy Deals", color: "from-orange-500/10 to-amber-500/10 text-orange-600 border-orange-200" },
           { name: "Laptops", icon: "💻", cat: "Laptops", color: "from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-200" },
           { name: "Desktops", icon: "🖥️", cat: "Desktops", color: "from-slate-500/10 to-gray-500/10 text-slate-700 border-slate-200" },
           { name: "Accessories", icon: "🎒", cat: "Accessories", color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-200" },
