@@ -1,0 +1,27 @@
+{
+  "name": "Lapro Solutions",
+  "short_name": "Lapro",
+  "description": "Laptop Sales, Service & Upgrades — Enterprise IT Hardware & Doorstep Repairs",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1d4ed8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "lapro-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "lapro-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "business", "utilities"],
+  "screenshots": [],
+  "lang": "en-IN"
+}
