@@ -227,6 +227,8 @@ class StateManager {
       if (!parsed.registeredUsers) {
         parsed.registeredUsers = DEFAULT_STATE.registeredUsers;
       }
+      // Always ensure the Home page gets opened first when loading the site
+      parsed.currentView = "home";
       return parsed;
     } catch (e) {
       console.error("Error reading localstorage state, resetting...", e);

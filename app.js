@@ -28,10 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Initialize view
+  // Initialize view: Always open Home page first on site visit
   const state = appState.state;
+  state.currentView = "home";
   updateHeaderControls(state);
-  renderView(state.currentView, state);
+  renderView("home", state);
   updateComparisonBar(state);
 });
 
