@@ -333,6 +333,9 @@ function renderView(viewName, state) {
     case "profile":
       renderProfileView(mainContent, state);
       break;
+    case "wishlist":
+      renderWishlistView(mainContent, state);
+      break;
     case "about":
       renderAboutView(mainContent);
       break;
@@ -418,7 +421,7 @@ function renderHomeView(container, state) {
                 <span class="text-teal-400 font-extrabold text-xl">₹ 7,906.00</span>
                 <span class="text-xs text-red-400 line-through ml-2">₹ 20,020.00</span>
               </div>
-              <button onclick="appState.addToCart('monitor-lenovo-thinkvision-s24e', 1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow">
+              <button onclick="handleAddToCart(event, 'monitor-lenovo-thinkvision-s24e', 1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow">
                 🛒 Add to Cart
               </button>
             </div>
@@ -472,10 +475,13 @@ function renderHomeView(container, state) {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         ${crazyDeals.map(p => `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+          <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
+            <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
+              ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
+            </button>
             <div class="relative mb-3">
               <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${p.discount}</span>
-              <img src="${p.images[0]}" alt="${p.name}" class="w-full h-40 object-cover rounded-xl group-hover:scale-102 transition duration-300">
+              <img src="${p.images[0]}" alt="${p.name}" class="w-full h-40 object-cover rounded-2xl group-hover:scale-102 transition duration-300">
             </div>
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">${p.brand} • ${p.category}</div>
@@ -485,7 +491,7 @@ function renderHomeView(container, state) {
                 <span class="text-[11px] text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>
               </div>
             </div>
-            <button onclick="appState.addToCart('${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2 rounded-xl transition shadow">
+            <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow">
               🛒 Add to Cart
             </button>
           </div>
@@ -754,7 +760,7 @@ function renderListCard(p) {
           <button onclick="adjustQty('${p.id}', 1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">+</button>
         </div>
 
-        <button onclick="addToCartWithQty('${p.id}')" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+        <button onclick="addToCartWithQty(event, '${p.id}')" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
           <span>🛒</span> ADD TO CART
         </button>
 
@@ -763,7 +769,9 @@ function renderListCard(p) {
         </button>
 
         <div class="flex gap-1.5">
-          <button onclick="appState.toggleWishlist('${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1 text-xs transition" title="Wishlist">♡ Wishlist</button>
+          <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
+            ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 font-bold">❤️ Saved</span>' : '<span class="text-slate-400">🤍 Wishlist</span>'}
+          </button>
           <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs" title="View Details">👁</button>
         </div>
       </div>
@@ -773,12 +781,16 @@ function renderListCard(p) {
 
 function renderGridCard(p) {
   return `
-    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+    <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
+      <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
+        ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
+      </button>
+
       <div>
         <div class="relative mb-3 select-none">
           ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">NEW</span>` : ''}
           ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
-          <img src="${p.images[0]}" alt="${p.name}" class="w-full h-44 object-cover rounded-xl border border-slate-100 group-hover:scale-102 transition duration-300">
+          <img src="${p.images[0]}" alt="${p.name}" class="w-full h-44 object-cover rounded-2xl border border-slate-100 group-hover:scale-102 transition duration-300">
         </div>
         <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">${p.brand} • ${p.category}</div>
         <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-900 hover:text-blue-600 cursor-pointer line-clamp-2 leading-snug mb-2">${p.name}</h3>
@@ -789,7 +801,7 @@ function renderGridCard(p) {
       </div>
 
       <div class="space-y-2">
-        <button onclick="appState.addToCart('${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+        <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
           <span>🛒</span> Add to Cart
         </button>
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
@@ -864,10 +876,29 @@ function adjustQty(prodId, delta) {
   }
 }
 
-function addToCartWithQty(prodId) {
+function addToCartWithQty(event, prodId) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
   const el = document.getElementById(`qty-${prodId}`);
   const qty = el ? parseInt(el.textContent) || 1 : 1;
-  appState.addToCart(prodId, qty);
+  const prod = appState.getProductById(prodId);
+  const success = appState.addToCart(prodId, qty);
+  if (success) {
+    showToast(`Added ${qty} × "${prod ? prod.name : ''}" to cart!`, "🛒", "success");
+
+    if (event && event.currentTarget) {
+      const btn = event.currentTarget;
+      const origText = btn.innerHTML;
+      btn.innerHTML = `<span>✓ Added</span>`;
+      btn.classList.add("bg-green-600", "text-white");
+      setTimeout(() => {
+        btn.innerHTML = origText;
+        btn.classList.remove("bg-green-600");
+      }, 1800);
+    }
+  }
 }
 
 // ======================== 3. PRODUCT DETAIL VIEW ========================
@@ -943,14 +974,14 @@ function renderProductView(container, state) {
 
         <!-- Add to cart and instant checkout -->
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
-          <button onclick="appState.addToCart('${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
             <span>🛒</span> Add to Cart
           </button>
           <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
             <span>⚡</span> Buy Now
           </button>
-          <button onclick="appState.toggleWishlist('${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition" title="Add to Wishlist">
-            ♡
+          <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
+            ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
           </button>
         </div>
       </div>
@@ -2952,6 +2983,178 @@ function handleDeleteCustomerAddress(addrId) {
 function closeCustomerAddressModal() {
   const container = document.getElementById("customer-address-modal-container");
   if (container) container.innerHTML = "";
+}
+
+// ======================== TOAST NOTIFICATION SYSTEM ========================
+function showToast(message, icon = "✅", type = "success") {
+  let toastContainer = document.getElementById("toast-container");
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "toast-container";
+    toastContainer.className = "fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none";
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold text-white transition-all transform duration-300 translate-y-4 opacity-0 pointer-events-auto border backdrop-blur-md ${
+    type === 'error' ? 'bg-red-600 border-red-500 shadow-red-500/20' : type === 'info' ? 'bg-slate-900 border-slate-700 shadow-slate-900/30' : 'bg-slate-950 border-blue-500 shadow-blue-500/30'
+  }`;
+  toast.innerHTML = `
+    <span class="text-base shrink-0">${icon}</span>
+    <span class="flex-1">${message}</span>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.remove("translate-y-4", "opacity-0");
+  }, 10);
+
+  setTimeout(() => {
+    toast.classList.add("translate-y-4", "opacity-0");
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, 2800);
+}
+
+// ======================== E-COMMERCE CART & WISHLIST HANDLERS ========================
+function handleAddToCart(event, prodId, qty = 1) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const prod = appState.getProductById(prodId);
+  if (!prod) return;
+
+  const success = appState.addToCart(prodId, qty);
+  if (success) {
+    showToast(`Added "${prod.name}" to cart!`, "🛒", "success");
+
+    // Button visual feedback without leaving the page
+    if (event && event.currentTarget) {
+      const btn = event.currentTarget;
+      const origText = btn.innerHTML;
+      btn.innerHTML = `<span>✓ Added to Cart</span>`;
+      btn.classList.add("bg-green-600", "text-white");
+      setTimeout(() => {
+        btn.innerHTML = origText;
+        btn.classList.remove("bg-green-600");
+      }, 1800);
+    }
+  }
+}
+
+function handleToggleWishlist(event, prodId) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const prod = appState.getProductById(prodId);
+  const wasInWishlist = (appState.state.wishlist || []).includes(prodId);
+  const success = appState.toggleWishlist(prodId);
+
+  if (success) {
+    if (wasInWishlist) {
+      showToast(`Removed from Wishlist`, "💔", "info");
+    } else {
+      showToast(`Added "${prod ? prod.name : ''}" to Wishlist!`, "❤️", "success");
+    }
+
+    if (appState.state.currentView === "wishlist") {
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) renderWishlistView(mainContent, appState.state);
+    } else {
+      if (event && event.currentTarget) {
+        const btn = event.currentTarget;
+        const nowIn = (appState.state.wishlist || []).includes(prodId);
+        btn.innerHTML = nowIn 
+          ? `<span class="text-red-500 font-bold">❤️</span>` 
+          : `<span class="text-slate-400">🤍</span>`;
+      }
+    }
+  }
+}
+
+// ======================== 8. DEDICATED WISHLIST VIEW ========================
+function renderWishlistView(container, state) {
+  const wishlistIds = state.wishlist || [];
+  const products = wishlistIds.map(id => appState.getProductById(id)).filter(Boolean);
+
+  if (!state.currentUser && !state.adminUser) {
+    container.innerHTML = `
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center max-w-md mx-auto shadow-sm space-y-4 my-8">
+        <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto">❤️</div>
+        <h2 class="text-xl font-black text-slate-900">Sign In to View Your Wishlist</h2>
+        <p class="text-xs text-slate-500">Save your favorite laptops, desktops, and parts to buy anytime.</p>
+        <button onclick="openAuthModal('login')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow">Sign In / Register</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (products.length === 0) {
+    container.innerHTML = `
+      <div class="max-w-4xl mx-auto py-16 text-center space-y-4">
+        <div class="w-20 h-20 bg-red-50 text-red-400 rounded-3xl flex items-center justify-center text-4xl mx-auto border border-red-100 shadow-sm">
+          🤍
+        </div>
+        <h2 class="text-2xl font-black text-slate-900">Your Wishlist is Empty</h2>
+        <p class="text-xs text-slate-500 max-w-md mx-auto">Explore our hardware catalog and click the heart icon on any product to save it here for later!</p>
+        <button onclick="appState.setView('catalog')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow">
+          Explore Hardware Catalog
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="max-w-6xl mx-auto space-y-6">
+      <div class="flex flex-wrap justify-between items-center gap-3 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <span>❤️</span> My Wishlist
+          </h1>
+          <p class="text-xs text-slate-400 mt-0.5">${products.length} saved products</p>
+        </div>
+        <button onclick="appState.setView('catalog')" class="text-xs font-bold text-blue-600 hover:underline">
+          + Continue Shopping
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        ${products.map(p => `
+          <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
+            <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-red-500 hover:scale-110 transition z-10" title="Remove from Wishlist">
+              ✕
+            </button>
+
+            <div onclick="appState.setView('product', { product: '${p.id}' })" class="cursor-pointer">
+              <div class="h-44 bg-slate-50 rounded-2xl overflow-hidden mb-3 flex items-center justify-center p-2">
+                <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+              </div>
+              <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">${p.category}</span>
+              <h3 class="font-bold text-xs text-slate-900 line-clamp-2 mt-0.5 group-hover:text-blue-600 transition">${p.name}</h3>
+              
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="text-base font-black text-slate-900 font-mono">₹ ${p.price.toLocaleString('en-IN')}</span>
+                ${p.originalPrice > p.price ? `<span class="text-[11px] text-slate-400 line-through font-mono">₹ ${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 mt-3 space-y-2">
+              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                <span>🛒</span> Move to Cart
+              </button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function renderAboutView(container) {
