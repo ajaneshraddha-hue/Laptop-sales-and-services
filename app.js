@@ -2288,6 +2288,17 @@ function renderProductImagePreviews() {
   `;
 }
 
+// Helper to calculate smart suggested negotiate price floor
+function autoSuggestMinPrice(val) {
+  const minInp = document.getElementById("new-prod-minprice");
+  if (minInp && (!minInp.value || minInp.dataset.userEdited !== "true")) {
+    const num = Number(val);
+    if (num > 0) {
+      minInp.value = Math.round(num * 0.88);
+    }
+  }
+}
+
 // ======================== ADMIN PRODUCT CRUD MODALS ========================
 function openAddProductModal() {
   const container = document.getElementById("product-modal-container");
@@ -2323,19 +2334,30 @@ function openAddProductModal() {
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-price" placeholder="45000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+          <!-- Pricing & Price Negotiation Settings -->
+          <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl space-y-2">
+            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+              <span>💬</span>
+              <span>Pricing & Customer Price Negotiation Settings</span>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Min Offer (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-minprice" placeholder="39000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-blue-700" title="Counter offers below this price are rejected">
+            
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Selling Price (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="new-prod-price" placeholder="45000" oninput="autoSuggestMinPrice(this.value)" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              </div>
+              <div>
+                <label class="block font-bold text-amber-900 uppercase mb-1 text-[11px]">Negotiate Min Floor (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="new-prod-minprice" placeholder="39000" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">MRP / List Price (₹)</label>
+                <input type="number" id="new-prod-origprice" placeholder="89000" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              </div>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">MRP Price (₹)</label>
-              <input type="number" id="new-prod-origprice" placeholder="89000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
-            </div>
+            <p class="text-[10.5px] text-amber-800">
+              💡 <strong>Negotiate Price Floor:</strong> When customers click <em>"Make an Offer / Negotiate Price"</em>, counter-offers at or above this amount are automatically approved. Offers below this floor are rejected.
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -2456,19 +2478,30 @@ function openEditProductModal(prodId) {
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3">
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+          <!-- Pricing & Price Negotiation Settings -->
+          <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl space-y-2">
+            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+              <span>💬</span>
+              <span>Pricing & Customer Price Negotiation Settings</span>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Min Offer (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-minprice" value="${p.minPrice || Math.round(p.price * 0.88)}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-blue-700" title="Counter offers below this price are rejected">
+            
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Selling Price (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              </div>
+              <div>
+                <label class="block font-bold text-amber-900 uppercase mb-1 text-[11px]">Negotiate Min Floor (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="edit-prod-minprice" value="${p.minPrice || Math.round(p.price * 0.88)}" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">MRP / List Price (₹)</label>
+                <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              </div>
             </div>
-            <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">MRP Price (₹)</label>
-              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
-            </div>
+            <p class="text-[10.5px] text-amber-800">
+              💡 <strong>Negotiate Price Floor:</strong> When customers click <em>"Make an Offer / Negotiate Price"</em>, counter-offers at or above this amount are automatically approved.
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
