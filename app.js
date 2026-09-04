@@ -94,19 +94,28 @@ function updateHeaderControls(state) {
         </div>
       `;
     } else if (state.currentUser) {
-      // If logged in as Customer
+      // If logged in as Customer (Click-toggled menu that never closes prematurely)
       authHeaderBtn.innerHTML = `
-        <div class="relative inline-block text-left group">
-          <button class="hover:text-blue-600 font-semibold transition flex items-center gap-1.5 text-xs text-slate-800 border border-slate-200 bg-slate-50 px-3 py-1.5 rounded-full">
+        <div class="relative inline-block text-left" id="customer-profile-wrapper">
+          <button onclick="toggleCustomerProfileMenu(event)" class="hover:text-blue-600 font-semibold transition flex items-center gap-1.5 text-xs text-slate-800 border border-slate-200 bg-slate-50 px-3 py-1.5 rounded-full shadow-sm">
             <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span>Hi, ${state.currentUser.name.split(" ")[0]}</span>
             <span class="text-[9px] text-slate-400">▾</span>
           </button>
-          <div class="absolute right-0 top-full mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-1.5 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100">
-            <button onclick="appState.setView('profile')" class="w-full text-left px-4 py-2 hover:bg-slate-50 font-semibold text-slate-700">My Account Profile</button>
-            <button onclick="appState.setView('orders')" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700">My Purchase Orders</button>
-            <button onclick="appState.setView('service-history')" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700">My Repair Tickets</button>
-            <button onclick="appState.customerLogout()" class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-bold">Logout</button>
+          <div id="customer-profile-dropdown" class="absolute right-0 top-full mt-2 w-52 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 hidden z-50 text-xs font-medium divide-y divide-slate-100">
+            <div class="px-4 py-2 bg-slate-50 border-b border-slate-100">
+              <span class="font-bold text-slate-900 block">${state.currentUser.name}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${state.currentUser.email}</span>
+            </div>
+            <div class="py-1">
+              <button onclick="appState.setView('profile'); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 font-semibold text-slate-700 flex items-center gap-2">👤 My Account Profile</button>
+              <button onclick="appState.setView('profile', { tab: 'addresses' }); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 text-slate-700 flex items-center gap-2">📍 Manage Addresses</button>
+              <button onclick="appState.setView('orders'); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 text-slate-700 flex items-center gap-2">📑 My Purchase Orders</button>
+              <button onclick="appState.setView('service-history'); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 text-slate-700 flex items-center gap-2">🛠️ My Repair Tickets</button>
+            </div>
+            <div class="pt-1">
+              <button onclick="appState.customerLogout(); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-bold flex items-center gap-2">🚪 Logout</button>
+            </div>
           </div>
         </div>
       `;
@@ -130,6 +139,18 @@ function updateHeaderControls(state) {
       tab.classList.remove("text-blue-600", "font-bold");
     }
   });
+}
+
+// Dropdown click helpers
+function toggleCustomerProfileMenu(event) {
+  if (event) event.stopPropagation();
+  const dropdown = document.getElementById("customer-profile-dropdown");
+  if (dropdown) dropdown.classList.toggle("hidden");
+}
+
+function closeCustomerProfileMenu() {
+  const dropdown = document.getElementById("customer-profile-dropdown");
+  if (dropdown) dropdown.classList.add("hidden");
 }
 
 // Global Search & Notification Handlers
@@ -172,6 +193,8 @@ function toggleAuthTab(tab) {
   const tabLogin = document.getElementById("tab-login");
   const tabReg = document.getElementById("tab-register");
   const tabAdmin = document.getElementById("tab-admin");
+  const modalTitle = document.getElementById("auth-modal-title");
+  const modalSub = document.getElementById("auth-modal-subtitle");
 
   // Reset all
   if (formLogin) formLogin.classList.add("hidden");
@@ -184,12 +207,18 @@ function toggleAuthTab(tab) {
   if (tab === "login") {
     if (formLogin) formLogin.classList.remove("hidden");
     if (tabLogin) tabLogin.className = "flex-1 pb-2.5 text-center border-b-2 border-blue-600 font-bold text-blue-600";
+    if (modalTitle) modalTitle.textContent = "Customer Account";
+    if (modalSub) modalSub.textContent = "Sign in to track orders, manage doorstep repairs & checkout";
   } else if (tab === "register") {
     if (formReg) formReg.classList.remove("hidden");
     if (tabReg) tabReg.className = "flex-1 pb-2.5 text-center border-b-2 border-blue-600 font-bold text-blue-600";
+    if (modalTitle) modalTitle.textContent = "Create Customer Account";
+    if (modalSub) modalSub.textContent = "Register to place orders, save addresses & track repair tickets";
   } else if (tab === "admin") {
     if (formAdmin) formAdmin.classList.remove("hidden");
     if (tabAdmin) tabAdmin.className = "flex-1 pb-2.5 text-center border-b-2 border-purple-600 font-bold text-purple-700";
+    if (modalTitle) modalTitle.textContent = "Authorized Admin Portal";
+    if (modalSub) modalSub.textContent = "Enter store administrator credentials to manage products, stock & orders";
   }
 }
 
@@ -688,7 +717,7 @@ function renderListCard(p) {
         ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
         <img src="${p.images[0]}" alt="${p.name}" class="w-full h-full object-cover rounded-xl border border-slate-100">
         <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-0.5 rounded">
-          ${p.specs.warranty || '1 Year Warranty'}
+          ${p.specs?.warranty || '1 Year Warranty'}
         </div>
       </div>
 
@@ -696,7 +725,7 @@ function renderListCard(p) {
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
           <span class="text-[10px] font-extrabold uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${p.brand}</span>
-          <span class="text-[10px] text-slate-400 font-medium">${p.category} › ${p.subcategory || 'General'}</span>
+          <span class="text-[10px] text-slate-400 font-medium">${p.category}</span>
           <span class="ml-auto text-amber-500 font-bold text-xs">⭐ ${p.rating}</span>
         </div>
         <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-sm text-slate-900 hover:text-blue-600 cursor-pointer line-clamp-2 leading-snug mb-2">
@@ -729,8 +758,12 @@ function renderListCard(p) {
           <span>🛒</span> ADD TO CART
         </button>
 
+        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
+          <span>💬</span> Negotiate Price
+        </button>
+
         <div class="flex gap-1.5">
-          <button onclick="appState.toggleWishlist('${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1.5 text-xs transition" title="Wishlist">♡ Wishlist</button>
+          <button onclick="appState.toggleWishlist('${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1 text-xs transition" title="Wishlist">♡ Wishlist</button>
           <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs" title="View Details">👁</button>
         </div>
       </div>
@@ -758,6 +791,9 @@ function renderGridCard(p) {
       <div class="space-y-2">
         <button onclick="appState.addToCart('${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
           <span>🛒</span> Add to Cart
+        </button>
+        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
+          <span>💬</span> Make an Offer
         </button>
         <button onclick="appState.setView('product', { product: '${p.id}' })" class="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs py-1.5 rounded-xl transition">
           View Specifications
@@ -859,9 +895,9 @@ function renderProductView(container, state) {
           <img id="main-prod-img" src="${p.images[0]}" alt="${p.name}" class="w-full h-80 md:h-96 object-cover">
           ${p.discount ? `<span class="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow">${p.discount}</span>` : ''}
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 overflow-x-auto pb-1">
           ${p.images.map((img, i) => `
-            <img src="${img}" onclick="document.getElementById('main-prod-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-slate-200 hover:border-blue-600 cursor-pointer transition">
+            <img src="${img}" onclick="document.getElementById('main-prod-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-slate-200 hover:border-blue-600 cursor-pointer transition shrink-0">
           `).join("")}
         </div>
       </div>
@@ -887,6 +923,11 @@ function renderProductView(container, state) {
           <span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">In Stock (${p.stockLeft} left)</span>
         </div>
 
+        <!-- Price Negotiation Action Button -->
+        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm py-3 rounded-xl transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
+          <span>💬</span> Make an Offer / Negotiate Price
+        </button>
+
         <!-- Specifications Breakdown Table -->
         <div class="space-y-2 pt-2">
           <h4 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Specifications & Key Highlights</h4>
@@ -901,11 +942,11 @@ function renderProductView(container, state) {
         </div>
 
         <!-- Add to cart and instant checkout -->
-        <div class="flex flex-col sm:flex-row gap-3 pt-4">
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
           <button onclick="appState.addToCart('${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
             <span>🛒</span> Add to Cart
           </button>
-          <button onclick="appState.addToCart('${p.id}', 1); appState.setView('checkout');" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+          <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
             <span>⚡</span> Buy Now
           </button>
           <button onclick="appState.toggleWishlist('${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition" title="Add to Wishlist">
@@ -918,6 +959,105 @@ function renderProductView(container, state) {
 
   container.innerHTML = html;
 }
+
+// ======================== PRICE NEGOTIATION MODAL SYSTEM ========================
+function openNegotiateModal(prodId) {
+  if (!appState.state.currentUser && !appState.state.adminUser) {
+    openAuthModal('login');
+    alert("Please sign in or register to negotiate price or submit an offer!");
+    return;
+  }
+  const p = appState.getProductById(prodId);
+  if (!p) return;
+
+  const modal = document.getElementById("negotiate-modal");
+  if (!modal) return;
+
+  modal.innerHTML = `
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in relative border border-slate-200">
+      <button onclick="closeNegotiateModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 font-bold text-base">✕</button>
+
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl shadow-sm">💬</div>
+        <h3 class="font-black text-lg text-slate-900">Make an Offer / Negotiate Price</h3>
+        <p class="text-xs text-slate-500">Submit your proposed counter-offer directly to the seller</p>
+      </div>
+
+      <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 mb-4 flex items-center gap-3">
+        <img src="${p.images[0]}" alt="${p.name}" class="w-16 h-16 object-cover rounded-xl border border-slate-200 shrink-0">
+        <div class="min-w-0">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">${p.brand} • ${p.category}</span>
+          <h4 class="font-bold text-xs text-slate-900 line-clamp-1">${p.name}</h4>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span class="text-xs text-slate-500">Listed Price:</span>
+            <span class="font-black text-sm text-teal-700">₹ ${p.price.toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+      </div>
+
+      <form onsubmit="handleNegotiateOfferSubmit(event, '${p.id}')" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Your Proposed Offer Price (₹) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">₹</span>
+            <input type="number" id="negotiate-offer-input" min="1" max="${p.price}" placeholder="e.g. ${Math.round(p.price * 0.9)}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-8 pr-4 font-black text-base text-slate-900 focus:outline-none focus:border-amber-500 font-mono shadow-inner">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Offers close to the listed price have the highest chance of instant approval.</p>
+        </div>
+
+        <div id="negotiate-feedback" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+
+        <div class="flex gap-2.5 pt-1">
+          <button type="button" onclick="closeNegotiateModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" id="negotiate-submit-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-black py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+            <span>⚡</span> Submit Offer
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeNegotiateModal() {
+  const modal = document.getElementById("negotiate-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
+
+function handleNegotiateOfferSubmit(event, prodId) {
+  event.preventDefault();
+  const input = document.getElementById("negotiate-offer-input");
+  const feedback = document.getElementById("negotiate-feedback");
+  const submitBtn = document.getElementById("negotiate-submit-btn");
+  if (!input || !feedback) return;
+
+  const offer = Number(input.value);
+  const res = appState.negotiatePrice(prodId, offer);
+
+  feedback.classList.remove("hidden", "bg-green-50", "text-green-800", "border-green-200", "bg-red-50", "text-red-800", "border-red-200");
+
+  if (res.success) {
+    feedback.className = "p-3 rounded-xl text-xs font-bold bg-green-50 text-green-800 border border-green-200";
+    feedback.innerHTML = res.message;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "✅ Offer Accepted!";
+    }
+    setTimeout(() => {
+      closeNegotiateModal();
+      appState.setView("cart");
+    }, 1500);
+  } else {
+    feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-50 text-red-800 border border-red-200";
+    feedback.innerHTML = res.message;
+  }
+}
+
 
 // ======================== 4. CART & CHECKOUT ========================
 function renderCartView(container, state) {
@@ -1442,7 +1582,7 @@ function handleAdminRegisterSubmit(event) {
 }
 
 // Global active tab inside Admin Dashboard
-let activeAdminTab = "products"; // products, orders, tickets, customers, analytics
+let activeAdminTab = "dashboard"; // dashboard, products, orders, tickets, customers, categories
 
 function renderAdminDashboardView(container, state) {
   // STRICT SECURITY CHECK: Customers CANNOT view this dashboard!
@@ -1455,80 +1595,75 @@ function renderAdminDashboardView(container, state) {
   const orders = state.orders || [];
   const tickets = state.serviceTickets || [];
   const customers = state.registeredUsers || [];
+  const categories = state.categories || [];
 
   let html = `
     <!-- Top Admin Bar -->
-    <div class="bg-slate-950 text-white rounded-3xl p-6 shadow-xl mb-6 border border-slate-800 flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <img src="lapro-logo.png" alt="Lapro" class="w-10 h-10 object-contain rounded-xl" style="background:#000;padding:2px;">
+    <div class="bg-slate-950 text-white rounded-3xl p-6 shadow-2xl mb-6 border border-slate-800 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-4">
+        <img src="lapro-logo.png" alt="Lapro Solutions" class="w-12 h-12 object-contain rounded-2xl bg-black p-1 border border-slate-700 shadow-inner">
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-black text-lg text-white">Lapro Admin Console</h1>
-            <span class="bg-purple-900/60 border border-purple-500/40 text-purple-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">${state.adminUser.role || 'Super Admin'}</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-black text-xl text-white tracking-tight">Authorized Admin Portal</h1>
+            <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">${state.adminUser.role || 'Super Admin'}</span>
           </div>
-          <p class="text-xs text-slate-400">Logged in as: <strong class="text-slate-200">${state.adminUser.email}</strong></p>
+          <p class="text-xs text-slate-400 mt-0.5">Logged in as: <strong class="text-slate-200">${state.adminUser.email}</strong></p>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
         <button onclick="openAddProductModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
-          <span>➕</span> Add New Product
+          <span>➕</span> Add Product
         </button>
-        <button onclick="appState.setView('home')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl transition">
-          Storefront View
+        <button onclick="appState.setView('home')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+          <span>🏠</span> Storefront View
         </button>
-        <button onclick="appState.adminLogout()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition">
-          Logout
+        <button onclick="appState.adminLogout()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+          <span>🚪</span> Logout
         </button>
       </div>
     </div>
 
-    <!-- Admin KPI Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs text-slate-400 font-bold uppercase">Total Inventory</span>
-        <div class="text-2xl font-black text-slate-900 mt-1">${products.length} Items</div>
-        <span class="text-[10px] text-green-600 font-bold">Active in Catalog</span>
+    <!-- Admin SaaS Layout (Sidebar + Main Content) -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+      <!-- SaaS Sidebar Menu -->
+      <div class="lg:col-span-1 bg-white rounded-3xl border border-slate-200 p-4 shadow-sm space-y-1.5 sticky top-24">
+        <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 py-1">Management</div>
+        ${[
+          { id: "dashboard", label: "📊 Earnings Dashboard", count: null },
+          { id: "products", label: "📦 Product Inventory", count: products.length },
+          { id: "orders", label: "📑 Orders", count: orders.length },
+          { id: "customers", label: "👥 Customers", count: customers.length },
+          { id: "tickets", label: "🛠️ Service & Repair", count: tickets.length },
+          { id: "categories", label: "🏷️ Categories", count: categories.length }
+        ].map(item => `
+          <button onclick="setAdminTab('${item.id}')" class="w-full flex items-center justify-between text-left px-3.5 py-3 rounded-2xl font-bold text-xs transition ${activeAdminTab === item.id ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}">
+            <span>${item.label}</span>
+            ${item.count !== null ? `<span class="${activeAdminTab === item.id ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'} rounded-full px-2 py-0.5 text-[10px] font-mono font-extrabold">${item.count}</span>` : ''}
+          </button>
+        `).join("")}
+
+        <div class="pt-4 border-t border-slate-100 space-y-1">
+          <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 py-1">Quick Links</div>
+          <button onclick="openAddCategoryModal()" class="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
+            <span>➕</span> Add New Category
+          </button>
+          <button onclick="openAddCustomerModal()" class="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
+            <span>➕</span> Add New Customer
+          </button>
+        </div>
       </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs text-slate-400 font-bold uppercase">Customer Orders</span>
-        <div class="text-2xl font-black text-slate-900 mt-1">${orders.length}</div>
-        <span class="text-[10px] text-blue-600 font-bold">Recent Purchases</span>
-      </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs text-slate-400 font-bold uppercase">Repair Tickets</span>
-        <div class="text-2xl font-black text-slate-900 mt-1">${tickets.length}</div>
-        <span class="text-[10px] text-amber-600 font-bold">Diagnostics & Repairs</span>
-      </div>
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs text-slate-400 font-bold uppercase">Registered Customers</span>
-        <div class="text-2xl font-black text-slate-900 mt-1">${customers.length}</div>
-        <span class="text-[10px] text-purple-600 font-bold">Accounts Created</span>
+
+      <!-- Main Admin Content Area -->
+      <div class="lg:col-span-4" id="admin-tab-content">
+        ${renderAdminTabContent(activeAdminTab, state)}
       </div>
     </div>
 
-    <!-- Admin Navigation Tabs -->
-    <div class="flex border-b border-slate-200 mb-6 gap-2 select-none overflow-x-auto">
-      ${[
-        { id: "products", label: "📦 Product Inventory", count: products.length },
-        { id: "orders", label: "📑 Orders Management", count: orders.length },
-        { id: "tickets", label: "🛠️ Service Tickets", count: tickets.length },
-        { id: "customers", label: "👥 Customers", count: customers.length }
-      ].map(t => `
-        <button onclick="setAdminTab('${t.id}')" class="pb-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition ${activeAdminTab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}">
-          <span>${t.label}</span>
-          <span class="bg-slate-100 text-slate-600 rounded-full px-2 py-0.5 text-[10px] font-mono">${t.count}</span>
-        </button>
-      `).join("")}
-    </div>
-
-    <!-- Admin Tab Content View -->
-    <div id="admin-tab-content">
-      ${renderAdminTabContent(activeAdminTab, state)}
-    </div>
-
-    <!-- ADD / EDIT PRODUCT MODAL CONTAINER -->
+    <!-- ADMIN MODAL CONTAINERS -->
     <div id="product-modal-container"></div>
+    <div id="admin-category-modal-container"></div>
+    <div id="admin-customer-modal-container"></div>
   `;
 
   container.innerHTML = html;
@@ -1536,18 +1671,18 @@ function renderAdminDashboardView(container, state) {
 
 function setAdminTab(tab) {
   activeAdminTab = tab;
-  const contentEl = document.getElementById("admin-tab-content");
-  if (contentEl) {
-    contentEl.innerHTML = renderAdminTabContent(tab, appState.state);
+  // Re-render whole view to update sidebar active classes
+  const mainContent = document.getElementById("main-content");
+  if (mainContent && appState.state.currentView === "admin-dashboard") {
+    renderAdminDashboardView(mainContent, appState.state);
   }
 }
 
 // Admin order status update + instant tab refresh
 function adminUpdateOrder(orderId, newStatus) {
   appState.updateOrderStatus(orderId, newStatus);
-  // Refresh the orders tab so status badge and dropdown update immediately
   const contentEl = document.getElementById("admin-tab-content");
-  if (contentEl) {
+  if (contentEl && activeAdminTab === "orders") {
     contentEl.innerHTML = renderAdminTabContent("orders", appState.state);
   }
 }
@@ -1556,7 +1691,7 @@ function adminUpdateOrder(orderId, newStatus) {
 function adminUpdateTicket(ticketId, newStatus) {
   appState.updateTicketStatus(ticketId, newStatus);
   const contentEl = document.getElementById("admin-tab-content");
-  if (contentEl) {
+  if (contentEl && activeAdminTab === "tickets") {
     contentEl.innerHTML = renderAdminTabContent("tickets", appState.state);
   }
 }
@@ -1566,27 +1701,188 @@ function renderAdminTabContent(tab, state) {
   const orders = state.orders || [];
   const tickets = state.serviceTickets || [];
   const customers = state.registeredUsers || [];
+  const categories = state.categories || [];
 
+  // ==================== 1. DYNAMIC CATEGORY EARNINGS DASHBOARD ====================
+  if (tab === "dashboard") {
+    const earnings = appState.getCategoryEarnings();
+    const colors = [
+      "#2563eb", "#0d9488", "#f59e0b", "#8b5cf6", 
+      "#ec4899", "#10b981", "#6366f1", "#14b8a6", "#f97316"
+    ];
+
+    // Build SVG Donut Chart
+    let totalPct = 0;
+    const donutSlices = earnings.categories.map((c, i) => {
+      const pct = c.share;
+      const strokeDash = `${pct} ${100 - pct}`;
+      const strokeOffset = -totalPct;
+      totalPct += pct;
+      const color = colors[i % colors.length];
+      return `<circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="${color}" stroke-width="5" stroke-dasharray="${strokeDash}" stroke-dashoffset="${strokeOffset}"></circle>`;
+    }).join("");
+
+    return `
+      <div class="space-y-6">
+        <!-- 4 KPI Summary Cards matching Screenshot -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-5xl opacity-10">💰</div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Earnings</span>
+            <div class="text-2xl font-black text-slate-900 mt-1">₹ ${earnings.totalRevenue.toLocaleString('en-IN')}</div>
+            <div class="flex items-center gap-1 text-[11px] text-green-600 font-bold mt-1">
+              <span>↑ 18.4%</span>
+              <span class="text-slate-400 font-normal">vs last month</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-5xl opacity-10">📑</div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Orders</span>
+            <div class="text-2xl font-black text-slate-900 mt-1">${earnings.totalOrders}</div>
+            <div class="flex items-center gap-1 text-[11px] text-blue-600 font-bold mt-1">
+              <span>↑ 12.1%</span>
+              <span class="text-slate-400 font-normal">sales volume</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-5xl opacity-10">📦</div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Items Sold</span>
+            <div class="text-2xl font-black text-slate-900 mt-1">${earnings.totalItemsSold}</div>
+            <div class="flex items-center gap-1 text-[11px] text-purple-600 font-bold mt-1">
+              <span>Units Fulfilled</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-5xl opacity-10">📊</div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Avg. Order Value</span>
+            <div class="text-2xl font-black text-slate-900 mt-1">₹ ${earnings.avgOrderValue.toLocaleString('en-IN')}</div>
+            <div class="flex items-center gap-1 text-[11px] text-teal-600 font-bold mt-1">
+              <span>Per transaction</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts & Category Breakdown Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Category Earnings Table (2 Cols) -->
+          <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-black text-base text-slate-900">Category-wise Earnings Breakdown</h3>
+                <p class="text-xs text-slate-400">Live revenue distribution by product category & doorstep repairs</p>
+              </div>
+              <span class="bg-emerald-50 text-emerald-700 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200">Live Telemetry</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px]">
+                    <th class="pb-3">Category</th>
+                    <th class="pb-3 text-center">Items Sold</th>
+                    <th class="pb-3 text-right">Gross Revenue</th>
+                    <th class="pb-3 text-right">Share</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                  ${earnings.categories.map((c, i) => {
+                    const color = colors[i % colors.length];
+                    return `
+                      <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 flex items-center gap-2.5">
+                          <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color}"></span>
+                          <span class="font-bold text-slate-900 text-xs">${c.name}</span>
+                        </td>
+                        <td class="py-3.5 text-center font-mono text-slate-600 font-bold">${c.count}</td>
+                        <td class="py-3.5 text-right font-bold text-slate-900 font-mono">₹ ${c.earnings.toLocaleString('en-IN')}</td>
+                        <td class="py-3.5 text-right">
+                          <div class="flex items-center justify-end gap-2">
+                            <span class="font-mono text-xs font-bold text-slate-700">${c.share}%</span>
+                            <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden shrink-0">
+                              <div class="h-full rounded-full" style="width: ${c.share}%; background-color: ${color}"></div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Revenue Donut & Insights (1 Col) -->
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6 flex flex-col justify-between">
+            <div>
+              <h3 class="font-black text-base text-slate-900 mb-1">Revenue Share Distribution</h3>
+              <p class="text-xs text-slate-400 mb-4">Percentage allocation of total store revenue</p>
+
+              <!-- Donut Chart -->
+              <div class="relative w-44 h-44 mx-auto my-2">
+                <svg viewBox="0 0 42 42" class="w-full h-full -rotate-90">
+                  ${donutSlices}
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase">Top Category</span>
+                  <span class="text-xs font-black text-slate-900">${earnings.topCategory?.name || 'Laptops'}</span>
+                  <span class="text-[10px] text-blue-600 font-bold">${earnings.topCategory?.share || '50.6'}%</span>
+                </div>
+              </div>
+
+              <!-- Compact Legend -->
+              <div class="grid grid-cols-2 gap-2 mt-4 text-[11px]">
+                ${earnings.categories.slice(0, 6).map((c, i) => `
+                  <div class="flex items-center gap-1.5 truncate">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${colors[i % colors.length]}"></span>
+                    <span class="text-slate-600 truncate">${c.name}: <strong class="text-slate-900">${c.share}%</strong></span>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+
+            <!-- Quick Insight Card -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 text-xs">
+              <div class="font-bold text-blue-900 flex items-center gap-1.5 mb-1">
+                <span>💡</span> Store Revenue Insight
+              </div>
+              <p class="text-blue-800 leading-relaxed text-[11px]">
+                <strong>${earnings.topCategory?.name}</strong> accounts for the largest earnings driver (₹ ${earnings.topCategory?.earnings.toLocaleString('en-IN')}). Doorstep repairs continue to show a <strong>92% profit margin</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== 2. PRODUCT CATALOG MANAGEMENT ====================
   if (tab === "products") {
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
-          <h3 class="font-extrabold text-sm text-slate-900">Manage Hardware Catalog (${products.length} Products)</h3>
-          <button onclick="openAddProductModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition shadow">
-            ➕ Add Product
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900">Hardware Catalog & Inventory</h3>
+            <p class="text-xs text-slate-400">${products.length} active items available across all categories</p>
+          </div>
+          <button onclick="openAddProductModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> Add New Product
           </button>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto px-4 pb-4">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
               <tr>
                 <th class="p-3">Product</th>
                 <th class="p-3">Category</th>
                 <th class="p-3">Brand</th>
                 <th class="p-3">Deal Price</th>
+                <th class="p-3">Min Offer (Floor)</th>
                 <th class="p-3">Stock</th>
-                <th class="p-3">Status</th>
+                <th class="p-3">Type</th>
                 <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -1594,22 +1890,23 @@ function renderAdminTabContent(tab, state) {
               ${products.map(p => `
                 <tr class="hover:bg-slate-50 transition">
                   <td class="p-3 flex items-center gap-3">
-                    <img src="${p.images[0]}" alt="${p.name}" class="w-10 h-10 object-cover rounded-lg border shrink-0">
+                    <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
                     <div class="min-w-0">
                       <p class="font-bold text-slate-900 line-clamp-1">${p.name}</p>
                       <span class="text-[10px] text-slate-400 font-mono">${p.id}</span>
                     </div>
                   </td>
-                  <td class="p-3 font-medium text-slate-700">${p.category} <span class="text-[10px] text-slate-400">(${p.subcategory || 'General'})</span></td>
+                  <td class="p-3 font-semibold text-slate-700">${p.category}</td>
                   <td class="p-3 font-semibold text-slate-800">${p.brand}</td>
-                  <td class="p-3 font-bold text-teal-700">₹ ${p.price.toLocaleString('en-IN')}</td>
-                  <td class="p-3 font-mono font-bold">${p.stockLeft} units</td>
+                  <td class="p-3 font-bold text-teal-700 font-mono">₹ ${p.price.toLocaleString('en-IN')}</td>
+                  <td class="p-3 font-mono text-slate-500 font-bold">₹ ${(p.minPrice || Math.round(p.price * 0.88)).toLocaleString('en-IN')}</td>
+                  <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft} units</td>
                   <td class="p-3">
                     ${p.isCrazyDeal ? `<span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Crazy Deal</span>` : `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Standard</span>`}
                   </td>
-                  <td class="p-3 text-right space-x-2">
-                    <button onclick="openEditProductModal('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1 rounded transition text-[11px]" title="Edit Details">✏️ Edit</button>
-                    <button onclick="handleDeleteProduct('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded transition text-[11px]" title="Remove Product">🗑️ Delete</button>
+                  <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                    <button onclick="openEditProductModal('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">✏️ Edit</button>
+                    <button onclick="handleDeleteProduct('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">🗑️ Delete</button>
                   </td>
                 </tr>
               `).join("")}
@@ -1620,6 +1917,7 @@ function renderAdminTabContent(tab, state) {
     `;
   }
 
+  // ==================== 3. ORDERS MANAGEMENT ====================
   if (tab === "orders") {
     const statusColor = {
       confirmed: "bg-blue-100 text-blue-700",
@@ -1631,37 +1929,36 @@ function renderAdminTabContent(tab, state) {
     };
 
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 class="font-extrabold text-sm text-slate-900">📦 Customer Purchase Orders</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">${orders.length} total orders — all placed by customers are visible here</p>
+            <h3 class="font-black text-base text-slate-900">Customer Purchase Orders (${orders.length})</h3>
+            <p class="text-xs text-slate-400">All orders placed by customers are tracked and stored here</p>
           </div>
-          <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full">${orders.length} Orders</span>
+          <span class="bg-blue-600 text-white text-xs font-black px-3.5 py-1 rounded-full">${orders.length} Total</span>
         </div>
 
         ${orders.length === 0 ? `
           <div class="p-12 text-center text-slate-400">
             <div class="text-4xl mb-3">📭</div>
             <p class="font-bold text-slate-600">No orders yet</p>
-            <p class="text-xs mt-1">Orders placed by customers will appear here instantly.</p>
+            <p class="text-xs mt-1">New customer orders will appear here automatically.</p>
           </div>
         ` : `
           <div class="divide-y divide-slate-100">
             ${orders.map(o => {
               const badge = statusColor[o.status] || "bg-slate-100 text-slate-600";
               return `
-                <div class="p-4 hover:bg-slate-50 transition">
-                  <!-- Order Header Row -->
-                  <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div class="p-5 hover:bg-slate-50 transition space-y-3">
+                  <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-black text-sm text-slate-900 font-mono">${o.id}</span>
-                        <span class="${badge} text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">${o.status.replace(/_/g,' ')}</span>
+                        <span class="${badge} text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">${o.status.replace(/_/g,' ')}</span>
                         ${o.paymentMethod ? `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">${o.paymentMethod}</span>` : ''}
                       </div>
-                      <div class="text-[11px] text-slate-400 mt-0.5">
-                        🕐 ${o.date} ${o.time || ''} &nbsp;|&nbsp; Invoice: <span class="font-mono">${o.invoiceId || '—'}</span>
+                      <div class="text-xs text-slate-400 mt-1">
+                        🕐 ${o.date} ${o.time || ''} &nbsp;|&nbsp; Invoice: <span class="font-mono text-slate-600">${o.invoiceId || '—'}</span>
                       </div>
                     </div>
                     <div class="text-right">
@@ -1670,47 +1967,44 @@ function renderAdminTabContent(tab, state) {
                     </div>
                   </div>
 
-                  <!-- Customer + Address -->
-                  <div class="flex flex-wrap gap-4 mb-3">
-                    <div class="bg-slate-50 rounded-xl p-3 flex-1 min-w-[180px]">
-                      <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Customer</div>
-                      <div class="font-bold text-xs text-slate-800">${o.customerName || 'Customer'}</div>
-                      <div class="text-[11px] text-slate-500 font-mono">${o.customerEmail || ''}</div>
+                  <!-- Customer & Delivery Address -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                      <div class="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Customer Details</div>
+                      <div class="font-bold text-xs text-slate-900">${o.customerName || 'Customer'}</div>
+                      <div class="text-xs text-slate-500 font-mono">${o.customerEmail || ''}</div>
                     </div>
                     ${o.address ? `
-                      <div class="bg-slate-50 rounded-xl p-3 flex-1 min-w-[200px]">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">📍 Delivery Address</div>
-                        <div class="font-bold text-xs text-slate-800">${o.address.name}</div>
-                        <div class="text-[11px] text-slate-500">${o.address.line}, ${o.address.city}, ${o.address.state} — ${o.address.pin}</div>
-                        <div class="text-[11px] text-slate-500">${o.address.phone}</div>
+                      <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-0.5">📍 Shipping Address</div>
+                        <div class="font-bold text-xs text-slate-900">${o.address.name} (${o.address.phone})</div>
+                        <div class="text-xs text-slate-500">${o.address.line}, ${o.address.city}, ${o.address.state} - ${o.address.pin}</div>
                       </div>
                     ` : ''}
                   </div>
 
                   <!-- Ordered Items -->
-                  <div class="mb-3">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Ordered Items (${o.items.length})</div>
-                    <div class="space-y-2">
-                      ${o.items.map(item => `
-                        <div class="flex items-center gap-3 bg-white border border-slate-100 rounded-xl p-2">
-                          ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shrink-0">` : `<div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 text-xs shrink-0">📦</div>`}
-                          <div class="flex-1 min-w-0">
-                            <div class="font-bold text-xs text-slate-800 line-clamp-1">${item.name}</div>
-                            <div class="text-[10px] text-slate-400">${item.brand} &nbsp;·&nbsp; Qty: ${item.quantity}</div>
-                          </div>
-                          <div class="text-right shrink-0">
-                            <div class="font-bold text-xs text-teal-700">₹ ${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-                            <div class="text-[10px] text-slate-400">@ ₹${item.price.toLocaleString('en-IN')} each</div>
-                          </div>
+                  <div class="space-y-1.5">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Items in this Order (${o.items.length})</div>
+                    ${o.items.map(item => `
+                      <div class="flex items-center gap-3 bg-white border border-slate-100 rounded-xl p-2.5">
+                        <img src="${item.image || 'lapro-logo.png'}" alt="${item.name}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shrink-0">
+                        <div class="flex-1 min-w-0">
+                          <div class="font-bold text-xs text-slate-800 line-clamp-1">${item.name}</div>
+                          <div class="text-[10px] text-slate-400">${item.brand} &nbsp;•&nbsp; Qty: <strong>${item.quantity}</strong></div>
                         </div>
-                      `).join('')}
-                    </div>
+                        <div class="text-right shrink-0">
+                          <div class="font-bold text-xs text-teal-700">₹ ${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                          <div class="text-[10px] text-slate-400">@ ₹${item.price.toLocaleString('en-IN')}</div>
+                        </div>
+                      </div>
+                    `).join('')}
                   </div>
 
-                  <!-- Status Update -->
+                  <!-- Status Action Bar -->
                   <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
-                    <span class="text-[11px] font-bold text-slate-500">Update Delivery Status:</span>
-                    <select onchange="adminUpdateOrder('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500">
+                    <span class="text-xs font-bold text-slate-600">Update Status:</span>
+                    <select onchange="adminUpdateOrder('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500">
                       <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ Confirmed</option>
                       <option value="packed" ${o.status==='packed'?'selected':''}>📦 Packed</option>
                       <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
@@ -1718,7 +2012,7 @@ function renderAdminTabContent(tab, state) {
                       <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
                       <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
                     </select>
-                    ${o.trackingId ? `<span class="text-[10px] text-slate-400 font-mono ml-auto">Track: ${o.trackingId}</span>` : ''}
+                    ${o.trackingId ? `<span class="text-xs text-slate-400 font-mono ml-auto">Tracking: ${o.trackingId}</span>` : ''}
                   </div>
                 </div>
               `;
@@ -1729,19 +2023,73 @@ function renderAdminTabContent(tab, state) {
     `;
   }
 
+  // ==================== 4. CUSTOMER MANAGEMENT ====================
+  if (tab === "customers") {
+    return `
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900">Registered Customer Accounts (${customers.length})</h3>
+            <p class="text-xs text-slate-400">Manage customer credentials, addresses, and contact records</p>
+          </div>
+          <button onclick="openAddCustomerModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> Add Customer
+          </button>
+        </div>
+
+        <div class="overflow-x-auto px-4 pb-4">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Customer Name</th>
+                <th class="p-3">Email Address</th>
+                <th class="p-3">Phone Number</th>
+                <th class="p-3">Saved Addresses</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${customers.map(c => `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-black">${c.name.charAt(0)}</div>
+                    <div>
+                      <span>${c.name}</span>
+                    </div>
+                  </td>
+                  <td class="p-3 font-mono text-slate-700">${c.email}</td>
+                  <td class="p-3 font-mono text-slate-600">${c.phone}</td>
+                  <td class="p-3 text-slate-500">
+                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-bold text-[10px]">${(c.addresses || []).length} Saved</span>
+                  </td>
+                  <td class="p-3 text-right space-x-1.5">
+                    <button onclick="openEditCustomerModal('${c.email}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">✏️ Edit</button>
+                    <button onclick="handleDeleteCustomer('${c.email}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">🗑️ Delete</button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== 5. SERVICE & REPAIR TICKETS ====================
   if (tab === "tickets") {
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100">
-          <h3 class="font-extrabold text-sm text-slate-900">Doorstep Repair Service Tickets (${tickets.length})</h3>
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+        <div class="p-5 border-b border-slate-100">
+          <h3 class="font-black text-base text-slate-900">Doorstep Repair Service Tickets (${tickets.length})</h3>
+          <p class="text-xs text-slate-400">Manage diagnostic lifecycle, pickup, repair progress, and delivery</p>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto px-4 pb-4">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
               <tr>
                 <th class="p-3">Ticket ID</th>
                 <th class="p-3">Customer</th>
-                <th class="p-3">Device & Problem</th>
+                <th class="p-3">Device & Issue</th>
                 <th class="p-3">Service Mode</th>
                 <th class="p-3">Status</th>
                 <th class="p-3 text-right">Update Ticket Status</th>
@@ -1751,12 +2099,12 @@ function renderAdminTabContent(tab, state) {
               ${tickets.map(t => `
                 <tr class="hover:bg-slate-50 transition">
                   <td class="p-3 font-mono font-bold text-slate-900">${t.id}</td>
-                  <td class="p-3 font-semibold text-slate-800">${t.customerName || 'Customer'}</td>
-                  <td class="p-3 font-medium text-slate-700">${t.brand} ${t.model}<br><span class="text-[10px] text-red-500 font-semibold">${t.problem}</span></td>
+                  <td class="p-3 font-semibold text-slate-800">${t.customerName || 'Customer'}<br><span class="text-[10px] text-slate-400">${t.customerPhone || ''}</span></td>
+                  <td class="p-3 font-medium text-slate-700"><strong>${t.brand} ${t.model}</strong><br><span class="text-[10px] text-red-500 font-semibold">${t.problem}</span></td>
                   <td class="p-3 text-slate-500">${t.mode}</td>
-                  <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">${t.status}</span></td>
+                  <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase">${t.status.replace(/_/g,' ')}</span></td>
                   <td class="p-3 text-right">
-                    <select onchange="appState.updateTicketStatus('${t.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded p-1 text-[11px] font-semibold">
+                    <select onchange="adminUpdateTicket('${t.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-800">
                       <option value="received" ${t.status === 'received' ? 'selected' : ''}>Received</option>
                       <option value="scheduled" ${t.status === 'scheduled' ? 'selected' : ''}>Pickup Scheduled</option>
                       <option value="picked_up" ${t.status === 'picked_up' ? 'selected' : ''}>Picked Up</option>
@@ -1777,31 +2125,48 @@ function renderAdminTabContent(tab, state) {
     `;
   }
 
-  if (tab === "customers") {
+  // ==================== 6. CATEGORY MANAGEMENT ====================
+  if (tab === "categories") {
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100">
-          <h3 class="font-extrabold text-sm text-slate-900">Registered Customer Accounts (${customers.length})</h3>
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900">Category Management (${categories.length} Categories)</h3>
+            <p class="text-xs text-slate-400">Add, rename, and organize store product categories</p>
+          </div>
+          <button onclick="openAddCategoryModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> Add New Category
+          </button>
         </div>
-        <div class="overflow-x-auto">
+
+        <div class="overflow-x-auto px-4 pb-4">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
               <tr>
-                <th class="p-3">Customer Name</th>
-                <th class="p-3">Email Address</th>
-                <th class="p-3">Phone Number</th>
-                <th class="p-3">Saved Addresses</th>
+                <th class="p-3">Category Name</th>
+                <th class="p-3">Icon / Symbol</th>
+                <th class="p-3">Linked Products</th>
+                <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              ${customers.map(c => `
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="p-3 font-bold text-slate-900">${c.name}</td>
-                  <td class="p-3 font-mono text-slate-700">${c.email}</td>
-                  <td class="p-3 text-slate-600">${c.phone}</td>
-                  <td class="p-3 text-slate-500">${(c.addresses || []).length} Addresses</td>
-                </tr>
-              `).join("")}
+              ${categories.map(cat => {
+                const prodCount = products.filter(p => p.category === cat.name).length;
+                return `
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-bold text-slate-900 flex items-center gap-2">
+                      <span class="text-xl">${cat.icon || '📦'}</span>
+                      <span class="text-sm">${cat.name}</span>
+                    </td>
+                    <td class="p-3 font-mono text-base">${cat.icon || '📦'}</td>
+                    <td class="p-3 font-bold text-slate-600">${prodCount} Products</td>
+                    <td class="p-3 text-right space-x-1.5">
+                      <button onclick="openEditCategoryModal('${cat.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">✏️ Edit / Rename</button>
+                      <button onclick="handleDeleteCategory('${cat.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">🗑️ Delete</button>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
             </tbody>
           </table>
         </div>
@@ -1810,13 +2175,59 @@ function renderAdminTabContent(tab, state) {
   }
 }
 
+// ======================== MULTI-IMAGE LOCAL FILE UPLOAD HELPER ========================
+let tempUploadedImages = [];
+
+function handleProductFilesSelect(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      tempUploadedImages.push(e.target.result);
+      renderProductImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeTempImage(idx) {
+  tempUploadedImages.splice(idx, 1);
+  renderProductImagePreviews();
+}
+
+function renderProductImagePreviews() {
+  const container = document.getElementById("product-img-previews");
+  if (!container) return;
+
+  if (tempUploadedImages.length === 0) {
+    container.innerHTML = `<p class="text-slate-400 text-xs italic">No local images chosen yet.</p>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="flex flex-wrap gap-2.5 pt-2">
+      ${tempUploadedImages.map((src, idx) => `
+        <div class="relative group w-16 h-16 rounded-xl border border-slate-300 overflow-hidden shadow-sm bg-white">
+          <img src="${src}" class="w-full h-full object-cover">
+          <button type="button" onclick="removeTempImage(${idx})" class="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-4 h-4 text-[10px] font-bold flex items-center justify-center shadow opacity-90 hover:opacity-100">✕</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 // ======================== ADMIN PRODUCT CRUD MODALS ========================
 function openAddProductModal() {
   const container = document.getElementById("product-modal-container");
   if (!container) return;
 
+  tempUploadedImages = [];
+  const categories = appState.state.categories || [];
+
   container.innerHTML = `
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
         <div class="flex justify-between items-center pb-3 border-b mb-4">
           <h3 class="font-black text-base text-slate-900">➕ Add New Product to Inventory</h3>
@@ -1825,60 +2236,61 @@ function openAddProductModal() {
 
         <form onsubmit="handleCreateProductSubmit(event)" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name</label>
-            <input type="text" id="new-prod-name" placeholder="e.g. Dell XPS 15 9520, 15.6\" 4K Touch, Core i7, 32GB RAM" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-blue-600">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name <span class="text-red-500">*</span></label>
+            <input type="text" id="new-prod-name" placeholder="e.g. Dell XPS 15 9520, Core i7, 32GB RAM, 1TB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Category</label>
-              <select id="new-prod-category" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600 font-semibold">
-                <option value="Laptops">Laptops</option>
-                <option value="Desktops">Desktops</option>
-                <option value="Accessories">Accessories</option>
-                <option value="Peripherals">Peripherals</option>
-                <option value="Storages">Storages</option>
-                <option value="Networking">Networking</option>
-                <option value="Consumables">Consumables</option>
-                <option value="Servers & Workstations">Servers & Workstations</option>
-                <option value="Software's">Software's</option>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
+              <select id="new-prod-category" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+                ${categories.map(c => `<option value="${c.name}">${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
-              <input type="text" id="new-prod-subcat" placeholder="e.g. Business Laptops" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
+              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo, Apple" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
           </div>
 
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Brand</label>
-              <input type="text" id="new-prod-brand" placeholder="e.g. Dell" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="new-prod-price" placeholder="45000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹)</label>
-              <input type="number" id="new-prod-price" placeholder="45000" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Min Offer (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="new-prod-minprice" placeholder="39000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-blue-700" title="Counter offers below this price are rejected">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">MRP Price (₹)</label>
-              <input type="number" id="new-prod-origprice" placeholder="89000" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600 font-mono">
+              <input type="number" id="new-prod-origprice" placeholder="89000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Quantity</label>
-              <input type="number" id="new-prod-stock" value="10" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Quantity <span class="text-red-500">*</span></label>
+              <input type="number" id="new-prod-stock" value="10" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty Period</label>
-              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty <span class="text-red-500">*</span></label>
+              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
           </div>
 
-          <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Image URL</label>
-            <input type="url" id="new-prod-image" value="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+          <!-- Multi-Image Local File Upload -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+            <label class="block font-bold text-slate-800 uppercase text-[11px]">Upload Product Images (Local Files) <span class="text-red-500">*</span></label>
+            <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+            <div id="product-img-previews">
+              <p class="text-slate-400 text-xs italic">Select one or multiple images from your computer.</p>
+            </div>
+
+            <div class="pt-2">
+              <label class="block font-semibold text-slate-600 text-[10px] uppercase mb-0.5">Or Fallback Image URL</label>
+              <input type="url" id="new-prod-image-url" placeholder="https://..." class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs">
+            </div>
           </div>
 
           <div class="flex items-center gap-4 pt-1">
@@ -1893,8 +2305,8 @@ function openAddProductModal() {
           </div>
 
           <div class="pt-3 flex gap-3">
-            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Add to Catalog</button>
+            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Add to Catalog</button>
           </div>
         </form>
       </div>
@@ -1904,16 +2316,29 @@ function openAddProductModal() {
 
 function handleCreateProductSubmit(event) {
   event.preventDefault();
+  const urlImage = document.getElementById("new-prod-image-url")?.value;
+  let finalImages = [...tempUploadedImages];
+  if (finalImages.length === 0 && urlImage) {
+    finalImages.push(urlImage);
+  }
+  if (finalImages.length === 0) {
+    finalImages.push("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
+  }
+
+  const priceVal = Number(document.getElementById("new-prod-price").value);
+  const minPriceVal = Number(document.getElementById("new-prod-minprice").value) || Math.round(priceVal * 0.88);
+
   const newProduct = {
     name: document.getElementById("new-prod-name").value,
     category: document.getElementById("new-prod-category").value,
-    subcategory: document.getElementById("new-prod-subcat").value,
     brand: document.getElementById("new-prod-brand").value,
-    price: Number(document.getElementById("new-prod-price").value),
-    originalPrice: Number(document.getElementById("new-prod-origprice").value) || Number(document.getElementById("new-prod-price").value),
+    price: priceVal,
+    minPrice: minPriceVal,
+    originalPrice: Number(document.getElementById("new-prod-origprice").value) || priceVal,
     stockLeft: Number(document.getElementById("new-prod-stock").value) || 10,
     warranty: document.getElementById("new-prod-warranty").value,
-    image: document.getElementById("new-prod-image").value,
+    images: finalImages,
+    image: finalImages[0],
     isCrazyDeal: document.getElementById("new-prod-crazy").checked,
     isNew: document.getElementById("new-prod-new").checked,
     features: ["100% Genuine", "Warranty Assured", "Fast Shipping"]
@@ -1931,8 +2356,11 @@ function openEditProductModal(prodId) {
   const container = document.getElementById("product-modal-container");
   if (!container) return;
 
+  tempUploadedImages = [...(p.images || [p.image || ""])].filter(Boolean);
+  const categories = appState.state.categories || [];
+
   container.innerHTML = `
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
         <div class="flex justify-between items-center pb-3 border-b mb-4">
           <h3 class="font-black text-base text-slate-900">✏️ Edit Product: ${p.id}</h3>
@@ -1941,30 +2369,54 @@ function openEditProductModal(prodId) {
 
         <form onsubmit="handleEditProductSubmit(event, '${p.id}')" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title</label>
-            <input type="text" id="edit-prod-name" value="${p.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-blue-600">
+            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title <span class="text-red-500">*</span></label>
+            <input type="text" id="edit-prod-name" value="${p.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹)</label>
-              <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
+              <select id="edit-prod-category" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+                ${categories.map(c => `<option value="${c.name}" ${p.category === c.name ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
+              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Deal Price (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Min Offer (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="edit-prod-minprice" value="${p.minPrice || Math.round(p.price * 0.88)}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-blue-700" title="Counter offers below this price are rejected">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">MRP Price (₹)</label>
-              <input type="number" id="edit-prod-origprice" value="${p.originalPrice}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600 font-mono">
+              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left</label>
-              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left <span class="text-red-500">*</span></label>
+              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
-              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || '1 Year Warranty'}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none focus:border-blue-600">
+              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
+          </div>
+
+          <!-- Multi-Image Local File Upload -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+            <label class="block font-bold text-slate-800 uppercase text-[11px]">Product Images (Local File Upload)</label>
+            <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+            <div id="product-img-previews"></div>
           </div>
 
           <div class="flex items-center gap-4 pt-1">
@@ -1979,22 +2431,37 @@ function openEditProductModal(prodId) {
           </div>
 
           <div class="pt-3 flex gap-3">
-            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Save Changes</button>
+            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Save Changes</button>
           </div>
         </form>
       </div>
     </div>
   `;
+
+  renderProductImagePreviews();
 }
 
 function handleEditProductSubmit(event, prodId) {
   event.preventDefault();
+  let finalImages = [...tempUploadedImages];
+  if (finalImages.length === 0) {
+    finalImages.push("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
+  }
+
+  const priceVal = Number(document.getElementById("edit-prod-price").value);
+  const minPriceVal = Number(document.getElementById("edit-prod-minprice").value) || Math.round(priceVal * 0.88);
+
   const updatedData = {
     name: document.getElementById("edit-prod-name").value,
-    price: Number(document.getElementById("edit-prod-price").value),
+    category: document.getElementById("edit-prod-category").value,
+    brand: document.getElementById("edit-prod-brand").value,
+    price: priceVal,
+    minPrice: minPriceVal,
     originalPrice: Number(document.getElementById("edit-prod-origprice").value),
     stockLeft: Number(document.getElementById("edit-prod-stock").value),
+    images: finalImages,
+    image: finalImages[0],
     isCrazyDeal: document.getElementById("edit-prod-crazy").checked,
     isNew: document.getElementById("edit-prod-new").checked,
     specs: { warranty: document.getElementById("edit-prod-warranty").value }
@@ -2006,7 +2473,7 @@ function handleEditProductSubmit(event, prodId) {
 }
 
 function handleDeleteProduct(prodId) {
-  if (confirm(`Are you sure you want to permanently delete product ID "${prodId}" from the live catalog?`)) {
+  if (confirm(`Are you sure you want to permanently delete product "${prodId}" from the live catalog?`)) {
     appState.deleteProduct(prodId);
     setAdminTab("products");
   }
@@ -2017,42 +2484,474 @@ function closeProductModal() {
   if (container) container.innerHTML = "";
 }
 
-// ======================== 7. PROFILE & INFO VIEWS ========================
+// ======================== ADMIN CATEGORY CRUD MODALS ========================
+function openAddCategoryModal() {
+  const container = document.getElementById("admin-category-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <h3 class="font-black text-base text-slate-900">➕ Add New Category</h3>
+          <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleCreateCategorySubmit(event)" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Category Name <span class="text-red-500">*</span></label>
+            <input type="text" id="new-cat-name" placeholder="e.g. Graphic Tablets, Audio, Monitors" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Category Emoji / Icon</label>
+            <input type="text" id="new-cat-icon" placeholder="e.g. 🎨, 🎧, 🖥️" value="📦" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono text-base">
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeCategoryModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Save Category</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleCreateCategorySubmit(event) {
+  event.preventDefault();
+  const name = document.getElementById("new-cat-name").value;
+  const icon = document.getElementById("new-cat-icon").value || "📦";
+
+  const res = appState.addCategory(name, icon);
+  if (res.success) {
+    closeCategoryModal();
+    setAdminTab("categories");
+  } else {
+    alert(res.message);
+  }
+}
+
+function openEditCategoryModal(catId) {
+  const cat = (appState.state.categories || []).find(c => c.id === catId);
+  if (!cat) return;
+
+  const container = document.getElementById("admin-category-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <h3 class="font-black text-base text-slate-900">✏️ Edit Category</h3>
+          <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleEditCategorySubmit(event, '${cat.id}')" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Category Name <span class="text-red-500">*</span></label>
+            <input type="text" id="edit-cat-name" value="${cat.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Category Emoji / Icon</label>
+            <input type="text" id="edit-cat-icon" value="${cat.icon || '📦'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono text-base">
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeCategoryModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Update Category</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleEditCategorySubmit(event, catId) {
+  event.preventDefault();
+  const name = document.getElementById("edit-cat-name").value;
+  const icon = document.getElementById("edit-cat-icon").value;
+
+  const res = appState.updateCategory(catId, name, icon);
+  if (res.success) {
+    closeCategoryModal();
+    setAdminTab("categories");
+  } else {
+    alert(res.message);
+  }
+}
+
+function handleDeleteCategory(catId) {
+  const cat = (appState.state.categories || []).find(c => c.id === catId);
+  if (!cat) return;
+
+  if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
+    appState.deleteCategory(catId);
+    setAdminTab("categories");
+  }
+}
+
+function closeCategoryModal() {
+  const container = document.getElementById("admin-category-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+// ======================== ADMIN CUSTOMER CRUD MODALS ========================
+function openAddCustomerModal() {
+  const container = document.getElementById("admin-customer-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <h3 class="font-black text-base text-slate-900">➕ Add New Customer Account</h3>
+          <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleCreateCustomerSubmit(event)" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Full Name <span class="text-red-500">*</span></label>
+            <input type="text" id="new-cust-name" placeholder="e.g. Ramesh Kumar" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
+            <input type="email" id="new-cust-email" placeholder="ramesh@example.com" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number <span class="text-red-500">*</span></label>
+            <input type="tel" id="new-cust-phone" placeholder="+91 98450 00000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Delivery Address</label>
+            <input type="text" id="new-cust-address" placeholder="e.g. 45, 1st Cross, Indiranagar, Bangalore" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeCustomerModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleCreateCustomerSubmit(event) {
+  event.preventDefault();
+  const customerData = {
+    name: document.getElementById("new-cust-name").value,
+    email: document.getElementById("new-cust-email").value,
+    phone: document.getElementById("new-cust-phone").value,
+    addressLine: document.getElementById("new-cust-address").value
+  };
+
+  const res = appState.addCustomer(customerData);
+  if (res.success) {
+    closeCustomerModal();
+    setAdminTab("customers");
+  } else {
+    alert(res.message);
+  }
+}
+
+function openEditCustomerModal(email) {
+  const c = (appState.state.registeredUsers || []).find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!c) return;
+
+  const container = document.getElementById("admin-customer-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <h3 class="font-black text-base text-slate-900">✏️ Edit Customer</h3>
+          <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleEditCustomerSubmit(event, '${c.email}')" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Customer Name <span class="text-red-500">*</span></label>
+            <input type="text" id="edit-cust-name" value="${c.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number <span class="text-red-500">*</span></label>
+            <input type="tel" id="edit-cust-phone" value="${c.phone}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeCustomerModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleEditCustomerSubmit(event, email) {
+  event.preventDefault();
+  const name = document.getElementById("edit-cust-name").value;
+  const phone = document.getElementById("edit-cust-phone").value;
+
+  const res = appState.updateCustomer(email, { name, phone });
+  if (res.success) {
+    closeCustomerModal();
+    setAdminTab("customers");
+  } else {
+    alert(res.message);
+  }
+}
+
+function handleDeleteCustomer(email) {
+  if (confirm(`Are you sure you want to remove customer account "${email}"?`)) {
+    appState.deleteCustomer(email);
+    setAdminTab("customers");
+  }
+}
+
+function closeCustomerModal() {
+  const container = document.getElementById("admin-customer-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+// ======================== 7. CUSTOMER PROFILE & ADDRESS MANAGEMENT ========================
 function renderProfileView(container, state) {
   const user = state.currentUser;
   if (!user) {
     container.innerHTML = `
       <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center max-w-md mx-auto shadow-sm space-y-4">
+        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto">👤</div>
         <h2 class="text-xl font-black text-slate-900">Sign in to Access Your Account</h2>
-        <p class="text-xs text-slate-500">View orders, service history, and manage addresses.</p>
-        <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow">Sign In</button>
+        <p class="text-xs text-slate-500">View orders, service history, and manage saved delivery addresses.</p>
+        <button onclick="openAuthModal('login')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow">Sign In / Register</button>
       </div>
     `;
     return;
   }
 
+  const addresses = user.addresses || [];
+
   container.innerHTML = `
-    <div class="max-w-3xl mx-auto space-y-6">
-      <div class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-black text-slate-900">${user.name}</h1>
-          <p class="text-xs text-slate-500 font-mono">${user.email} • ${user.phone}</p>
+    <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Profile Header -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-md">
+            ${user.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900">${user.name}</h1>
+              <span class="bg-green-100 text-green-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">Customer</span>
+            </div>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} &nbsp;•&nbsp; ${user.phone}</p>
+          </div>
         </div>
-        <button onclick="appState.customerLogout()" class="bg-red-50 text-red-600 font-bold text-xs px-4 py-2 rounded-xl hover:bg-red-100 transition">Logout</button>
+        <button onclick="appState.customerLogout()" class="bg-red-50 text-red-600 font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-red-100 transition">
+          🚪 Logout
+        </button>
       </div>
 
+      <!-- Quick Navigation Tiles -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div onclick="appState.setView('orders')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-blue-600 transition">
-          <h3 class="font-bold text-sm text-slate-900 mb-1">📑 My Purchase Orders</h3>
-          <p class="text-xs text-slate-500">Track current shipments and view invoices</p>
+        <div onclick="appState.setView('orders')" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm cursor-pointer hover:border-blue-600 transition flex items-center justify-between group">
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">📑 My Purchase Orders</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Track current shipments and download invoices</p>
+          </div>
+          <span class="text-xl text-slate-300 group-hover:text-blue-600 transition">➔</span>
         </div>
-        <div onclick="appState.setView('service-history')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-blue-600 transition">
-          <h3 class="font-bold text-sm text-slate-900 mb-1">🛠️ My Repair Tickets</h3>
-          <p class="text-xs text-slate-500">Track diagnostic and repair progress</p>
+        <div onclick="appState.setView('service-history')" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm cursor-pointer hover:border-blue-600 transition flex items-center justify-between group">
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">🛠️ My Repair Tickets</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Track doorstep diagnostic and repair progress</p>
+          </div>
+          <span class="text-xl text-slate-300 group-hover:text-blue-600 transition">➔</span>
         </div>
+      </div>
+
+      <!-- SAVED DELIVERY ADDRESSES SECTION -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-5">
+        <div class="flex flex-wrap justify-between items-center gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+              <span>📍</span> Saved Delivery Addresses
+            </h2>
+            <p class="text-xs text-slate-400">Manage addresses for hardware delivery and doorstep repair pickups</p>
+          </div>
+          <button onclick="openCustomerAddressModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> Add New Address
+          </button>
+        </div>
+
+        ${addresses.length === 0 ? `
+          <div class="text-center py-8 text-slate-400 space-y-2">
+            <div class="text-3xl">📍</div>
+            <p class="font-bold text-slate-600 text-xs">No saved addresses yet</p>
+            <p class="text-[11px]">Add a delivery address to enable quick 1-click checkout.</p>
+          </div>
+        ` : `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${addresses.map(addr => `
+              <div class="border ${addr.default ? 'border-blue-600 bg-blue-50/20' : 'border-slate-200 bg-slate-50/50'} rounded-2xl p-4 space-y-2.5 relative flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-black text-sm text-slate-900">${addr.name}</span>
+                      <span class="bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">${addr.tag || 'Home'}</span>
+                    </div>
+                    ${addr.default ? `<span class="bg-blue-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Default</span>` : ''}
+                  </div>
+                  <p class="text-xs text-slate-600 leading-relaxed">${addr.line}, ${addr.city}, ${addr.state} - <strong>${addr.pin}</strong></p>
+                  <p class="text-xs font-mono text-slate-500 mt-1">📞 ${addr.phone}</p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold gap-2">
+                  ${!addr.default ? `
+                    <button onclick="handleSetDefaultAddress('${addr.id}')" class="text-blue-600 hover:underline text-[11px]">Set as Default</button>
+                  ` : `<span class="text-[11px] text-green-600">✓ Primary Address</span>`}
+                  <div class="space-x-2">
+                    <button onclick="openCustomerAddressModal('${addr.id}')" class="text-slate-600 hover:text-slate-900 text-[11px]">✏️ Edit</button>
+                    <button onclick="handleDeleteCustomerAddress('${addr.id}')" class="text-red-500 hover:text-red-700 text-[11px]">🗑️ Delete</button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `}
+      </div>
+    </div>
+
+    <!-- CUSTOMER ADDRESS MODAL CONTAINER -->
+    <div id="customer-address-modal-container"></div>
+  `;
+}
+
+// Customer Address Modals & Actions
+function openCustomerAddressModal(addrId = null) {
+  const container = document.getElementById("customer-address-modal-container");
+  if (!container) return;
+
+  let existing = null;
+  if (addrId && appState.state.currentUser && appState.state.currentUser.addresses) {
+    existing = appState.state.currentUser.addresses.find(a => a.id === addrId);
+  }
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <h3 class="font-black text-base text-slate-900">${existing ? '✏️ Edit Address' : '➕ Add Delivery Address'}</h3>
+          <button onclick="closeCustomerAddressModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleCustomerAddressSubmit(event, '${addrId || ''}')" class="space-y-4 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Contact Name <span class="text-red-500">*</span></label>
+              <input type="text" id="addr-name" value="${existing ? existing.name : (appState.state.currentUser?.name || '')}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number <span class="text-red-500">*</span></label>
+              <input type="tel" id="addr-phone" value="${existing ? existing.phone : (appState.state.currentUser?.phone || '')}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Street / House / Apartment Address <span class="text-red-500">*</span></label>
+            <input type="text" id="addr-line" value="${existing ? existing.line : ''}" placeholder="e.g. Flat 402, Oakwood Heights, Indiranagar" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">City <span class="text-red-500">*</span></label>
+              <input type="text" id="addr-city" value="${existing ? existing.city : 'Bangalore'}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">State <span class="text-red-500">*</span></label>
+              <input type="text" id="addr-state" value="${existing ? existing.state : 'Karnataka'}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">PIN Code <span class="text-red-500">*</span></label>
+              <input type="text" id="addr-pin" value="${existing ? existing.pin : '560001'}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Address Tag</label>
+              <select id="addr-tag" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 focus:outline-none focus:border-blue-600 font-semibold">
+                <option value="Home" ${existing?.tag === 'Home' ? 'selected' : ''}>🏠 Home</option>
+                <option value="Work" ${existing?.tag === 'Work' ? 'selected' : ''}>🏢 Work / Office</option>
+                <option value="Other" ${existing?.tag === 'Other' ? 'selected' : ''}>📍 Other</option>
+              </select>
+            </div>
+            <div class="flex items-center pt-5">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="addr-default" ${existing?.default ? 'checked' : ''} class="rounded text-blue-600">
+                <span class="font-bold text-slate-700">Set as Default Address</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-3 flex gap-3">
+            <button type="button" onclick="closeCustomerAddressModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow">Save Address</button>
+          </div>
+        </form>
       </div>
     </div>
   `;
+}
+
+function handleCustomerAddressSubmit(event, addrId) {
+  event.preventDefault();
+  const addressData = {
+    name: document.getElementById("addr-name").value,
+    phone: document.getElementById("addr-phone").value,
+    line: document.getElementById("addr-line").value,
+    city: document.getElementById("addr-city").value,
+    state: document.getElementById("addr-state").value,
+    pin: document.getElementById("addr-pin").value,
+    tag: document.getElementById("addr-tag").value,
+    default: document.getElementById("addr-default").checked
+  };
+
+  if (addrId) {
+    appState.updateCustomerAddress(addrId, addressData);
+  } else {
+    appState.addCustomerAddress(addressData);
+  }
+
+  closeCustomerAddressModal();
+  const mainContent = document.getElementById("main-content");
+  if (mainContent && appState.state.currentView === "profile") {
+    renderProfileView(mainContent, appState.state);
+  }
+}
+
+function handleSetDefaultAddress(addrId) {
+  appState.setDefaultCustomerAddress(addrId);
+  const mainContent = document.getElementById("main-content");
+  if (mainContent && appState.state.currentView === "profile") {
+    renderProfileView(mainContent, appState.state);
+  }
+}
+
+function handleDeleteCustomerAddress(addrId) {
+  if (confirm("Are you sure you want to delete this saved address?")) {
+    appState.deleteCustomerAddress(addrId);
+    const mainContent = document.getElementById("main-content");
+    if (mainContent && appState.state.currentView === "profile") {
+      renderProfileView(mainContent, appState.state);
+    }
+  }
+}
+
+function closeCustomerAddressModal() {
+  const container = document.getElementById("customer-address-modal-container");
+  if (container) container.innerHTML = "";
 }
 
 function renderAboutView(container) {

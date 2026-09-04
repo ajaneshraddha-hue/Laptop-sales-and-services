@@ -80,9 +80,12 @@
       </div>
 
 
-      <!-- Search Bar -->
-      <div class="flex-1 max-w-xl hidden md:block">
-        <form id="search-form" onsubmit="handleGlobalSearch(event)" class="relative">
+      <!-- Search Bar + Home Button -->
+      <div class="flex-1 max-w-xl hidden md:flex items-center gap-2.5">
+        <button onclick="appState.setView('home')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-2 rounded-full border border-blue-200 transition flex items-center gap-1.5 shadow-sm shrink-0" title="Go to Home">
+          <span>🏠</span> Home
+        </button>
+        <form id="search-form" onsubmit="handleGlobalSearch(event)" class="relative flex-1">
           <input type="text" id="search-input" placeholder="Search laptops, desktops, servers, parts, specs..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 rounded-full px-5 py-2 pr-10 focus:outline-none focus:border-blue-600 focus:bg-white transition text-xs shadow-inner">
           <button type="submit" class="absolute right-3.5 top-2.5 text-slate-500 hover:text-blue-600 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -317,18 +320,18 @@
     </div>
   </div>
 
-  <!-- CUSTOMER AUTH MODAL (LOGIN / REGISTER) - Strictly Customer Only -->
+  <!-- CUSTOMER / ADMIN AUTH MODAL -->
   <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 fade-in relative border border-slate-100">
       <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
 
-      <!-- Customer Portal Header -->
+      <!-- Modal Header with Lapro Logo -->
       <div class="mb-4 text-center">
-        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base mx-auto mb-2 shadow-md">LS</div>
-        <h3 class="font-extrabold text-lg text-slate-900">Customer Account</h3>
-        <p class="text-xs text-slate-500">Sign in to track orders, manage doorstep repairs & checkout</p>
+        <img src="lapro-logo.png" alt="Lapro Solutions" class="w-12 h-12 object-contain mx-auto mb-2 rounded-xl" style="background:#000;padding:2px;">
+        <h3 class="font-extrabold text-lg text-slate-900" id="auth-modal-title">Customer Account</h3>
+        <p class="text-xs text-slate-500" id="auth-modal-subtitle">Sign in to track orders, manage doorstep repairs & checkout</p>
       </div>
 
       <!-- Toggle Customer Login vs Register vs Admin Portal tabs -->
@@ -341,11 +344,11 @@
       <!-- Customer Login Form -->
       <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
-          <input type="email" id="login-email" required placeholder="e.g. amit.sharma@gmail.com" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
+          <input type="email" id="login-email" required placeholder="Enter your email address" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password <span class="text-red-500">*</span></label>
           <input type="password" id="login-pass" required placeholder="Enter password" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
         </div>
         <div class="flex justify-between items-center text-xs">
@@ -355,10 +358,6 @@
           <a href="javascript:void(0)" onclick="alert('Password reset link has been dispatched to your registered email.')" class="text-blue-600 hover:underline">Forgot Password?</a>
         </div>
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Sign In</button>
-        
-        <div class="text-center pt-2 space-y-1">
-          <p class="text-[11px] text-slate-400">Demo Customer: <span class="font-mono text-slate-600">amit.sharma@gmail.com / password123</span></p>
-        </div>
       </form>
 
       <!-- Admin Login Form inside Modal -->
@@ -368,12 +367,12 @@
           <p class="text-[11px] text-slate-300">Enter private admin credentials to manage products, stock & orders.</p>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin Email Address</label>
-          <input type="email" id="modal-admin-email" value="admin@laprosolutions.com" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600 font-mono">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin Email Address <span class="text-red-500">*</span></label>
+          <input type="email" id="modal-admin-email" required placeholder="Enter admin email address" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600 font-mono">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Master Admin Password</label>
-          <input type="password" id="modal-admin-pass" value="LaproAdminSecure2026!" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Master Admin Password <span class="text-red-500">*</span></label>
+          <input type="password" id="modal-admin-pass" required placeholder="Enter master admin password" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600">
         </div>
         <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">
           🔒 Login to Admin Dashboard
@@ -383,19 +382,19 @@
       <!-- Customer Register Form -->
       <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name <span class="text-red-500">*</span></label>
           <input type="text" id="reg-name" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. Ramesh Kumar">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
           <input type="email" id="reg-email" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. ramesh.kumar@gmail.com">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number <span class="text-red-500">*</span></label>
           <input type="tel" id="reg-phone" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. +91 98765 43210">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password <span class="text-red-500">*</span></label>
           <input type="password" id="reg-pass" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="Create strong password">
         </div>
         <div class="flex items-center gap-1.5 text-xs py-1">
@@ -406,6 +405,9 @@
       </form>
     </div>
   </div>
+
+  <!-- PRICE NEGOTIATION / MAKE AN OFFER MODAL CONTAINER -->
+  <div id="negotiate-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm"></div>
 
   <!-- APPLICATION FOOTER -->
   <footer class="bg-slate-900 text-slate-400 text-sm mt-auto border-t border-slate-800">
