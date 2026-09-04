@@ -1734,6 +1734,8 @@ function renderAdminDashboardView(container, state) {
     <div id="product-modal-container"></div>
     <div id="admin-category-modal-container"></div>
     <div id="admin-customer-modal-container"></div>
+    <div id="admin-order-modal-container"></div>
+    <div id="admin-ticket-modal-container"></div>
   `;
 
   container.innerHTML = html;
@@ -2072,17 +2074,25 @@ function renderAdminTabContent(tab, state) {
                   </div>
 
                   <!-- Status Action Bar -->
-                  <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
-                    <span class="text-xs font-bold text-slate-600">Update Status:</span>
-                    <select onchange="adminUpdateOrder('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500">
-                      <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ Confirmed</option>
-                      <option value="packed" ${o.status==='packed'?'selected':''}>📦 Packed</option>
-                      <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
-                      <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>🛵 Out for Delivery</option>
-                      <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
-                      <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
-                    </select>
-                    ${o.trackingId ? `<span class="text-xs text-slate-400 font-mono ml-auto">Tracking: ${o.trackingId}</span>` : ''}
+                  <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-slate-600">Status:</span>
+                      <select onchange="adminUpdateOrder('${o.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500">
+                        <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ Confirmed</option>
+                        <option value="packed" ${o.status==='packed'?'selected':''}>📦 Packed</option>
+                        <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
+                        <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>🛵 Out for Delivery</option>
+                        <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
+                        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      ${o.trackingId ? `<span class="text-xs text-slate-400 font-mono hidden sm:inline">Tracking: ${o.trackingId}</span>` : ''}
+                      <button onclick="openEditOrderModal('${o.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-3 py-1.5 rounded-xl transition text-xs flex items-center gap-1">
+                        <span>✏️</span> Edit Order Details
+                      </button>
+                    </div>
                   </div>
                 </div>
               `;
@@ -2162,7 +2172,7 @@ function renderAdminTabContent(tab, state) {
                 <th class="p-3">Device & Issue</th>
                 <th class="p-3">Service Mode</th>
                 <th class="p-3">Status</th>
-                <th class="p-3 text-right">Update Ticket Status</th>
+                <th class="p-3 text-right">Actions & Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -2173,8 +2183,8 @@ function renderAdminTabContent(tab, state) {
                   <td class="p-3 font-medium text-slate-700"><strong>${t.brand} ${t.model}</strong><br><span class="text-[10px] text-red-500 font-semibold">${t.problem}</span></td>
                   <td class="p-3 text-slate-500">${t.mode}</td>
                   <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase">${t.status.replace(/_/g,' ')}</span></td>
-                  <td class="p-3 text-right">
-                    <select onchange="adminUpdateTicket('${t.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-800">
+                  <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                    <select onchange="adminUpdateTicket('${t.id}', this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-800 focus:outline-none focus:border-blue-500">
                       <option value="received" ${t.status === 'received' ? 'selected' : ''}>Received</option>
                       <option value="scheduled" ${t.status === 'scheduled' ? 'selected' : ''}>Pickup Scheduled</option>
                       <option value="picked_up" ${t.status === 'picked_up' ? 'selected' : ''}>Picked Up</option>
@@ -2185,6 +2195,9 @@ function renderAdminTabContent(tab, state) {
                       <option value="ready" ${t.status === 'ready' ? 'selected' : ''}>Ready</option>
                       <option value="delivered" ${t.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                     </select>
+                    <button onclick="openEditTicketModal('${t.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded-lg transition text-[11px]">
+                      ✏️ Edit
+                    </button>
                   </td>
                 </tr>
               `).join("")}
@@ -2815,6 +2828,267 @@ function handleDeleteCustomer(email) {
 
 function closeCustomerModal() {
   const container = document.getElementById("admin-customer-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+// ======================== ADMIN ORDER EDIT MODAL ========================
+function openEditOrderModal(orderId) {
+  const o = (appState.state.orders || []).find(ord => ord.id === orderId);
+  if (!o) return;
+
+  const container = document.getElementById("admin-order-modal-container");
+  if (!container) return;
+
+  const addr = o.address || { name: o.customerName || '', phone: '', line: '', city: 'Bangalore', state: 'Karnataka', pin: '560001' };
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <div>
+            <h3 class="font-black text-base text-slate-900">✏️ Edit Order: #${o.id}</h3>
+            <p class="text-[11px] text-slate-400">Placed on ${o.date} &nbsp;|&nbsp; Total: ₹ ${o.totals?.total?.toLocaleString('en-IN') || 0}</p>
+          </div>
+          <button onclick="closeOrderModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleEditOrderSubmit(event, '${o.id}')" class="space-y-4 text-xs">
+          <!-- Customer & Contact -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Customer Name <span class="text-red-500">*</span></label>
+              <input type="text" id="edit-ord-custname" value="${o.customerName || addr.name || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Customer Phone</label>
+              <input type="tel" id="edit-ord-phone" value="${addr.phone || ''}" placeholder="+91 98450 00000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            </div>
+          </div>
+
+          <!-- Shipping Address -->
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Doorstep Delivery Address</label>
+            <input type="text" id="edit-ord-line" value="${addr.line || ''}" placeholder="Street, Flat/House No, Landmark" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">City</label>
+              <input type="text" id="edit-ord-city" value="${addr.city || 'Bangalore'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">State</label>
+              <input type="text" id="edit-ord-state" value="${addr.state || 'Karnataka'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">PIN Code</label>
+              <input type="text" id="edit-ord-pin" value="${addr.pin || '560001'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            </div>
+          </div>
+
+          <!-- Logistics & Fulfillment -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div class="font-bold text-slate-800 text-[11px] uppercase">🚚 Logistics & Dispatch Information</div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Courier / Carrier Partner</label>
+                <select id="edit-ord-carrier" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+                  <option value="BlueDart Express" ${o.deliveryPartner==='BlueDart Express'?'selected':''}>BlueDart Express</option>
+                  <option value="Delhivery Surface" ${o.deliveryPartner==='Delhivery Surface'?'selected':''}>Delhivery Surface</option>
+                  <option value="DTDC Air" ${o.deliveryPartner==='DTDC Air'?'selected':''}>DTDC Air Express</option>
+                  <option value="Lapro Doorstep Fleet" ${o.deliveryPartner==='Lapro Doorstep Fleet'?'selected':''}>Lapro Doorstep Fleet (Bangalore Direct)</option>
+                  <option value="Ekart Logistics" ${o.deliveryPartner==='Ekart Logistics'?'selected':''}>Ekart Logistics</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Tracking Number / AWB</label>
+                <input type="text" id="edit-ord-tracking" value="${o.trackingId || ''}" placeholder="e.g. LP98234123" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Fulfillment Status</label>
+              <select id="edit-ord-status" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+                <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ Confirmed</option>
+                <option value="packed" ${o.status==='packed'?'selected':''}>📦 Packed</option>
+                <option value="shipped" ${o.status==='shipped'?'selected':''}>🚚 Shipped</option>
+                <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>🛵 Out for Delivery</option>
+                <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ Delivered</option>
+                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeOrderModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Save Order Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleEditOrderSubmit(event, orderId) {
+  event.preventDefault();
+  const o = (appState.state.orders || []).find(ord => ord.id === orderId);
+  if (!o) return;
+
+  const newStatus = document.getElementById("edit-ord-status").value;
+  const updatedData = {
+    customerName: document.getElementById("edit-ord-custname").value,
+    deliveryPartner: document.getElementById("edit-ord-carrier").value,
+    trackingId: document.getElementById("edit-ord-tracking").value,
+    status: newStatus,
+    address: {
+      name: document.getElementById("edit-ord-custname").value,
+      phone: document.getElementById("edit-ord-phone").value,
+      line: document.getElementById("edit-ord-line").value,
+      city: document.getElementById("edit-ord-city").value,
+      state: document.getElementById("edit-ord-state").value,
+      pin: document.getElementById("edit-ord-pin").value
+    }
+  };
+
+  appState.updateOrderDetails(orderId, updatedData);
+  if (newStatus !== o.status) {
+    appState.updateOrderStatus(orderId, newStatus);
+  }
+
+  closeOrderModal();
+  setAdminTab("orders");
+}
+
+function closeOrderModal() {
+  const container = document.getElementById("admin-order-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+// ======================== ADMIN SERVICE TICKET EDIT MODAL ========================
+function openEditTicketModal(ticketId) {
+  const t = (appState.state.serviceTickets || []).find(tkt => tkt.id === ticketId);
+  if (!t) return;
+
+  const container = document.getElementById("admin-ticket-modal-container");
+  if (!container) return;
+
+  const currentEst = t.estimate?.total || (t.estimate ? Number(t.estimate) : 0);
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
+        <div class="flex justify-between items-center pb-3 border-b mb-4">
+          <div>
+            <h3 class="font-black text-base text-slate-900">🛠️ Edit Repair Ticket: #${t.id}</h3>
+            <p class="text-[11px] text-slate-400">Created on ${t.date} &nbsp;|&nbsp; Device: ${t.brand} ${t.model}</p>
+          </div>
+          <button onclick="closeTicketModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleEditTicketSubmit(event, '${t.id}')" class="space-y-4 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Customer Name</label>
+              <input type="text" id="edit-tkt-custname" value="${t.customerName || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Customer Phone / Contact</label>
+              <input type="tel" id="edit-tkt-phone" value="${t.customerPhone || (t.address?.phone) || ''}" placeholder="+91 98450 00000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Device Brand & Model</label>
+              <input type="text" id="edit-tkt-brandmodel" value="${t.brand} ${t.model}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Service Mode / Location</label>
+              <input type="text" id="edit-tkt-mode" value="${t.mode}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Reported Issue / Problem</label>
+            <input type="text" id="edit-tkt-problem" value="${t.problem}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+          </div>
+
+          <!-- Diagnostic Estimate & Costing -->
+          <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-200 space-y-3">
+            <div class="font-bold text-indigo-950 text-[11px] uppercase flex items-center gap-1.5">
+              <span>🧾</span> Diagnostic Estimate & Payment Setting
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Repair Cost / Estimate (₹)</label>
+                <input type="number" id="edit-tkt-estimate" value="${currentEst || 0}" placeholder="2500" class="w-full bg-white border border-indigo-300 rounded-xl p-2.5 focus:outline-none focus:border-indigo-600 font-mono font-bold text-indigo-900">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Payment Status</label>
+                <select id="edit-tkt-payment" class="w-full bg-white border border-indigo-300 rounded-xl p-2.5 focus:outline-none focus:border-indigo-600 font-bold">
+                  <option value="pending" ${t.paymentStatus==='pending'?'selected':''}>⏳ Payment Pending</option>
+                  <option value="paid" ${t.paymentStatus==='paid'?'selected':''}>✅ Paid & Cleared</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ticket Workflow Status -->
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Lifecycle Status</label>
+            <select id="edit-tkt-status" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <option value="received" ${t.status==='received'?'selected':''}>1. Received</option>
+              <option value="scheduled" ${t.status==='scheduled'?'selected':''}>2. Pickup Scheduled</option>
+              <option value="picked_up" ${t.status==='picked_up'?'selected':''}>3. Picked Up</option>
+              <option value="center" ${t.status==='center'?'selected':''}>4. At Service Center</option>
+              <option value="diagnosing" ${t.status==='diagnosing'?'selected':''}>5. Diagnosing</option>
+              <option value="estimate_sent" ${t.status==='estimate_sent'?'selected':''}>6. Estimate Sent to Customer</option>
+              <option value="repair_progress" ${t.status==='repair_progress'?'selected':''}>7. Repair In Progress</option>
+              <option value="ready" ${t.status==='ready'?'selected':''}>8. Ready for Pickup/Delivery</option>
+              <option value="delivered" ${t.status==='delivered'?'selected':''}>9. Delivered & Closed</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeTicketModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Save Ticket Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleEditTicketSubmit(event, ticketId) {
+  event.preventDefault();
+  const t = (appState.state.serviceTickets || []).find(tkt => tkt.id === ticketId);
+  if (!t) return;
+
+  const newStatus = document.getElementById("edit-tkt-status").value;
+  const estVal = Number(document.getElementById("edit-tkt-estimate").value) || 0;
+  const payStatus = document.getElementById("edit-tkt-payment").value;
+
+  const updatedData = {
+    customerName: document.getElementById("edit-tkt-custname").value,
+    customerPhone: document.getElementById("edit-tkt-phone").value,
+    problem: document.getElementById("edit-tkt-problem").value,
+    mode: document.getElementById("edit-tkt-mode").value,
+    status: newStatus,
+    paymentStatus: payStatus,
+    estimate: estVal > 0 ? { total: estVal, parts: Math.round(estVal * 0.7), labor: Math.round(estVal * 0.3) } : null
+  };
+
+  appState.updateTicketDetails(ticketId, updatedData);
+  if (newStatus !== t.status) {
+    appState.updateTicketStatus(ticketId, newStatus, updatedData.estimate);
+  }
+
+  closeTicketModal();
+  setAdminTab("tickets");
+}
+
+function closeTicketModal() {
+  const container = document.getElementById("admin-ticket-modal-container");
   if (container) container.innerHTML = "";
 }
 

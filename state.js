@@ -1070,6 +1070,15 @@ class StateManager {
     }
   }
 
+  updateTicketDetails(ticketId, updatedData) {
+    const ticket = this.state.serviceTickets.find(t => t.id === ticketId);
+    if (!ticket) return { success: false, message: "Ticket not found." };
+    Object.assign(ticket, updatedData);
+    this.addNotification(`Service ticket ${ticketId} details updated.`);
+    this.saveState();
+    return { success: true };
+  }
+
   // ======================== DYNAMIC CATEGORY EARNINGS ANALYTICS ========================
   getCategoryEarnings() {
     const orders = this.state.orders || [];
