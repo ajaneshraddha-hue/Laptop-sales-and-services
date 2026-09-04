@@ -1743,10 +1743,16 @@ function renderAdminDashboardView(container, state) {
 
 function setAdminTab(tab) {
   activeAdminTab = tab;
-  // Re-render whole view to update sidebar active classes
+  // Re-render whole view to update sidebar active classes and content area
   const mainContent = document.getElementById("main-content");
-  if (mainContent && appState.state.currentView === "admin-dashboard") {
+  if (mainContent && (appState.state.currentView === "admin" || appState.state.currentView === "admin-dashboard")) {
     renderAdminDashboardView(mainContent, appState.state);
+  } else {
+    // Fallback if inside admin tab content directly
+    const contentEl = document.getElementById("admin-tab-content");
+    if (contentEl) {
+      contentEl.innerHTML = renderAdminTabContent(tab, appState.state);
+    }
   }
 }
 
