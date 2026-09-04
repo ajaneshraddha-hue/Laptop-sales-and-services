@@ -42,72 +42,7 @@ const DEFAULT_STATE = {
     }
   ],
   wishlist: [],
-  orders: [
-    {
-      id: "ORD1001",
-      invoiceId: "INV2026001",
-      date: "Aug 28, 2026",
-      time: "11:45 AM",
-      status: "delivered",
-      paymentMethod: "UPI QR",
-      transactionRef: "TXN123456789",
-      customerName: "Amit Sharma",
-      customerEmail: "amit.sharma@gmail.com",
-      totals: { subtotal: 24990, discount: 0, tax: 4498.2, total: 29488.2 },
-      address: { name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" },
-      items: [
-        { id: "deal-dell-latitude-7490", name: "Dell Latitude 7490 Touch (Core i7)", category: "Laptops", brand: "Dell", price: 24990, quantity: 1, image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=700&auto=format&fit=crop&q=80" }
-      ]
-    },
-    {
-      id: "ORD1002",
-      invoiceId: "INV2026002",
-      date: "Aug 30, 2026",
-      time: "04:15 PM",
-      status: "shipped",
-      paymentMethod: "Card Payment",
-      transactionRef: "TXN987654321",
-      customerName: "Priya Patel",
-      customerEmail: "priya.patel@yahoo.com",
-      totals: { subtotal: 26990, discount: 0, tax: 4858.2, total: 31848.2 },
-      address: { name: "Priya Patel", phone: "+91 99000 54321", line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102" },
-      items: [
-        { id: "deal-hp-elitebook-840-g6", name: "HP EliteBook 840 G6 Ultralight", category: "Laptops", brand: "HP", price: 26990, quantity: 1, image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80" }
-      ]
-    },
-    {
-      id: "ORD1003",
-      invoiceId: "INV2026003",
-      date: "Sep 01, 2026",
-      time: "02:30 PM",
-      status: "delivered",
-      paymentMethod: "UPI QR",
-      transactionRef: "TXN456789123",
-      customerName: "Amit Sharma",
-      customerEmail: "amit.sharma@gmail.com",
-      totals: { subtotal: 22990, discount: 0, tax: 4138.2, total: 27128.2 },
-      address: { name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" },
-      items: [
-        { id: "desktop-dell-optiplex-7070", name: "Dell OptiPlex 7070 Micro Tiny PC", category: "Desktops", brand: "Dell", price: 22990, quantity: 1, image: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80" }
-      ]
-    },
-    {
-      id: "ORD1004",
-      invoiceId: "INV2026004",
-      date: "Sep 03, 2026",
-      time: "10:15 AM",
-      status: "confirmed",
-      paymentMethod: "Net Banking",
-      transactionRef: "TXN789123456",
-      customerName: "Priya Patel",
-      customerEmail: "priya.patel@yahoo.com",
-      totals: { subtotal: 7906, discount: 0, tax: 1423.08, total: 9329.08 },
-      address: { name: "Priya Patel", phone: "+91 99000 54321", line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102" },
-      items: [
-        { id: "monitor-lenovo-thinkvision-s24e", name: "Lenovo ThinkVision S24e-20 23.8\" Monitor", category: "Peripherals", brand: "Lenovo", price: 7906, quantity: 1, image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700&auto=format&fit=crop&q=80" }
-      ]
-    }
-  ],
+  orders: [],
   serviceTickets: [
     {
       id: "TKT1001",
@@ -226,6 +161,12 @@ class StateManager {
       }
       if (!parsed.registeredUsers) {
         parsed.registeredUsers = DEFAULT_STATE.registeredUsers;
+      }
+      // Purge all legacy demo mock orders
+      if (parsed.orders) {
+        parsed.orders = parsed.orders.filter(o => !["ORD1001", "ORD1002", "ORD1003", "ORD1004"].includes(o.id));
+      } else {
+        parsed.orders = [];
       }
       // Always ensure the Home page gets opened first when loading the site
       parsed.currentView = "home";
@@ -1009,6 +950,20 @@ class StateManager {
     order.status = "cancelled";
     order.cancelReason = reason;
     this.addNotification(`Order ${orderId} has been cancelled.`);
+    this.saveState();
+    return { success: true };
+  }
+
+  deleteOrder(orderId) {
+    this.state.orders = (this.state.orders || []).filter(o => o.id !== orderId);
+    this.addNotification(`Order ${orderId} permanently deleted.`);
+    this.saveState();
+    return { success: true };
+  }
+
+  clearAllOrders() {
+    this.state.orders = [];
+    this.addNotification("All orders have been permanently cleared.");
     this.saveState();
     return { success: true };
   }

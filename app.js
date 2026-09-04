@@ -2067,14 +2067,21 @@ function renderAdminTabContent(tab, state) {
             <h3 class="font-black text-base text-slate-900">Customer Purchase Orders (${orders.length})</h3>
             <p class="text-xs text-slate-400">All orders placed by customers are tracked and stored here</p>
           </div>
-          <span class="bg-blue-600 text-white text-xs font-black px-3.5 py-1 rounded-full">${orders.length} Total</span>
+          <div class="flex items-center gap-2">
+            ${orders.length > 0 ? `
+              <button onclick="handleAdminClearAllOrders()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+                <span>🗑️</span> Clear All Orders
+              </button>
+            ` : ''}
+            <span class="bg-blue-600 text-white text-xs font-black px-3.5 py-1 rounded-full">${orders.length} Total</span>
+          </div>
         </div>
 
         ${orders.length === 0 ? `
           <div class="p-12 text-center text-slate-400">
             <div class="text-4xl mb-3">📭</div>
-            <p class="font-bold text-slate-600">No orders yet</p>
-            <p class="text-xs mt-1">New customer orders will appear here automatically.</p>
+            <p class="font-bold text-slate-600">No orders currently</p>
+            <p class="text-xs mt-1">All previous orders have been cleared. New customer orders will appear here automatically.</p>
           </div>
         ` : `
           <div class="divide-y divide-slate-100">
@@ -2151,6 +2158,9 @@ function renderAdminTabContent(tab, state) {
                       ${o.trackingId ? `<span class="text-xs text-slate-400 font-mono hidden sm:inline">Tracking: ${o.trackingId}</span>` : ''}
                       <button onclick="openEditOrderModal('${o.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-3 py-1.5 rounded-xl transition text-xs flex items-center gap-1">
                         <span>✏️</span> Edit Order Details
+                      </button>
+                      <button onclick="handleAdminDeleteOrder('${o.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-xl transition text-xs flex items-center gap-1">
+                        <span>🗑️</span> Delete
                       </button>
                     </div>
                   </div>
@@ -3022,6 +3032,20 @@ function handleEditOrderSubmit(event, orderId) {
 function closeOrderModal() {
   const container = document.getElementById("admin-order-modal-container");
   if (container) container.innerHTML = "";
+}
+
+function handleAdminDeleteOrder(orderId) {
+  if (confirm(`Are you sure you want to permanently delete order "${orderId}"?`)) {
+    appState.deleteOrder(orderId);
+    setAdminTab("orders");
+  }
+}
+
+function handleAdminClearAllOrders() {
+  if (confirm("Are you sure you want to permanently delete ALL existing customer orders? This cannot be undone.")) {
+    appState.clearAllOrders();
+    setAdminTab("orders");
+  }
 }
 
 // ======================== ADMIN SERVICE TICKET EDIT MODAL ========================
