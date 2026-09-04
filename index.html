@@ -482,6 +482,81 @@
     </div>
   </footer>
 
+  <!-- LAPRO AI ASSISTANT CHATBOT WIDGET -->
+  <div id="lapro-chatbot-root" class="fixed bottom-6 right-6 z-50 select-none">
+    <!-- Chatbot Launcher Floating Button -->
+    <button id="chatbot-launcher-btn" onclick="toggleChatbot()" class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-full p-3.5 shadow-2xl hover:scale-105 transition duration-200 flex items-center gap-2.5 border-2 border-white/20 group relative" title="Chat with Lapro AI Assistant">
+      <div class="relative">
+        <span class="text-2xl">🤖</span>
+        <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-slate-900 rounded-full animate-pulse"></span>
+      </div>
+      <div class="hidden sm:flex flex-col text-left pr-1">
+        <span class="text-xs font-black leading-tight tracking-tight">Lapro AI</span>
+        <span class="text-[9px] text-blue-200 font-bold leading-tight">Support & Assistant</span>
+      </div>
+      <span id="chatbot-unread-dot" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white hidden animate-bounce"></span>
+    </button>
+
+    <!-- Chatbot Window Modal -->
+    <div id="chatbot-window" class="hidden absolute bottom-16 right-0 w-[92vw] sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col transition-all duration-300 transform origin-bottom-right" style="height: 520px; max-height: 80vh;">
+      <!-- Chat Header -->
+      <div class="bg-slate-950 text-white p-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-xl shadow-inner border border-blue-400/30">
+            🤖
+            <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-slate-950 rounded-full"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h4 class="font-black text-sm text-white">Lapro AI Assistant</h4>
+              <span class="bg-blue-900/60 border border-blue-500/40 text-blue-300 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">Online</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Ask about laptops, repairs, orders & offers</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="clearChatHistory()" class="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg text-xs" title="Clear Chat History">🔄</button>
+          <button onclick="toggleChatbot()" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg text-sm font-bold" title="Close">✕</button>
+        </div>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div class="bg-slate-50 p-2.5 border-b border-slate-100 flex gap-1.5 overflow-x-auto text-[11px] font-bold select-none no-scrollbar">
+        <button onclick="sendQuickPrompt('Recommend a laptop under 50000')" class="bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap transition shadow-2xs">💻 Laptop under ₹50k</button>
+        <button onclick="sendQuickPrompt('How do I book a doorstep laptop repair?')" class="bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap transition shadow-2xs">🛠️ Book Repair</button>
+        <button onclick="sendQuickPrompt('Show me Crazy Deals')" class="bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap transition shadow-2xs">🔥 Crazy Deals</button>
+        <button onclick="sendQuickPrompt('Where is my order?')" class="bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap transition shadow-2xs">📦 Track Order</button>
+        <button onclick="sendQuickPrompt('How does price negotiation work?')" class="bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap transition shadow-2xs">💬 Price Negotiation</button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatbot-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-gradient-to-b from-slate-50/50 to-white">
+        <!-- Initial Welcome Message -->
+        <div class="flex gap-2.5 items-start">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">🤖</div>
+          <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-2xs text-slate-800 space-y-1.5 max-w-[85%]">
+            <p class="font-semibold">Hello! 👋 I'm your <strong>Lapro AI Assistant</strong>.</p>
+            <p class="text-slate-600 leading-relaxed">How can I assist you today? I can help you find hardware, check prices, track orders, or schedule doorstep computer repairs!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator (Hidden by default) -->
+      <div id="chatbot-typing" class="hidden px-4 py-2 text-[11px] text-slate-400 italic flex items-center gap-2">
+        <span class="w-2 h-2 bg-blue-600 rounded-full animate-ping"></span>
+        <span>Lapro AI is thinking...</span>
+      </div>
+
+      <!-- Input Form -->
+      <form id="chatbot-form" onsubmit="handleChatSubmit(event)" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+        <input type="text" id="chatbot-input" placeholder="Ask anything about products, repairs..." autocomplete="off" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white transition shadow-inner">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition shadow flex items-center justify-center shrink-0" title="Send Message">
+          <svg class="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Loaded Javascript Modules -->
   <script src="products.js"></script>
   <script src="state.js"></script>

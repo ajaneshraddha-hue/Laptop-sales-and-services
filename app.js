@@ -3254,3 +3254,268 @@ function closeComparisonModal() {
     modal.classList.remove("flex");
   }
 }
+
+// ======================== 9. LAPRO AI CHATBOT ASSISTANT ENGINE ========================
+let isChatbotOpen = false;
+
+function toggleChatbot() {
+  isChatbotOpen = !isChatbotOpen;
+  const chatWin = document.getElementById("chatbot-window");
+  const unreadDot = document.getElementById("chatbot-unread-dot");
+  if (!chatWin) return;
+
+  if (isChatbotOpen) {
+    chatWin.classList.remove("hidden");
+    if (unreadDot) unreadDot.classList.add("hidden");
+    const input = document.getElementById("chatbot-input");
+    if (input) setTimeout(() => input.focus(), 150);
+  } else {
+    chatWin.classList.add("hidden");
+  }
+}
+
+function openChatbot() {
+  isChatbotOpen = true;
+  const chatWin = document.getElementById("chatbot-window");
+  if (chatWin) chatWin.classList.remove("hidden");
+}
+
+function closeChatbot() {
+  isChatbotOpen = false;
+  const chatWin = document.getElementById("chatbot-window");
+  if (chatWin) chatWin.classList.add("hidden");
+}
+
+function clearChatHistory() {
+  const container = document.getElementById("chatbot-messages");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="flex gap-2.5 items-start">
+      <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">🤖</div>
+      <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-2xs text-slate-800 space-y-1.5 max-w-[85%]">
+        <p class="font-semibold">Chat history reset! 👋</p>
+        <p class="text-slate-600 leading-relaxed">How can I help you right now? Ask me about laptops, doorstep repair services, current orders, or price discounts!</p>
+      </div>
+    </div>
+  `;
+}
+
+function sendQuickPrompt(promptText) {
+  const input = document.getElementById("chatbot-input");
+  if (input) {
+    input.value = promptText;
+    handleChatSubmit(new Event("submit"));
+  }
+}
+
+function handleChatSubmit(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById("chatbot-input");
+  if (!input) return;
+  const query = input.value.trim();
+  if (!query) return;
+
+  // Append user message
+  appendChatMessage("user", query);
+  input.value = "";
+
+  // Show typing indicator
+  const typingEl = document.getElementById("chatbot-typing");
+  if (typingEl) typingEl.classList.remove("hidden");
+
+  // Generate AI Response with natural typing delay
+  setTimeout(() => {
+    if (typingEl) typingEl.classList.add("hidden");
+    const responseHtml = generateAIResponse(query);
+    appendChatMessage("bot", responseHtml);
+  }, 600);
+}
+
+function appendChatMessage(sender, content) {
+  const container = document.getElementById("chatbot-messages");
+  if (!container) return;
+
+  const msgDiv = document.createElement("div");
+
+  if (sender === "user") {
+    msgDiv.className = "flex gap-2 justify-end";
+    msgDiv.innerHTML = `
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] text-xs font-medium">
+        ${escapeHtml(content)}
+      </div>
+    `;
+  } else {
+    msgDiv.className = "flex gap-2.5 items-start fade-in";
+    msgDiv.innerHTML = `
+      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-sm shrink-0 shadow-sm">🤖</div>
+      <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-2xs text-slate-800 space-y-2 max-w-[88%] text-xs leading-relaxed">
+        ${content}
+      </div>
+    `;
+  }
+
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function generateAIResponse(rawQuery) {
+  const query = rawQuery.toLowerCase();
+  const products = appState.getProducts();
+
+  // 1. Budget Laptop / Hardware Search (e.g. "under 50000", "under 40k", "gaming laptop")
+  const budgetMatch = query.match(/(?:under|below|budget|within|less than)\s*(?:rs\.?|inr|₹)?\s*(\d+)(?:k|000)?/i);
+  let budgetLimit = null;
+  if (budgetMatch) {
+    let num = parseInt(budgetMatch[1]);
+    if (num < 1000) num = num * 1000;
+    budgetLimit = num;
+  }
+
+  if (budgetLimit || query.includes("recommend") || query.includes("suggest") || query.includes("laptop") || query.includes("desktop") || query.includes("buy")) {
+    let matchingProds = products;
+    if (budgetLimit) {
+      matchingProds = products.filter(p => p.price <= budgetLimit);
+    }
+    if (query.includes("gaming")) {
+      matchingProds = matchingProds.filter(p => p.category === "Laptops" && (p.specs?.processor?.toLowerCase().includes("i7") || p.specs?.processor?.toLowerCase().includes("ryzen") || p.price > 60000));
+    } else if (query.includes("desktop")) {
+      matchingProds = matchingProds.filter(p => p.category === "Desktops");
+    } else if (query.includes("apple") || query.includes("macbook")) {
+      matchingProds = matchingProds.filter(p => p.brand.toLowerCase() === "apple");
+    } else if (query.includes("dell")) {
+      matchingProds = matchingProds.filter(p => p.brand.toLowerCase() === "dell");
+    } else if (query.includes("lenovo")) {
+      matchingProds = matchingProds.filter(p => p.brand.toLowerCase() === "lenovo");
+    } else if (query.includes("hp")) {
+      matchingProds = matchingProds.filter(p => p.brand.toLowerCase() === "hp");
+    }
+
+    const topMatches = matchingProds.slice(0, 2);
+    if (topMatches.length > 0) {
+      return `
+        <p class="font-bold text-slate-900">Here are top recommended options for you:</p>
+        <div class="space-y-2 pt-1">
+          ${topMatches.map(p => `
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <img src="${(p.images && p.images[0]) || p.image}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 bg-white">
+                <div class="min-w-0 flex-1">
+                  <div class="font-bold text-slate-900 truncate">${p.name}</div>
+                  <div class="text-teal-700 font-bold font-mono">₹ ${p.price.toLocaleString('en-IN')} <span class="text-slate-400 font-normal line-through text-[10px]">₹ ${p.originalPrice.toLocaleString('en-IN')}</span></div>
+                </div>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="appState.setView('product', { product: '${p.id}' }); toggleChatbot();" class="flex-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold text-[10px] py-1 rounded-lg">View Specs</button>
+                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-1 rounded-lg">🛒 Add to Cart</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        <button onclick="appState.setView('catalog'); toggleChatbot();" class="text-blue-600 font-bold hover:underline text-[11px] block mt-1">Browse entire catalog (${products.length} items) →</button>
+      `;
+    }
+  }
+
+  // 2. Doorstep Service & Repair Queries
+  if (query.includes("repair") || query.includes("service") || query.includes("pickup") || query.includes("screen") || query.includes("battery") || query.includes("keyboard") || query.includes("motherboard") || query.includes("slow") || query.includes("diagnostic")) {
+    return `
+      <p class="font-bold text-slate-900">🛠️ Certified Doorstep Computer Repair Services</p>
+      <p class="text-slate-600">Lapro Solutions provides <strong>Free Doorstep Pickup & Drop</strong> across Bangalore with <strong>32-Point Quality Diagnostics</strong>.</p>
+      <ul class="list-disc list-inside text-[11px] text-slate-600 space-y-0.5 pt-1">
+        <li>Screen & Glass Panel Replacement (1-Yr Warranty)</li>
+        <li>Chip-Level Motherboard Repairs</li>
+        <li>Original Battery & Charger Replacements</li>
+        <li>High-Speed RAM & NVMe SSD Upgrades</li>
+      </ul>
+      <div class="pt-2">
+        <button onclick="appState.setView('service'); toggleChatbot();" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+          <span>🛠️</span> Book Doorstep Repair Now
+        </button>
+      </div>
+    `;
+  }
+
+  // 3. Order Tracking / History
+  if (query.includes("order") || query.includes("track") || query.includes("delivery") || query.includes("shipping") || query.includes("invoice")) {
+    const orders = appState.state.orders || [];
+    if (!appState.state.currentUser && !appState.state.adminUser) {
+      return `
+        <p class="font-bold text-slate-900">📦 Order Tracking</p>
+        <p class="text-slate-600">Please sign in to view your live orders and download tax invoices.</p>
+        <button onclick="openAuthModal('login'); toggleChatbot();" class="bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs mt-1">Sign In</button>
+      `;
+    }
+    if (orders.length > 0) {
+      const latest = orders[0];
+      return `
+        <p class="font-bold text-slate-900">📦 Your Latest Order: <strong>${latest.id}</strong></p>
+        <p class="text-slate-600">Status: <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full uppercase text-[10px]">${latest.status.replace(/_/g, ' ')}</span></p>
+        <p class="text-slate-500 text-[11px]">Total: ₹ ${latest.totals.total.toLocaleString('en-IN')} &nbsp;•&nbsp; Date: ${latest.date}</p>
+        <button onclick="appState.setView('orders'); toggleChatbot();" class="bg-slate-900 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">View All Orders & Invoices →</button>
+      `;
+    } else {
+      return `
+        <p class="font-bold text-slate-900">No active orders found.</p>
+        <p class="text-slate-600">You haven't placed any orders yet. Check out our Crazy Deals to start shopping!</p>
+        <button onclick="appState.setView('catalog'); toggleChatbot();" class="bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-1">Explore Products</button>
+      `;
+    }
+  }
+
+  // 4. Crazy Deals / Coupons / Discounts
+  if (query.includes("deal") || query.includes("offer") || query.includes("discount") || query.includes("coupon") || query.includes("promo") || query.includes("crazy")) {
+    return `
+      <p class="font-bold text-slate-900">🔥 Current Hot Deals & Promo Codes:</p>
+      <div class="bg-orange-50 border border-orange-200 rounded-xl p-2.5 text-xs text-orange-900 space-y-1">
+        <div>🎟️ Use code <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-orange-300">WELCOME10</strong> for <strong>10% OFF</strong></div>
+        <div>🎟️ Use code <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-orange-300">SAVE1000</strong> for <strong>₹1,000 Flat Off</strong></div>
+      </div>
+      <button onclick="appState.setView('catalog', { category: 'Crazy Deals' }); toggleChatbot();" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-xl text-xs mt-2 transition shadow">
+        View All Crazy Deals →
+      </button>
+    `;
+  }
+
+  // 5. Price Negotiation Help
+  if (query.includes("negotiate") || query.includes("offer") || query.includes("bargain") || query.includes("counter")) {
+    return `
+      <p class="font-bold text-slate-900">💬 How Price Negotiation Works:</p>
+      <ol class="list-decimal list-inside text-slate-600 space-y-1 text-[11px] pt-1">
+        <li>Click <strong>"Make an Offer / Negotiate Price"</strong> on any product card.</li>
+        <li>Enter your proposed counter-offer in Rupees.</li>
+        <li>If your offer meets the seller's floor price, it is <strong>instantly approved</strong> and added to your cart at your discounted price!</li>
+      </ol>
+      <button onclick="appState.setView('catalog'); toggleChatbot();" class="bg-amber-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">Try Price Negotiation on Catalog</button>
+    `;
+  }
+
+  // 6. Contact & Helpline
+  if (query.includes("contact") || query.includes("phone") || query.includes("email") || query.includes("address") || query.includes("helpline") || query.includes("location") || query.includes("support")) {
+    return `
+      <p class="font-bold text-slate-900">📞 Lapro Solutions Support & Service Center</p>
+      <div class="text-slate-600 space-y-1 text-[11px] pt-1">
+        <p>📍 <strong>Location:</strong> Lapro Solutions Tech Park, Sector 4, Indiranagar, Bangalore - 560102</p>
+        <p>📞 <strong>Helpline:</strong> +91 80 4999 5000 (Mon - Sat, 9 AM - 8 PM)</p>
+        <p>✉️ <strong>Support Email:</strong> support@laprosolutions.com</p>
+      </div>
+      <button onclick="appState.setView('contact'); toggleChatbot();" class="bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">View Contact Page</button>
+    `;
+  }
+
+  // 7. General Fallback
+  return `
+    <p>I can help you with:</p>
+    <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+      <button onclick="sendQuickPrompt('Recommend a laptop under 50000')" class="bg-slate-50 hover:bg-slate-100 border p-1.5 rounded-lg text-left font-semibold text-slate-700">💻 Buy Laptops</button>
+      <button onclick="sendQuickPrompt('How do I book a doorstep laptop repair?')" class="bg-slate-50 hover:bg-slate-100 border p-1.5 rounded-lg text-left font-semibold text-slate-700">🛠️ Book Repair</button>
+      <button onclick="sendQuickPrompt('Show me Crazy Deals')" class="bg-slate-50 hover:bg-slate-100 border p-1.5 rounded-lg text-left font-semibold text-slate-700">🔥 Crazy Deals</button>
+      <button onclick="sendQuickPrompt('Where is my order?')" class="bg-slate-50 hover:bg-slate-100 border p-1.5 rounded-lg text-left font-semibold text-slate-700">📦 Order Status</button>
+    </div>
+  `;
+}
