@@ -716,6 +716,9 @@ function renderCatalogView(container, state) {
 
 // Card Renderers (List View & Grid View)
 function renderListCard(p) {
+  const inCart = (appState.state.cart || []).some(item => item.id === p.id);
+  const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
+
   return `
     <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col md:flex-row items-center gap-5">
       <!-- Thumbnail & Badges -->
@@ -751,19 +754,32 @@ function renderListCard(p) {
           ${p.originalPrice > p.price ? `<span class="text-xs text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
           ${p.gstITC ? `<span class="text-[10px] text-slate-400 font-medium">(GST Input: ₹${p.gstITC.toLocaleString('en-IN')})</span>` : ''}
         </div>
+
+        ${inCart ? `
+          <div class="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+            <span>✓ Added in Cart</span>
+            <span class="font-normal text-emerald-600">(${cartItem?.quantity || 1} item${(cartItem?.quantity || 1) > 1 ? 's' : ''})</span>
+          </div>
+        ` : ''}
       </div>
 
       <!-- Actions Column -->
       <div class="w-full md:w-44 shrink-0 flex flex-col gap-2 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-4">
-        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-1">
-          <button onclick="adjustQty('${p.id}', -1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">-</button>
-          <span id="qty-${p.id}" class="text-xs font-bold text-slate-800 font-mono">1</span>
-          <button onclick="adjustQty('${p.id}', 1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">+</button>
-        </div>
+        ${!inCart ? `
+          <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-1">
+            <button onclick="adjustQty('${p.id}', -1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">-</button>
+            <span id="qty-${p.id}" class="text-xs font-bold text-slate-800 font-mono">1</span>
+            <button onclick="adjustQty('${p.id}', 1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">+</button>
+          </div>
 
-        <button onclick="addToCartWithQty(event, '${p.id}')" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-          <span>🛒</span> ADD TO CART
-        </button>
+          <button onclick="addToCartWithQty(event, '${p.id}')" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+            <span>🛒</span> ADD TO CART
+          </button>
+        ` : `
+          <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5" title="Remove this item from your shopping cart">
+            <span>🗑️</span> REMOVE FROM CART
+          </button>
+        `}
 
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
           <span>💬</span> Negotiate Price
@@ -781,6 +797,9 @@ function renderListCard(p) {
 }
 
 function renderGridCard(p) {
+  const inCart = (appState.state.cart || []).some(item => item.id === p.id);
+  const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
+
   return `
     <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
       <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
@@ -795,16 +814,27 @@ function renderGridCard(p) {
         </div>
         <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">${p.brand} • ${p.category}</div>
         <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-900 hover:text-blue-600 cursor-pointer line-clamp-2 leading-snug mb-2">${p.name}</h3>
-        <div class="flex items-baseline gap-2 mb-3">
+        <div class="flex items-baseline gap-2 mb-2">
           <span class="text-teal-700 font-black text-base">₹ ${p.price.toLocaleString('en-IN')}.00</span>
           ${p.originalPrice > p.price ? `<span class="text-[11px] text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
         </div>
+        ${inCart ? `
+          <div class="mb-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
+            <span>✓ Added in Cart (${cartItem?.quantity || 1})</span>
+          </div>
+        ` : ''}
       </div>
 
       <div class="space-y-2">
-        <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-          <span>🛒</span> Add to Cart
-        </button>
+        ${inCart ? `
+          <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5">
+            <span>🗑️</span> Remove from Cart
+          </button>
+        ` : `
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+            <span>🛒</span> Add to Cart
+          </button>
+        `}
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
           <span>💬</span> Make an Offer
         </button>
@@ -888,17 +918,7 @@ function addToCartWithQty(event, prodId) {
   const success = appState.addToCart(prodId, qty);
   if (success) {
     showToast(`Added ${qty} × "${prod ? prod.name : ''}" to cart!`, "🛒", "success");
-
-    if (event && event.currentTarget) {
-      const btn = event.currentTarget;
-      const origText = btn.innerHTML;
-      btn.innerHTML = `<span>✓ Added</span>`;
-      btn.classList.add("bg-green-600", "text-white");
-      setTimeout(() => {
-        btn.innerHTML = origText;
-        btn.classList.remove("bg-green-600");
-      }, 1800);
-    }
+    refreshCurrentViewCartState();
   }
 }
 
@@ -975,9 +995,15 @@ function renderProductView(container, state) {
 
         <!-- Add to cart and instant checkout -->
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
-            <span>🛒</span> Add to Cart
-          </button>
+          ${(appState.state.cart || []).some(item => item.id === p.id) ? `
+            <button onclick="handleRemoveFromCart(event, '${p.id}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-sm py-3.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2" title="Remove this product from cart">
+              <span>🗑️</span> Remove from Cart
+            </button>
+          ` : `
+            <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+              <span>🛒</span> Add to Cart
+            </button>
+          `}
           <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
             <span>⚡</span> Buy Now
           </button>
@@ -3044,18 +3070,34 @@ function handleAddToCart(event, prodId, qty = 1) {
   const success = appState.addToCart(prodId, qty);
   if (success) {
     showToast(`Added "${prod.name}" to cart!`, "🛒", "success");
+    refreshCurrentViewCartState();
+  }
+}
 
-    // Button visual feedback without leaving the page
-    if (event && event.currentTarget) {
-      const btn = event.currentTarget;
-      const origText = btn.innerHTML;
-      btn.innerHTML = `<span>✓ Added to Cart</span>`;
-      btn.classList.add("bg-green-600", "text-white");
-      setTimeout(() => {
-        btn.innerHTML = origText;
-        btn.classList.remove("bg-green-600");
-      }, 1800);
-    }
+function handleRemoveFromCart(event, prodId) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const prod = appState.getProductById(prodId);
+  appState.removeFromCart(prodId);
+  showToast(`Removed "${prod ? prod.name : 'Item'}" from cart`, "🗑️", "info");
+  refreshCurrentViewCartState();
+}
+
+function refreshCurrentViewCartState() {
+  const mainContent = document.getElementById("main-content");
+  if (!mainContent) return;
+  const currentView = appState.state.currentView;
+  if (currentView === "catalog") {
+    renderCatalogView(mainContent, appState.state);
+  } else if (currentView === "product") {
+    renderProductView(mainContent, appState.state);
+  } else if (currentView === "wishlist") {
+    renderWishlistView(mainContent, appState.state);
+  } else if (currentView === "cart") {
+    renderCartView(mainContent, appState.state);
   }
 }
 
@@ -3159,9 +3201,15 @@ function renderWishlistView(container, state) {
             </div>
 
             <div class="pt-3 border-t border-slate-100 mt-3 space-y-2">
-              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-                <span>🛒</span> Move to Cart
-              </button>
+              ${(appState.state.cart || []).some(item => item.id === p.id) ? `
+                <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5" title="Remove from Cart">
+                  <span>🗑️</span> Remove from Cart
+                </button>
+              ` : `
+                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                  <span>🛒</span> Move to Cart
+                </button>
+              `}
             </div>
           </div>
         `).join("")}

@@ -806,6 +806,14 @@ class StateManager {
     this.saveState();
   }
 
+  isInCart(productId) {
+    return (this.state.cart || []).some(item => item.id === productId);
+  }
+
+  getCartItem(productId) {
+    return (this.state.cart || []).find(item => item.id === productId);
+  }
+
   applyCoupon(code) {
     const normalized = code.toUpperCase().trim();
     if (normalized === "LAPRO10" || normalized === "WELCOME10") {
