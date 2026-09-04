@@ -1,5 +1,5 @@
 // Global State Management for Lapro Solutions SPA
-const STATE_KEY = "lapro_solutions_state_v9";
+const STATE_KEY = "lapro_solutions_state_v10";
 
 const DEFAULT_STATE = {
   currentUser: null, // Customer auth session
@@ -10,7 +10,7 @@ const DEFAULT_STATE = {
       email: "admin@laprosolutions.com",
       password: "LaproAdminSecure2026!",
       role: "Super Admin",
-      phone: "+91 80 4999 5000"
+      phone: "+91 7996389264"
     }
   ],
   products: MOCK_PRODUCTS.map(p => ({

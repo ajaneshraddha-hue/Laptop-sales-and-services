@@ -1405,10 +1405,14 @@ function renderServiceView(container, state) {
         <!-- 4. Mode & Preferred Date -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Service Mode</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Service Mode / Nearest Branch</label>
             <select id="srv-mode" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-600">
-              <option value="Pickup & Drop">Free Doorstep Pickup & Drop</option>
-              <option value="Walk-in">Walk-in Service Center</option>
+              <option value="Pickup & Drop (Electronic City Hub)">Free Doorstep Pickup (Electronic City Hub)</option>
+              <option value="Pickup & Drop (Begur Hub)">Free Doorstep Pickup (Begur Hub)</option>
+              <option value="Pickup & Drop (Uttarahalli Hub)">Free Doorstep Pickup (Uttarahalli Hub)</option>
+              <option value="Walk-in: Electronic City Phase 1">Walk-in: Electronic City Phase 1 (Near Neo Hospital)</option>
+              <option value="Walk-in: Begur Branch">Walk-in: Begur Branch</option>
+              <option value="Walk-in: Uttarahalli Branch">Walk-in: Uttarahalli Branch</option>
             </select>
           </div>
           <div>
@@ -1418,8 +1422,16 @@ function renderServiceView(container, state) {
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup Address</label>
-          <textarea id="srv-address" rows="2" placeholder="Full address in Bangalore with pincode" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600">12, Maple Drive, Indiranagar, Bangalore - 560038</textarea>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup Address (Bangalore)</label>
+          <textarea id="srv-address" rows="2" placeholder="Full doorstep address in Bangalore with pincode" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600">Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</textarea>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 flex items-center justify-between text-xs text-blue-900">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📞</span>
+            <span>Direct Support Helpline: <a href="tel:7996389264" class="font-bold underline">+91 7996389264</a></span>
+          </div>
+          <span class="text-[11px] text-blue-700 font-semibold hidden sm:inline">✉️ laprosolutions1120@gmail.com</span>
         </div>
 
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow">
@@ -3182,10 +3194,117 @@ function renderFAQView(container) {
 
 function renderContactView(container) {
   container.innerHTML = `
-    <div class="max-w-3xl mx-auto bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-4">
-      <h1 class="text-2xl font-black text-slate-900">Contact & Service Center</h1>
-      <p class="text-xs text-slate-600">Head Office: <strong>Lapro Solutions Tech Park, Sector 4, Bangalore - 560102</strong></p>
-      <p class="text-xs text-slate-600">Helpline: <strong>+91 80 4999 5000</strong> | Email: <strong>support@laprosolutions.com</strong></p>
+    <div class="max-w-5xl mx-auto space-y-8 py-4">
+      <!-- Contact Hero -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl p-8 shadow-2xl border border-slate-800 text-center space-y-3">
+        <span class="bg-blue-600/30 text-cyan-300 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-blue-400/30">Connect With Us</span>
+        <h1 class="text-3xl font-black text-white">Contact & Service Center Locations</h1>
+        <p class="text-xs text-slate-300 max-w-xl mx-auto">Get in touch for enterprise hardware procurement, retail laptop sales, or certified doorstep repair services across Bangalore.</p>
+        
+        <div class="flex flex-wrap justify-center gap-4 pt-3">
+          <a href="tel:7996389264" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
+            <span>📞</span> <span>Call Us: +91 7996389264</span>
+          </a>
+          <a href="mailto:laprosolutions1120@gmail.com" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-5 py-2.5 rounded-xl border border-white/20 transition flex items-center gap-2">
+            <span>✉️</span> <span>laprosolutions1120@gmail.com</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Office & Contact Channels Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Head Office Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">🏢</div>
+            <div>
+              <h3 class="font-black text-base text-slate-900">Head Office</h3>
+              <span class="text-[11px] text-slate-500 font-medium">Main Headquarters & Sales Center</span>
+            </div>
+          </div>
+          <div class="text-xs text-slate-600 space-y-2 leading-relaxed">
+            <p><strong class="text-slate-900">Lapro Solutions Tech Park</strong></p>
+            <p>Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</p>
+            <div class="pt-2 border-t border-slate-100 space-y-1.5 font-medium">
+              <p class="flex items-center gap-2 text-slate-800">
+                <span class="text-slate-400">📞 Phone:</span>
+                <a href="tel:7996389264" class="text-blue-600 font-bold hover:underline">+91 7996389264</a>
+              </p>
+              <p class="flex items-center gap-2 text-slate-800">
+                <span class="text-slate-400">✉️ Email:</span>
+                <a href="mailto:laprosolutions1120@gmail.com" class="text-blue-600 font-bold hover:underline">laprosolutions1120@gmail.com</a>
+              </p>
+              <p class="text-slate-500 text-[11px]">⏰ Working Hours: Monday - Saturday, 9:00 AM - 8:30 PM</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doorstep Repair & Express Service Info -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">🛠️</div>
+              <div>
+                <h3 class="font-black text-base text-slate-900">Free Doorstep Pickup & Drop</h3>
+                <span class="text-[11px] text-slate-500 font-medium">Anywhere across Bangalore</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 mt-3 leading-relaxed">Need your laptop diagnosed or repaired? We provide fast <strong>doorstep pickup & drop</strong> service with 32-point diagnostics and 1-Year Warranty on replaced components.</p>
+          </div>
+          <button onclick="appState.setView('service')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
+            <span>🛠️</span> Book Doorstep Repair Service Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Bangalore Branch Locations -->
+      <div>
+        <div class="mb-4">
+          <h2 class="text-xl font-black text-slate-900">Our Service & Sales Branches in Bangalore</h2>
+          <p class="text-xs text-slate-500">Visit our nearest branch or request free doorstep delivery and repair</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Branch 1: Electronic City -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3 hover:border-blue-500 transition group">
+            <div class="flex items-center justify-between">
+              <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Branch 1</span>
+              <span class="text-emerald-500 text-xs font-bold">● Open</span>
+            </div>
+            <h4 class="font-black text-sm text-slate-900 group-hover:text-blue-600 transition">Electronic City (E-City)</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</p>
+            <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+              <span>Services: Laptop Sales, Motherboard & Screen Repair, SSD Upgrade</span>
+            </div>
+          </div>
+
+          <!-- Branch 2: Begur -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3 hover:border-blue-500 transition group">
+            <div class="flex items-center justify-between">
+              <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Branch 2</span>
+              <span class="text-emerald-500 text-xs font-bold">● Open</span>
+            </div>
+            <h4 class="font-black text-sm text-slate-900 group-hover:text-blue-600 transition">Begur Branch</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Begur Main Road, Near Lake View, Bangalore - 560068</p>
+            <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+              <span>Services: Doorstep Pickup Hub, Express Diagnostic, Battery & Keyboard</span>
+            </div>
+          </div>
+
+          <!-- Branch 3: Uttarahalli -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3 hover:border-blue-500 transition group">
+            <div class="flex items-center justify-between">
+              <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Branch 3</span>
+              <span class="text-emerald-500 text-xs font-bold">● Open</span>
+            </div>
+            <h4 class="font-black text-sm text-slate-900 group-hover:text-blue-600 transition">Uttarahalli Branch</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Uttarahalli Main Road, South Bangalore - 560061</p>
+            <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+              <span>Services: Desktop Assembly, Chip-Level Repair, Refurbished Laptops</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -3496,15 +3615,23 @@ function generateAIResponse(rawQuery) {
   }
 
   // 6. Contact & Helpline
-  if (query.includes("contact") || query.includes("phone") || query.includes("email") || query.includes("address") || query.includes("helpline") || query.includes("location") || query.includes("support")) {
+  if (query.includes("contact") || query.includes("phone") || query.includes("email") || query.includes("address") || query.includes("helpline") || query.includes("location") || query.includes("support") || query.includes("branch") || query.includes("branches")) {
     return `
-      <p class="font-bold text-slate-900">📞 Lapro Solutions Support & Service Center</p>
-      <div class="text-slate-600 space-y-1 text-[11px] pt-1">
-        <p>📍 <strong>Location:</strong> Lapro Solutions Tech Park, Sector 4, Indiranagar, Bangalore - 560102</p>
-        <p>📞 <strong>Helpline:</strong> +91 80 4999 5000 (Mon - Sat, 9 AM - 8 PM)</p>
-        <p>✉️ <strong>Support Email:</strong> support@laprosolutions.com</p>
+      <p class="font-bold text-slate-900">📞 Lapro Solutions Support & Service Centers</p>
+      <div class="text-slate-600 space-y-1.5 text-[11px] pt-1 leading-relaxed">
+        <p>🏢 <strong>Head Office:</strong> Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</p>
+        <p>📞 <strong>Direct Helpline:</strong> <a href="tel:7996389264" class="text-blue-600 font-bold hover:underline">+91 7996389264</a> (Mon - Sat, 9 AM - 8:30 PM)</p>
+        <p>✉️ <strong>Official Gmail:</strong> <a href="mailto:laprosolutions1120@gmail.com" class="text-blue-600 font-bold hover:underline">laprosolutions1120@gmail.com</a></p>
+        <div class="pt-1">
+          <strong>🏢 Service Branches:</strong>
+          <div class="flex flex-wrap gap-1 mt-1">
+            <span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-bold">Electronic City</span>
+            <span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-bold">Begur</span>
+            <span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-bold">Uttarahalli</span>
+          </div>
+        </div>
       </div>
-      <button onclick="appState.setView('contact'); toggleChatbot();" class="bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">View Contact Page</button>
+      <button onclick="appState.setView('contact'); toggleChatbot();" class="bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">View Contact Page & Branches →</button>
     `;
   }
 

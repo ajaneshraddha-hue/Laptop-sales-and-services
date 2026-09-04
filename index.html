@@ -64,6 +64,27 @@
 </head>
 <body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
 
+  <!-- Top Contact & Branch Locations Announcement Bar -->
+  <div class="bg-slate-950 text-slate-300 text-[11px] py-1.5 px-4 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-4 flex-wrap">
+        <a href="tel:7996389264" class="hover:text-cyan-400 transition flex items-center gap-1.5 font-semibold text-slate-200">
+          <span>📞</span> <span>+91 7996389264</span>
+        </a>
+        <span class="text-slate-700 hidden sm:inline">|</span>
+        <a href="mailto:laprosolutions1120@gmail.com" class="hover:text-cyan-400 transition flex items-center gap-1.5 font-semibold text-slate-200">
+          <span>✉️</span> <span>laprosolutions1120@gmail.com</span>
+        </a>
+      </div>
+      <div class="flex items-center gap-2 text-[10.5px]">
+        <span class="text-slate-400 font-medium">📍 Service Branches:</span>
+        <span class="bg-slate-900 text-cyan-300 font-bold px-2 py-0.5 rounded border border-slate-800">Electronic City (E-City)</span>
+        <span class="bg-slate-900 text-cyan-300 font-bold px-2 py-0.5 rounded border border-slate-800">Begur</span>
+        <span class="bg-slate-900 text-cyan-300 font-bold px-2 py-0.5 rounded border border-slate-800">Uttarahalli</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Lapro Solutions Main Header -->
   <header class="bg-white sticky top-0 z-40 border-b border-slate-200 shadow-sm">
     <!-- Main Header Bar -->
@@ -453,12 +474,30 @@
         </ul>
       </div>
 
-      <!-- Col 4: Private Admin Portal & Office Info -->
-      <div class="space-y-4">
-        <h4 class="text-white font-bold uppercase tracking-wider text-xs">Enterprise & Administration</h4>
-        <p class="text-xs text-slate-400">Head Office: <br><strong class="text-slate-200">Lapro Solutions Tech Park, Sector 4, Bangalore - 560102</strong></p>
+      <!-- Col 4: Contact, Branches & Admin Portal -->
+      <div class="space-y-3">
+        <h4 class="text-white font-bold uppercase tracking-wider text-xs">Head Office & Branches</h4>
+        <div class="text-xs text-slate-400 space-y-1.5">
+          <p class="leading-relaxed">
+            <span class="text-slate-500 block text-[10px] font-bold uppercase">Head Office:</span>
+            <strong class="text-slate-200">Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</strong>
+          </p>
+          <p class="pt-1">
+            <span class="text-slate-500 block text-[10px] font-bold uppercase">Direct Contact:</span>
+            <a href="tel:7996389264" class="text-blue-400 hover:text-blue-300 font-bold block">📞 +91 7996389264</a>
+            <a href="mailto:laprosolutions1120@gmail.com" class="text-slate-300 hover:text-white block truncate">✉️ laprosolutions1120@gmail.com</a>
+          </p>
+          <div class="pt-1">
+            <span class="text-slate-500 block text-[10px] font-bold uppercase mb-1">Service Branches:</span>
+            <div class="flex flex-wrap gap-1 text-[10.5px]">
+              <span class="bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">Electronic City</span>
+              <span class="bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">Begur</span>
+              <span class="bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">Uttarahalli</span>
+            </div>
+          </div>
+        </div>
         
-        <!-- Discreet Private Admin Portal Link (Not visible in normal top customer menus) -->
+        <!-- Discreet Private Admin Portal Link -->
         <div class="pt-2 border-t border-slate-800">
           <button onclick="appState.setView('admin-login')" class="text-[11px] text-slate-500 hover:text-slate-300 flex items-center gap-1.5 transition py-1">
             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
