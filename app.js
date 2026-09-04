@@ -1220,22 +1220,47 @@ function handleApplyCoupon() {
 
 function renderCheckoutView(container, state) {
   const totals = appState.getCartTotals();
-  const user = state.currentUser || { name: "Guest Customer", phone: "+91 98450 12345", addresses: [{ id: "addr-default", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" }] };
-  const address = (user.addresses && user.addresses[0]) || { line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102" };
+  const user = state.currentUser || { name: "Guest Customer", phone: "+91 98450 12345", addresses: [{ id: "addr-default", name: "Guest Customer", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038", default: true }] };
+  const addresses = (user.addresses && user.addresses.length > 0) ? user.addresses : [{ id: "addr-default", name: user.name, phone: user.phone, line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102", default: true }];
+  
+  // Find selected or default address
+  const defaultAddr = addresses.find(a => a.default) || addresses[0];
 
   let html = `
     <h1 class="text-2xl font-black text-slate-900 mb-6">Checkout & Delivery</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2 space-y-6">
-        <!-- Delivery Address Box -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <h3 class="font-extrabold text-sm text-slate-900 mb-3 flex items-center gap-2">
-            <span>📍</span> Doorstep Delivery Address
-          </h3>
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1">
-            <p class="font-bold text-slate-800">${user.name} (${user.phone})</p>
-            <p class="text-slate-600">${address.line}, ${address.city}, ${address.state} - ${address.pin}</p>
+        <!-- Delivery Address Selection Box -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <span>📍</span> Select Delivery Address
+            </h3>
+            <button onclick="openCustomerAddressModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5">
+              <span>➕</span> Add New Address
+            </button>
+          </div>
+
+          <!-- List of addresses as selectable cards -->
+          <div class="space-y-3">
+            ${addresses.map((addr, idx) => `
+              <label class="block p-4 rounded-xl border ${addr.id === defaultAddr.id ? 'border-blue-600 bg-blue-50/30' : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'} cursor-pointer transition">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="checkout_address" value="${addr.id}" ${addr.id === defaultAddr.id ? 'checked' : ''} class="mt-1 text-blue-600">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                      <span class="font-bold text-xs text-slate-900">${addr.name}</span>
+                      <span class="bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2 py-0.2 rounded-full uppercase">${addr.tag || 'Home'}</span>
+                      <span class="font-mono text-xs text-slate-500">📞 ${addr.phone}</span>
+                      ${addr.default ? `<span class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.2 rounded-full uppercase">Default</span>` : ''}
+                    </div>
+                    <p class="text-xs text-slate-600">${addr.line}, ${addr.city}, ${addr.state} - <strong>${addr.pin}</strong></p>
+                  </div>
+                  <button type="button" onclick="openCustomerAddressModal('${addr.id}')" class="text-xs font-bold text-blue-600 hover:underline shrink-0">✏️ Edit</button>
+                </div>
+              </label>
+            `).join("")}
           </div>
         </div>
 
@@ -1278,20 +1303,26 @@ function renderCheckoutView(container, state) {
           <div class="flex justify-between text-slate-600"><span>Shipping:</span><span>FREE</span></div>
           <div class="flex justify-between text-base font-black text-slate-900 pt-3 border-t"><span>Total:</span><span class="text-teal-700">₹ ${totals.total.toLocaleString('en-IN')}.00</span></div>
         </div>
-        <button onclick="handlePlaceOrder('${address.id || 'addr-1'}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow">
-          Confirm & Pay ₹ ${totals.total.toLocaleString('en-IN')}
+        <button onclick="handlePlaceOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow">
+          Confirm & Place Order (₹ ${totals.total.toLocaleString('en-IN')})
         </button>
       </div>
     </div>
+
+    <!-- Customer Address Modal Container -->
+    <div id="customer-address-modal-container"></div>
   `;
 
   container.innerHTML = html;
 }
 
-function handlePlaceOrder(addressId) {
+function handlePlaceOrder() {
+  const selectedAddrId = document.querySelector('input[name="checkout_address"]:checked')?.value || "addr-default";
   const paymentMethod = document.querySelector('input[name="payment_opt"]:checked')?.value || "UPI QR";
-  const orderId = appState.placeOrder(addressId, paymentMethod);
-  appState.setView("order-confirm", { order: orderId });
+  const orderId = appState.placeOrder(selectedAddrId, paymentMethod);
+  if (orderId) {
+    appState.setView("order-confirm", { order: orderId });
+  }
 }
 
 function renderOrderConfirmView(container, state) {
@@ -1375,6 +1406,12 @@ function renderOrderTrackView(container, state) {
 
 // ======================== 5. SERVICES & DOORSTEP REPAIR ========================
 function renderServiceView(container, state) {
+  const user = state.currentUser || {};
+  const defaultAddr = (user.addresses && user.addresses[0]) || null;
+  const addressText = defaultAddr 
+    ? `${defaultAddr.line}, ${defaultAddr.city}, ${defaultAddr.state} - ${defaultAddr.pin}`
+    : "Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100";
+
   container.innerHTML = `
     <div class="max-w-3xl mx-auto space-y-6">
       <div class="text-center space-y-2">
@@ -1384,9 +1421,21 @@ function renderServiceView(container, state) {
       </div>
 
       <form onsubmit="handleServiceBookingSubmit(event)" class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-5">
-        <!-- 1. Device Type -->
+        <!-- 1. Customer Contact Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Customer Full Name <span class="text-red-500">*</span></label>
+            <input type="text" id="srv-name" value="${user.name || ''}" placeholder="e.g. Rahul Sharma" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone Number (For Technician) <span class="text-red-500">*</span></label>
+            <input type="tel" id="srv-phone" value="${user.phone || ''}" placeholder="+91 98450 00000" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:outline-none focus:border-blue-600">
+          </div>
+        </div>
+
+        <!-- 2. Device Type -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-2">1. Select Device Type</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Device Type <span class="text-red-500">*</span></label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             ${["Laptop", "Desktop PC", "Server / Workstation", "All-in-One"].map((d, i) => `
               <label class="p-3 rounded-xl border border-slate-200 text-center cursor-pointer hover:border-blue-600 flex flex-col items-center">
@@ -1397,10 +1446,10 @@ function renderServiceView(container, state) {
           </div>
         </div>
 
-        <!-- 2. Brand & Model -->
+        <!-- 3. Brand & Model -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Brand</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
             <select id="srv-brand" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-600">
               <option value="Dell">Dell</option>
               <option value="HP">HP</option>
@@ -1411,14 +1460,14 @@ function renderServiceView(container, state) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Model / Serial No.</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Model / Serial No. <span class="text-red-500">*</span></label>
             <input type="text" id="srv-model" placeholder="e.g. Latitude 7490 or Inspiron 15" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600">
           </div>
         </div>
 
-        <!-- 3. Problem Description -->
+        <!-- 4. Problem Description -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Issue / Service Required</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Issue / Service Required <span class="text-red-500">*</span></label>
           <select id="srv-problem" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:outline-none focus:border-blue-600">
             <option value="Screen / Display Broken or Lines">Screen / Display Broken or Lines</option>
             <option value="Keyboard Keys Not Working">Keyboard Keys Not Working</option>
@@ -1429,7 +1478,7 @@ function renderServiceView(container, state) {
           </select>
         </div>
 
-        <!-- 4. Mode & Preferred Date -->
+        <!-- 5. Mode & Preferred Date -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Service Mode / Nearest Branch</label>
@@ -1449,8 +1498,8 @@ function renderServiceView(container, state) {
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup Address (Bangalore)</label>
-          <textarea id="srv-address" rows="2" placeholder="Full doorstep address in Bangalore with pincode" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600">Prakruti Layout, Near Neo Hospital, Doddathogur, Electronic City Phase 1, Bangalore - 560100</textarea>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup / Contact Address (Bangalore) <span class="text-red-500">*</span></label>
+          <textarea id="srv-address" rows="2" placeholder="Full doorstep address in Bangalore with pincode" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600">${addressText}</textarea>
         </div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 flex items-center justify-between text-xs text-blue-900">
@@ -1472,17 +1521,22 @@ function renderServiceView(container, state) {
 function handleServiceBookingSubmit(event) {
   event.preventDefault();
   const ticketData = {
+    customerName: document.getElementById("srv-name").value,
+    customerPhone: document.getElementById("srv-phone").value,
     serviceType: document.querySelector('input[name="srv_device"]:checked')?.value || "Laptop",
     brand: document.getElementById("srv-brand").value,
     model: document.getElementById("srv-model").value,
     problem: document.getElementById("srv-problem").value,
     mode: document.getElementById("srv-mode").value,
     preferredDate: document.getElementById("srv-date").value,
+    address: document.getElementById("srv-address").value,
     description: document.getElementById("srv-address").value
   };
 
   const ticketId = appState.bookServiceTicket(ticketData);
-  appState.setView("ticket-track", { ticket: ticketId });
+  if (ticketId) {
+    appState.setView("ticket-track", { ticket: ticketId });
+  }
 }
 
 function renderTicketTrackView(container, state) {
@@ -3309,16 +3363,24 @@ function handleCustomerAddressSubmit(event, addrId) {
 
   closeCustomerAddressModal();
   const mainContent = document.getElementById("main-content");
-  if (mainContent && appState.state.currentView === "profile") {
-    renderProfileView(mainContent, appState.state);
+  if (mainContent) {
+    if (appState.state.currentView === "profile") {
+      renderProfileView(mainContent, appState.state);
+    } else if (appState.state.currentView === "checkout") {
+      renderCheckoutView(mainContent, appState.state);
+    }
   }
 }
 
 function handleSetDefaultAddress(addrId) {
   appState.setDefaultCustomerAddress(addrId);
   const mainContent = document.getElementById("main-content");
-  if (mainContent && appState.state.currentView === "profile") {
-    renderProfileView(mainContent, appState.state);
+  if (mainContent) {
+    if (appState.state.currentView === "profile") {
+      renderProfileView(mainContent, appState.state);
+    } else if (appState.state.currentView === "checkout") {
+      renderCheckoutView(mainContent, appState.state);
+    }
   }
 }
 
@@ -3326,8 +3388,12 @@ function handleDeleteCustomerAddress(addrId) {
   if (confirm("Are you sure you want to delete this saved address?")) {
     appState.deleteCustomerAddress(addrId);
     const mainContent = document.getElementById("main-content");
-    if (mainContent && appState.state.currentView === "profile") {
-      renderProfileView(mainContent, appState.state);
+    if (mainContent) {
+      if (appState.state.currentView === "profile") {
+        renderProfileView(mainContent, appState.state);
+      } else if (appState.state.currentView === "checkout") {
+        renderCheckoutView(mainContent, appState.state);
+      }
     }
   }
 }

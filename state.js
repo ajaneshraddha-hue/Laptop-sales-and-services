@@ -907,9 +907,21 @@ class StateManager {
     }
 
     const totals = this.getCartTotals();
-    const address = this.state.currentUser && this.state.currentUser.addresses 
-      ? this.state.currentUser.addresses.find(a => a.id === addressId) || this.state.currentUser.addresses[0]
-      : { name: "Valued Customer", phone: "+91 98765 43210", line: "Doorstep Delivery Address", city: "Bangalore", state: "Karnataka", pin: "560001" };
+    let address = null;
+    if (this.state.currentUser && this.state.currentUser.addresses && this.state.currentUser.addresses.length > 0) {
+      address = this.state.currentUser.addresses.find(a => a.id === addressId) 
+        || this.state.currentUser.addresses.find(a => a.default) 
+        || this.state.currentUser.addresses[0];
+    } else {
+      address = {
+        name: this.state.currentUser ? this.state.currentUser.name : "Valued Customer",
+        phone: this.state.currentUser ? this.state.currentUser.phone : "+91 98765 43210",
+        line: "Doorstep Delivery Address, Electronic City",
+        city: "Bangalore",
+        state: "Karnataka",
+        pin: "560100"
+      };
+    }
 
     const itemsOrdered = this.state.cart.map(item => {
       const prod = this.getProductById(item.id);
@@ -934,8 +946,9 @@ class StateManager {
       id: orderId,
       invoiceId: invoiceId,
       transactionRef: transactionRef,
-      customerName: this.state.currentUser ? this.state.currentUser.name : "Customer",
+      customerName: this.state.currentUser ? this.state.currentUser.name : (address.name || "Customer"),
       customerEmail: this.state.currentUser ? this.state.currentUser.email : "customer@laprosolutions.com",
+      customerPhone: this.state.currentUser ? this.state.currentUser.phone : (address.phone || "+91 98765 43210"),
       date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       items: itemsOrdered,
@@ -1010,20 +1023,48 @@ class StateManager {
     }
 
     const ticketId = "TKT" + Math.floor(1000 + Math.random() * 9000);
-    const address = ticketData.mode === "Pickup & Drop" 
-      ? (this.state.currentUser && this.state.currentUser.addresses ? this.state.currentUser.addresses.find(a => a.id === ticketData.addressId) || this.state.currentUser.addresses[0] : null)
-      : null;
+    
+    // Customer Contact
+    const custName = ticketData.customerName || (this.state.currentUser ? this.state.currentUser.name : "Valued Customer");
+    const custPhone = ticketData.customerPhone || (this.state.currentUser ? this.state.currentUser.phone : "+91 98765 43210");
+    const custEmail = ticketData.customerEmail || (this.state.currentUser ? this.state.currentUser.email : "service@laprosolutions.com");
+
+    let addrObj = null;
+    if (ticketData.address && typeof ticketData.address === "object") {
+      addrObj = ticketData.address;
+    } else if (ticketData.address && typeof ticketData.address === "string") {
+      addrObj = {
+        name: custName,
+        phone: custPhone,
+        line: ticketData.address,
+        city: "Bangalore",
+        state: "Karnataka",
+        pin: "560100"
+      };
+    } else if (this.state.currentUser && this.state.currentUser.addresses && this.state.currentUser.addresses.length > 0) {
+      addrObj = this.state.currentUser.addresses[0];
+    } else {
+      addrObj = {
+        name: custName,
+        phone: custPhone,
+        line: ticketData.description || "Electronic City Phase 1",
+        city: "Bangalore",
+        state: "Karnataka",
+        pin: "560100"
+      };
+    }
 
     const newTicket = {
       id: ticketId,
-      serviceType: ticketData.serviceType,
-      problem: ticketData.problem,
-      mode: ticketData.mode,
-      address: address,
-      customerName: this.state.currentUser ? this.state.currentUser.name : "Valued Customer",
-      customerEmail: this.state.currentUser ? this.state.currentUser.email : "service@laprosolutions.com",
-      preferredDate: ticketData.preferredDate,
-      description: ticketData.description,
+      serviceType: ticketData.serviceType || "Laptop",
+      problem: ticketData.problem || "Diagnostic Required",
+      mode: ticketData.mode || "Pickup & Drop",
+      address: addrObj,
+      customerName: custName,
+      customerPhone: custPhone,
+      customerEmail: custEmail,
+      preferredDate: ticketData.preferredDate || new Date().toISOString().split('T')[0],
+      description: ticketData.description || "",
       brand: ticketData.brand || "Dell",
       model: ticketData.model || "Inspiron 15",
       serialNo: ticketData.serialNo || "LAP" + Math.floor(100000 + Math.random() * 900000),
