@@ -42,7 +42,44 @@ const DEFAULT_STATE = {
     }
   ],
   wishlist: [],
-  orders: [],
+  orders: [
+    {
+      id: "ORD1001",
+      invoiceId: "INV-2026-001",
+      date: "04 Sep 2026",
+      time: "11:30 AM",
+      customerName: "Shraddha Ajane",
+      customerEmail: "ajaneshraddha@gmail.com",
+      customerPhone: "+91 74839 57801",
+      status: "shipped",
+      paymentMethod: "UPI QR (Instant GPay)",
+      trackingId: "LP7829104421",
+      deliveryPartner: "BlueDart Express",
+      address: { name: "Shraddha Ajane", phone: "+91 74839 57801", line: "Prakruti Layout, Doddathogur, Electronic City Phase 1", city: "Bangalore", state: "Karnataka", pin: "560100" },
+      items: [
+        { id: "deal-dell-latitude-7490", name: "Dell Latitude 7490 Touch (Core i7, 16GB RAM, 512GB SSD)", category: "Laptops", brand: "Dell", price: 24990, quantity: 1, image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=700&auto=format&fit=crop&q=80" }
+      ],
+      totals: { subtotal: 24990, discount: 0, shipping: 0, total: 24990 }
+    },
+    {
+      id: "ORD1002",
+      invoiceId: "INV-2026-002",
+      date: "06 Sep 2026",
+      time: "02:15 PM",
+      customerName: "Amit Sharma",
+      customerEmail: "amit.sharma@gmail.com",
+      customerPhone: "+91 98450 12345",
+      status: "confirmed",
+      paymentMethod: "Credit Card (Visa)",
+      trackingId: "LP9182374490",
+      deliveryPartner: "Delhivery Surface",
+      address: { name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" },
+      items: [
+        { id: "desktop-dell-optiplex-7070", name: "Dell OptiPlex 7070 Micro Tiny PC (Core i5 9th Gen)", category: "Desktops", brand: "Dell", price: 22990, quantity: 1, image: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80" }
+      ],
+      totals: { subtotal: 22990, discount: 0, shipping: 0, total: 22990 }
+    }
+  ],
   serviceTickets: [
     {
       id: "TKT1001",
@@ -162,11 +199,8 @@ class StateManager {
       if (!parsed.registeredUsers) {
         parsed.registeredUsers = DEFAULT_STATE.registeredUsers;
       }
-      // Purge all legacy demo mock orders
-      if (parsed.orders) {
-        parsed.orders = parsed.orders.filter(o => !["ORD1001", "ORD1002", "ORD1003", "ORD1004"].includes(o.id));
-      } else {
-        parsed.orders = [];
+      if (!parsed.orders || parsed.orders.length === 0) {
+        parsed.orders = DEFAULT_STATE.orders;
       }
       // Always ensure the Home page gets opened first when loading the site
       parsed.currentView = "home";
@@ -661,7 +695,6 @@ class StateManager {
       if (typeof openAuthModal === 'function') {
         openAuthModal('login');
       }
-      alert("Please sign in or register to add products to your cart!");
       return false;
     }
 
@@ -805,7 +838,6 @@ class StateManager {
       if (typeof openAuthModal === 'function') {
         openAuthModal('login');
       }
-      alert("Please sign in or register to save items to your wishlist!");
       return false;
     }
 
@@ -828,7 +860,7 @@ class StateManager {
       this.addNotification("Removed from Comparison.");
     } else {
       if (this.state.compareList.length >= 3) {
-        alert("You can compare up to 3 laptops at a time.");
+        if (typeof showToast === 'function') showToast("You can compare up to 3 laptops at a time.", "⚠️", "warning");
         return;
       }
       this.state.compareList.push(productId);
@@ -843,7 +875,6 @@ class StateManager {
       if (typeof openAuthModal === 'function') {
         openAuthModal('login');
       }
-      alert("Please sign in or register to place your order!");
       return null;
     }
 
@@ -973,7 +1004,6 @@ class StateManager {
       if (typeof openAuthModal === 'function') {
         openAuthModal('login');
       }
-      alert("Please sign in or register to book a doorstep repair service!");
       return null;
     }
 

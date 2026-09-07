@@ -91,7 +91,7 @@ function updateHeaderControls(state) {
             <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             Admin Portal
           </button>
-          <button onclick="appState.adminLogout()" class="text-xs text-red-600 hover:underline font-semibold" title="Logout Admin">Exit</button>
+          <button onclick="openLogoutConfirmModal('admin')" class="text-xs text-red-600 hover:underline font-semibold" title="Logout Admin">Exit</button>
         </div>
       `;
     } else if (state.currentUser) {
@@ -115,7 +115,7 @@ function updateHeaderControls(state) {
               <button onclick="appState.setView('service-history'); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 text-slate-700 flex items-center gap-2">🛠️ My Repair Tickets</button>
             </div>
             <div class="pt-1">
-              <button onclick="appState.customerLogout(); closeCustomerProfileMenu();" class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-bold flex items-center gap-2">🚪 Logout</button>
+              <button onclick="closeCustomerProfileMenu(); openLogoutConfirmModal('customer');" class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-bold flex items-center gap-2">🚪 Logout</button>
             </div>
           </div>
         </div>
@@ -239,7 +239,7 @@ function handleCustomerLoginSubmit(event) {
       appState.setView("admin");
       return;
     } else {
-      alert(adminRes.message);
+      showToast(adminRes.message, "⚠️", "error");
       return;
     }
   }
@@ -249,8 +249,9 @@ function handleCustomerLoginSubmit(event) {
     closeAuthModal();
     if (document.getElementById("login-email")) document.getElementById("login-email").value = "";
     if (document.getElementById("login-pass")) document.getElementById("login-pass").value = "";
+    showToast("Welcome back, " + (appState.state.currentUser?.name || "Customer") + "!", "👋", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -263,8 +264,9 @@ function handleAdminModalLoginSubmit(event) {
   if (res.success) {
     closeAuthModal();
     appState.setView("admin");
+    showToast("Authenticated as Administrator", "🛡️", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -282,8 +284,9 @@ function handleCustomerRegisterSubmit(event) {
     document.getElementById("reg-email").value = "";
     document.getElementById("reg-phone").value = "";
     document.getElementById("reg-pass").value = "";
+    showToast("Account created successfully! You are now logged in.", "🎉", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -475,7 +478,10 @@ function renderHomeView(container, state) {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        ${crazyDeals.map(p => `
+        ${crazyDeals.map(p => {
+          const inCart = (appState.state.cart || []).some(item => item.id === p.id);
+          const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
+          return `
           <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
             <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
               ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
@@ -491,12 +497,24 @@ function renderHomeView(container, state) {
                 <span class="text-teal-700 font-black text-base">₹ ${p.price.toLocaleString('en-IN')}.00</span>
                 <span class="text-[11px] text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>
               </div>
+              ${inCart ? `
+                <div class="mb-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                  <span>✓ Added in Cart (${cartItem?.quantity || 1})</span>
+                </div>
+              ` : ''}
             </div>
-            <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow">
-              🛒 Add to Cart
-            </button>
+            ${inCart ? `
+              <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5">
+                <span>🗑️</span> Remove from Cart
+              </button>
+            ` : `
+              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                <span>🛒</span> Add to Cart
+              </button>
+            `}
           </div>
-        `).join("")}
+        `;
+        }).join("")}
       </div>
     </div>
 
@@ -1022,7 +1040,7 @@ function renderProductView(container, state) {
 function openNegotiateModal(prodId) {
   if (!appState.state.currentUser && !appState.state.adminUser) {
     openAuthModal('login');
-    alert("Please sign in or register to negotiate price or submit an offer!");
+    showToast("Please sign in or register to negotiate prices and make offers!", "🔒", "info");
     return;
   }
   const p = appState.getProductById(prodId);
@@ -1208,13 +1226,17 @@ function renderCartView(container, state) {
 }
 
 function handleApplyCoupon() {
-  const inp = document.getElementById("coupon-input").value;
+  const inp = (document.getElementById("coupon-input")?.value || "").trim();
   if (!inp) return;
   const res = appState.applyCoupon(inp);
   if (res) {
-    alert("Coupon applied successfully!");
+    showToast("Coupon applied successfully!", "🎟️", "success");
+    const mainContent = document.getElementById("main-content");
+    if (mainContent && appState.state.currentView === "cart") {
+      renderCartView(mainContent, appState.state);
+    }
   } else {
-    alert("Invalid coupon code. Try LAPRO10, CRAZY15, or SAVE1000");
+    showToast("Invalid coupon code. Try LAPRO10, CRAZY15, or SAVE1000", "⚠️", "error");
   }
 }
 
@@ -1683,9 +1705,10 @@ function handleAdminLoginSubmit(event) {
 
   const res = appState.adminLogin(email, pass);
   if (res.success) {
+    showToast("Authenticated as Administrator", "🛡️", "success");
     appState.setView("admin");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -1698,10 +1721,10 @@ function handleAdminRegisterSubmit(event) {
 
   const res = appState.adminRegister(name, email, pass, secret);
   if (res.success) {
-    alert("Admin registered and authenticated successfully!");
+    showToast("Admin registered and authenticated successfully!", "🛡️", "success");
     appState.setView("admin");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -1739,10 +1762,7 @@ function renderAdminDashboardView(container, state) {
         <button onclick="openAddProductModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
           <span>➕</span> Add Product
         </button>
-        <button onclick="appState.setView('home')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
-          <span>🏠</span> Storefront View
-        </button>
-        <button onclick="appState.adminLogout()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+        <button onclick="openLogoutConfirmModal('admin')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
           <span>🚪</span> Logout
         </button>
       </div>
@@ -2659,10 +2679,20 @@ function handleEditProductSubmit(event, prodId) {
 }
 
 function handleDeleteProduct(prodId) {
-  if (confirm(`Are you sure you want to permanently delete product "${prodId}" from the live catalog?`)) {
-    appState.deleteProduct(prodId);
-    setAdminTab("products");
-  }
+  const p = appState.getProductById(prodId);
+  openConfirmModal({
+    title: "Delete Product?",
+    message: `Are you sure you want to permanently delete "${p ? p.name : prodId}" from the live catalog?`,
+    icon: "🗑️",
+    confirmText: "Yes, Delete Product",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteProduct(prodId);
+      setAdminTab("products");
+      showToast("Product deleted successfully.", "🗑️", "info");
+    }
+  });
 }
 
 function closeProductModal() {
@@ -2712,8 +2742,9 @@ function handleCreateCategorySubmit(event) {
   if (res.success) {
     closeCategoryModal();
     setAdminTab("categories");
+    showToast(`Category "${name}" created successfully!`, "✅", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -2761,8 +2792,9 @@ function handleEditCategorySubmit(event, catId) {
   if (res.success) {
     closeCategoryModal();
     setAdminTab("categories");
+    showToast(`Category "${name}" updated successfully!`, "✅", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -2770,10 +2802,19 @@ function handleDeleteCategory(catId) {
   const cat = (appState.state.categories || []).find(c => c.id === catId);
   if (!cat) return;
 
-  if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
-    appState.deleteCategory(catId);
-    setAdminTab("categories");
-  }
+  openConfirmModal({
+    title: "Delete Category?",
+    message: `Are you sure you want to delete category "${cat.name}"? Products in this category may become uncategorized.`,
+    icon: "📁",
+    confirmText: "Yes, Delete Category",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteCategory(catId);
+      setAdminTab("categories");
+      showToast(`Category "${cat.name}" deleted.`, "🗑️", "info");
+    }
+  });
 }
 
 function closeCategoryModal() {
@@ -2835,8 +2876,9 @@ function handleCreateCustomerSubmit(event) {
   if (res.success) {
     closeCustomerModal();
     setAdminTab("customers");
+    showToast(`Customer account for "${customerData.name}" created!`, "👤", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
@@ -2884,16 +2926,27 @@ function handleEditCustomerSubmit(event, email) {
   if (res.success) {
     closeCustomerModal();
     setAdminTab("customers");
+    showToast(`Customer details for "${name}" updated!`, "👤", "success");
   } else {
-    alert(res.message);
+    showToast(res.message, "⚠️", "error");
   }
 }
 
 function handleDeleteCustomer(email) {
-  if (confirm(`Are you sure you want to remove customer account "${email}"?`)) {
-    appState.deleteCustomer(email);
-    setAdminTab("customers");
-  }
+  const c = (appState.state.registeredUsers || []).find(u => u.email.toLowerCase() === email.toLowerCase());
+  openConfirmModal({
+    title: "Delete Customer Account?",
+    message: `Are you sure you want to remove customer account "${c ? c.name : email}" (${email})?`,
+    icon: "👤",
+    confirmText: "Yes, Delete Customer",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteCustomer(email);
+      setAdminTab("customers");
+      showToast(`Customer account for "${email}" removed.`, "🗑️", "info");
+    }
+  });
 }
 
 function closeCustomerModal() {
@@ -3027,6 +3080,7 @@ function handleEditOrderSubmit(event, orderId) {
 
   closeOrderModal();
   setAdminTab("orders");
+  showToast(`Order #${orderId} updated successfully.`, "✅", "success");
 }
 
 function closeOrderModal() {
@@ -3035,17 +3089,35 @@ function closeOrderModal() {
 }
 
 function handleAdminDeleteOrder(orderId) {
-  if (confirm(`Are you sure you want to permanently delete order "${orderId}"?`)) {
-    appState.deleteOrder(orderId);
-    setAdminTab("orders");
-  }
+  openConfirmModal({
+    title: "Delete Order?",
+    message: `Are you sure you want to permanently delete order "${orderId}"? This record will be removed from the system.`,
+    icon: "📦",
+    confirmText: "Yes, Delete Order",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteOrder(orderId);
+      setAdminTab("orders");
+      showToast(`Order #${orderId} deleted.`, "🗑️", "info");
+    }
+  });
 }
 
 function handleAdminClearAllOrders() {
-  if (confirm("Are you sure you want to permanently delete ALL existing customer orders? This cannot be undone.")) {
-    appState.clearAllOrders();
-    setAdminTab("orders");
-  }
+  openConfirmModal({
+    title: "Clear All Orders?",
+    message: "Are you sure you want to permanently delete ALL existing customer orders? This cannot be undone.",
+    icon: "⚠️",
+    confirmText: "Yes, Clear All Orders",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.clearAllOrders();
+      setAdminTab("orders");
+      showToast("All orders have been deleted from the portal.", "🗑️", "info");
+    }
+  });
 }
 
 // ======================== ADMIN SERVICE TICKET EDIT MODAL ========================
@@ -3209,7 +3281,7 @@ function renderProfileView(container, state) {
             <p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} &nbsp;•&nbsp; ${user.phone}</p>
           </div>
         </div>
-        <button onclick="appState.customerLogout()" class="bg-red-50 text-red-600 font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-red-100 transition">
+        <button onclick="openLogoutConfirmModal('customer')" class="bg-red-50 text-red-600 font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-red-100 transition">
           🚪 Logout
         </button>
       </div>
@@ -3409,22 +3481,107 @@ function handleSetDefaultAddress(addrId) {
 }
 
 function handleDeleteCustomerAddress(addrId) {
-  if (confirm("Are you sure you want to delete this saved address?")) {
-    appState.deleteCustomerAddress(addrId);
-    const mainContent = document.getElementById("main-content");
-    if (mainContent) {
-      if (appState.state.currentView === "profile") {
-        renderProfileView(mainContent, appState.state);
-      } else if (appState.state.currentView === "checkout") {
-        renderCheckoutView(mainContent, appState.state);
+  openConfirmModal({
+    title: "Delete Address?",
+    message: "Are you sure you want to delete this saved delivery address?",
+    icon: "📍",
+    confirmText: "Yes, Delete",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteCustomerAddress(addrId);
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) {
+        if (appState.state.currentView === "profile") {
+          renderProfileView(mainContent, appState.state);
+        } else if (appState.state.currentView === "checkout") {
+          renderCheckoutView(mainContent, appState.state);
+        }
       }
+      showToast("Address deleted successfully.", "🗑️", "info");
     }
-  }
+  });
 }
 
 function closeCustomerAddressModal() {
   const container = document.getElementById("customer-address-modal-container");
   if (container) container.innerHTML = "";
+}
+
+// ======================== IN-APP CONFIRMATION MODAL SYSTEM ========================
+function openConfirmModal({
+  title = "Confirm Action",
+  message = "Are you sure you want to proceed?",
+  icon = "⚠️",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  confirmClass = "bg-red-600 hover:bg-red-700 text-white",
+  onConfirm = null
+}) {
+  let container = document.getElementById("confirm-modal-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "confirm-modal-container";
+    document.body.appendChild(container);
+  }
+
+  window._pendingConfirmAction = onConfirm;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center relative animate-scale-up">
+        <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-red-100 shadow-inner">
+          ${icon}
+        </div>
+        <h3 class="text-lg font-black text-slate-900 mb-2">${title}</h3>
+        <p class="text-xs text-slate-600 mb-6 leading-relaxed">${message}</p>
+        <div class="flex items-center justify-center gap-3">
+          <button type="button" onclick="closeConfirmModal()" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition">
+            ${cancelText}
+          </button>
+          <button type="button" onclick="handleConfirmModalAction()" class="flex-1 py-3 px-4 rounded-xl font-bold text-xs shadow-md transition ${confirmClass}">
+            ${confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function closeConfirmModal() {
+  window._pendingConfirmAction = null;
+  const container = document.getElementById("confirm-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+function handleConfirmModalAction() {
+  const cb = window._pendingConfirmAction;
+  closeConfirmModal();
+  if (typeof cb === "function") {
+    cb();
+  }
+}
+
+function openLogoutConfirmModal(type = 'customer') {
+  const isAdmin = type === 'admin';
+  openConfirmModal({
+    title: isAdmin ? "Exit Admin Portal?" : "Log Out of Your Account?",
+    message: isAdmin 
+      ? "Are you sure you want to log out from the Admin Portal? Live dashboard sessions will be securely closed."
+      : "Are you sure you want to log out? You can log back in anytime to track your orders, view wishlist items, and manage repair tickets.",
+    icon: "🚪",
+    confirmText: "Yes, Log Out",
+    cancelText: "Stay Logged In",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20",
+    onConfirm: () => {
+      if (isAdmin) {
+        appState.adminLogout();
+      } else {
+        appState.customerLogout();
+      }
+      showToast("You have been safely logged out.", "👋", "info");
+    }
+  });
 }
 
 // ======================== TOAST NOTIFICATION SYSTEM ========================
@@ -3493,7 +3650,9 @@ function refreshCurrentViewCartState() {
   const mainContent = document.getElementById("main-content");
   if (!mainContent) return;
   const currentView = appState.state.currentView;
-  if (currentView === "catalog") {
+  if (currentView === "home") {
+    renderHomeView(mainContent, appState.state);
+  } else if (currentView === "catalog") {
     renderCatalogView(mainContent, appState.state);
   } else if (currentView === "product") {
     renderProductView(mainContent, appState.state);
