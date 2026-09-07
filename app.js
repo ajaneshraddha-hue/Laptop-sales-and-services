@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateHeaderControls(e.detail);
     renderView(e.detail.currentView, e.detail);
     updateComparisonBar(e.detail);
+    updateFloatingCartBar(e.detail);
   });
 
   // Close notifications dropdown on click outside
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateHeaderControls(state);
   renderView("home", state);
   updateComparisonBar(state);
+  updateFloatingCartBar(state);
 });
 
 // Update static nav states, badge values, and profile buttons
@@ -486,7 +488,7 @@ function renderHomeView(container, state) {
             <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
               ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
             </button>
-            <div class="relative mb-3">
+            <div class="relative mb-3 cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
               <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${p.discount}</span>
               <img src="${p.images[0]}" alt="${p.name}" class="w-full h-40 object-cover rounded-2xl group-hover:scale-102 transition duration-300">
             </div>
@@ -499,19 +501,33 @@ function renderHomeView(container, state) {
               </div>
               ${inCart ? `
                 <div class="mb-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
-                  <span>✓ Added in Cart (${cartItem?.quantity || 1})</span>
+                  <span>✓ Added to Cart (${cartItem?.quantity || 1})</span>
                 </div>
               ` : ''}
             </div>
-            ${inCart ? `
-              <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5">
-                <span>🗑️</span> Remove from Cart
-              </button>
-            ` : `
-              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-                <span>🛒</span> Add to Cart
-              </button>
-            `}
+            <div class="space-y-1.5">
+              ${!inCart ? `
+                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
+                  <span>🛒</span> ADD TO CART
+                </button>
+              ` : `
+                <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+                  <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
+                    −
+                  </button>
+                  <div class="px-1 text-center font-mono font-black text-xs text-white">
+                    <span>${cartItem.quantity}</span>
+                    <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
+                  </div>
+                  <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
+                    +
+                  </button>
+                </div>
+                <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
+                  <span>🛍️</span> Go to Cart ➔
+                </button>
+              `}
+            </div>
           </div>
         `;
         }).join("")}
@@ -740,7 +756,7 @@ function renderListCard(p) {
   return `
     <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col md:flex-row items-center gap-5">
       <!-- Thumbnail & Badges -->
-      <div class="relative w-full md:w-48 h-40 shrink-0 select-none">
+      <div class="relative w-full md:w-48 h-40 shrink-0 select-none cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
         ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">NEW</span>` : ''}
         ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
         <img src="${p.images[0]}" alt="${p.name}" class="w-full h-full object-cover rounded-xl border border-slate-100">
@@ -775,7 +791,7 @@ function renderListCard(p) {
 
         ${inCart ? `
           <div class="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
-            <span>✓ Added in Cart</span>
+            <span>✓ Added to Cart</span>
             <span class="font-normal text-emerald-600">(${cartItem?.quantity || 1} item${(cartItem?.quantity || 1) > 1 ? 's' : ''})</span>
           </div>
         ` : ''}
@@ -784,18 +800,24 @@ function renderListCard(p) {
       <!-- Actions Column -->
       <div class="w-full md:w-44 shrink-0 flex flex-col gap-2 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-4">
         ${!inCart ? `
-          <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-1">
-            <button onclick="adjustQty('${p.id}', -1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">-</button>
-            <span id="qty-${p.id}" class="text-xs font-bold text-slate-800 font-mono">1</span>
-            <button onclick="adjustQty('${p.id}', 1)" class="w-7 h-7 bg-white rounded text-slate-700 font-bold hover:bg-slate-200 transition text-xs shadow-sm">+</button>
-          </div>
-
-          <button onclick="addToCartWithQty(event, '${p.id}')" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-3 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
             <span>🛒</span> ADD TO CART
           </button>
         ` : `
-          <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5" title="Remove this item from your shopping cart">
-            <span>🗑️</span> REMOVE FROM CART
+          <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+            <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-8 h-8 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Decrease Quantity">
+              −
+            </button>
+            <div class="px-2 text-center font-mono font-black text-xs text-white">
+              <span>${cartItem.quantity}</span>
+              <span class="text-[10px] font-medium text-blue-100 block -mt-0.5">in cart</span>
+            </div>
+            <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-8 h-8 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Increase Quantity">
+              +
+            </button>
+          </div>
+          <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+            <span>🛍️</span> Go to Cart ➔
           </button>
         `}
 
@@ -804,10 +826,10 @@ function renderListCard(p) {
         </button>
 
         <div class="flex gap-1.5">
-          <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
+          <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1.5 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
             ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 font-bold">❤️ Saved</span>' : '<span class="text-slate-400">🤍 Wishlist</span>'}
           </button>
-          <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs" title="View Details">👁</button>
+          <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs" title="View Details">👁</button>
         </div>
       </div>
     </div>
@@ -825,7 +847,7 @@ function renderGridCard(p) {
       </button>
 
       <div>
-        <div class="relative mb-3 select-none">
+        <div class="relative mb-3 select-none cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
           ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">NEW</span>` : ''}
           ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
           <img src="${p.images[0]}" alt="${p.name}" class="w-full h-44 object-cover rounded-2xl border border-slate-100 group-hover:scale-102 transition duration-300">
@@ -838,19 +860,31 @@ function renderGridCard(p) {
         </div>
         ${inCart ? `
           <div class="mb-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
-            <span>✓ Added in Cart (${cartItem?.quantity || 1})</span>
+            <span>✓ Added to Cart (${cartItem?.quantity || 1})</span>
           </div>
         ` : ''}
       </div>
 
       <div class="space-y-2">
-        ${inCart ? `
-          <button onclick="handleRemoveFromCart(event, '${p.id}')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5">
-            <span>🗑️</span> Remove from Cart
+        ${!inCart ? `
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
+            <span>🛒</span> ADD TO CART
           </button>
         ` : `
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-            <span>🛒</span> Add to Cart
+          <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+            <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
+              −
+            </button>
+            <div class="px-1 text-center font-mono font-black text-xs text-white">
+              <span>${cartItem.quantity}</span>
+              <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
+            </div>
+            <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
+              +
+            </button>
+          </div>
+          <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
+            <span>🛍️</span> Go to Cart ➔
           </button>
         `}
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
@@ -1012,22 +1046,46 @@ function renderProductView(container, state) {
         </div>
 
         <!-- Add to cart and instant checkout -->
-        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <div class="space-y-3 pt-2">
           ${(appState.state.cart || []).some(item => item.id === p.id) ? `
-            <button onclick="handleRemoveFromCart(event, '${p.id}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-sm py-3.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2" title="Remove this product from cart">
-              <span>🗑️</span> Remove from Cart
-            </button>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex-1 flex items-center justify-between bg-blue-600 text-white rounded-2xl p-1.5 shadow-md font-bold text-sm">
+                <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-10 h-10 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-xl flex items-center justify-center text-lg font-black transition" title="Decrease Quantity">
+                  −
+                </button>
+                <div class="px-3 text-center font-mono font-black text-sm text-white">
+                  <span>${((appState.state.cart || []).find(item => item.id === p.id))?.quantity || 1}</span>
+                  <span class="text-xs font-medium text-blue-100 block -mt-0.5">in cart</span>
+                </div>
+                <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-10 h-10 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-xl flex items-center justify-center text-lg font-black transition" title="Increase Quantity">
+                  +
+                </button>
+              </div>
+              <button onclick="appState.setView('cart')" class="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow flex items-center justify-center gap-2">
+                <span>🛍️</span> Go to Cart ➔
+              </button>
+            </div>
+            <div class="flex gap-3">
+              <button onclick="appState.setView('checkout');" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
+                <span>⚡</span> Proceed to Checkout
+              </button>
+              <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
+                ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
+              </button>
+            </div>
           ` : `
-            <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
-              <span>🛒</span> Add to Cart
-            </button>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                <span>🛒</span> ADD TO CART
+              </button>
+              <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow flex items-center justify-center gap-2">
+                <span>⚡</span> Buy Now
+              </button>
+              <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
+                ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
+              </button>
+            </div>
           `}
-          <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
-            <span>⚡</span> Buy Now
-          </button>
-          <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
-            ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
-          </button>
         </div>
       </div>
     </div>
@@ -3634,6 +3692,32 @@ function handleAddToCart(event, prodId, qty = 1) {
   }
 }
 
+function handleUpdateCartQty(event, prodId, delta) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const prod = appState.getProductById(prodId);
+  const cartItem = (appState.state.cart || []).find(item => item.id === prodId);
+  if (!cartItem) {
+    if (delta > 0) {
+      return handleAddToCart(event, prodId, delta);
+    }
+    return;
+  }
+
+  const newQty = cartItem.quantity + delta;
+  if (newQty <= 0) {
+    appState.removeFromCart(prodId);
+    showToast(`Removed "${prod ? prod.name : 'Item'}" from cart`, "🗑️", "info");
+  } else {
+    appState.updateCartQty(prodId, delta);
+    showToast(`Cart: ${newQty} × "${prod ? prod.name : 'Item'}"`, "🛒", "success");
+  }
+  refreshCurrentViewCartState();
+}
+
 function handleRemoveFromCart(event, prodId) {
   if (event) {
     event.stopPropagation();
@@ -3661,6 +3745,48 @@ function refreshCurrentViewCartState() {
   } else if (currentView === "cart") {
     renderCartView(mainContent, appState.state);
   }
+  updateFloatingCartBar(appState.state);
+}
+
+// ======================== FLOATING BOTTOM CART BAR (Zomato / Flipkart Style) ========================
+function updateFloatingCartBar(state) {
+  let bar = document.getElementById("floating-cart-bar");
+  const cartItems = state?.cart || [];
+  const totalCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totals = typeof appState !== 'undefined' && appState.getCartTotals ? appState.getCartTotals() : { total: 0 };
+
+  // Do not show floating bar on cart, checkout, or admin views
+  const hiddenViews = ["cart", "checkout", "admin", "admin-login"];
+  if (totalCount === 0 || hiddenViews.includes(state?.currentView)) {
+    if (bar) bar.remove();
+    return;
+  }
+
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "floating-cart-bar";
+    bar.className = "fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-lg bg-slate-950/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-blue-500/40 flex items-center justify-between transition-all transform animate-bounce-short";
+    document.body.appendChild(bar);
+  }
+
+  bar.innerHTML = `
+    <div class="flex items-center gap-3 cursor-pointer" onclick="appState.setView('cart')">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-lg font-black shadow-inner shrink-0">
+        🛒
+      </div>
+      <div>
+        <div class="text-xs font-black text-white flex items-center gap-2">
+          <span>${totalCount} Item${totalCount > 1 ? 's' : ''} in Cart</span>
+          <span class="text-emerald-400 font-mono text-sm font-bold">₹ ${totals.total.toLocaleString('en-IN')}.00</span>
+        </div>
+        <p class="text-[10px] text-slate-400">Doorstep delivery across Bangalore</p>
+      </div>
+    </div>
+    <button onclick="appState.setView('cart')" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow-lg flex items-center gap-1.5 shrink-0">
+      <span>View Cart</span>
+      <span>➔</span>
+    </button>
+  `;
 }
 
 function handleToggleWishlist(event, prodId) {
