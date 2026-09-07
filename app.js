@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateHeaderControls(e.detail);
     renderView(e.detail.currentView, e.detail);
     updateComparisonBar(e.detail);
-    updateFloatingCartBar(e.detail);
   });
 
   // Close notifications dropdown on click outside
@@ -35,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateHeaderControls(state);
   renderView("home", state);
   updateComparisonBar(state);
-  updateFloatingCartBar(state);
 });
 
 // Update static nav states, badge values, and profile buttons
@@ -523,8 +521,11 @@ function renderHomeView(container, state) {
                     +
                   </button>
                 </div>
-                <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
-                  <span>🛍️</span> Go to Cart ➔
+                <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
+                  <span>⚡</span> Continue to Pay ➔
+                </button>
+                <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
+                  <span>🛒</span> View Cart
                 </button>
               `}
             </div>
@@ -816,8 +817,11 @@ function renderListCard(p) {
               +
             </button>
           </div>
-          <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
-            <span>🛍️</span> Go to Cart ➔
+          <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
+            <span>⚡</span> Continue to Pay ➔
+          </button>
+          <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
+            <span>🛒</span> View Cart
           </button>
         `}
 
@@ -883,8 +887,11 @@ function renderGridCard(p) {
               +
             </button>
           </div>
-          <button onclick="appState.setView('cart')" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1 shadow-sm">
-            <span>🛍️</span> Go to Cart ➔
+          <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
+            <span>⚡</span> Continue to Pay ➔
+          </button>
+          <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
+            <span>🛒</span> View Cart
           </button>
         `}
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
@@ -1061,13 +1068,13 @@ function renderProductView(container, state) {
                   +
                 </button>
               </div>
-              <button onclick="appState.setView('cart')" class="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow flex items-center justify-center gap-2">
-                <span>🛍️</span> Go to Cart ➔
+              <button onclick="appState.setView('checkout')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2" title="Continue directly to payment and checkout">
+                <span>⚡</span> Continue to Pay ➔
               </button>
             </div>
             <div class="flex gap-3">
-              <button onclick="appState.setView('checkout');" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
-                <span>⚡</span> Proceed to Checkout
+              <button onclick="appState.setView('cart')" class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                <span>🛒</span> View Cart Summary
               </button>
               <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
                 ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
@@ -1273,8 +1280,8 @@ function renderCartView(container, state) {
           </div>
         </div>
 
-        <button onclick="appState.setView('checkout')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl transition shadow">
-          Proceed to Checkout →
+        <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+          <span>⚡</span> Proceed to Pay (₹ ${totals.total.toLocaleString('en-IN')}) ➔
         </button>
       </div>
     </div>
@@ -1383,8 +1390,8 @@ function renderCheckoutView(container, state) {
           <div class="flex justify-between text-slate-600"><span>Shipping:</span><span>FREE</span></div>
           <div class="flex justify-between text-base font-black text-slate-900 pt-3 border-t"><span>Total:</span><span class="text-teal-700">₹ ${totals.total.toLocaleString('en-IN')}.00</span></div>
         </div>
-        <button onclick="handlePlaceOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow">
-          Confirm & Place Order (₹ ${totals.total.toLocaleString('en-IN')})
+        <button onclick="handlePlaceOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm py-4 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+          <span>🔒</span> Proceed to Pay & Place Order (₹ ${totals.total.toLocaleString('en-IN')})
         </button>
       </div>
     </div>
@@ -3745,48 +3752,6 @@ function refreshCurrentViewCartState() {
   } else if (currentView === "cart") {
     renderCartView(mainContent, appState.state);
   }
-  updateFloatingCartBar(appState.state);
-}
-
-// ======================== FLOATING BOTTOM CART BAR (Zomato / Flipkart Style) ========================
-function updateFloatingCartBar(state) {
-  let bar = document.getElementById("floating-cart-bar");
-  const cartItems = state?.cart || [];
-  const totalCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totals = typeof appState !== 'undefined' && appState.getCartTotals ? appState.getCartTotals() : { total: 0 };
-
-  // Do not show floating bar on cart, checkout, or admin views
-  const hiddenViews = ["cart", "checkout", "admin", "admin-login"];
-  if (totalCount === 0 || hiddenViews.includes(state?.currentView)) {
-    if (bar) bar.remove();
-    return;
-  }
-
-  if (!bar) {
-    bar = document.createElement("div");
-    bar.id = "floating-cart-bar";
-    bar.className = "fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-lg bg-slate-950/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-blue-500/40 flex items-center justify-between transition-all transform animate-bounce-short";
-    document.body.appendChild(bar);
-  }
-
-  bar.innerHTML = `
-    <div class="flex items-center gap-3 cursor-pointer" onclick="appState.setView('cart')">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-lg font-black shadow-inner shrink-0">
-        🛒
-      </div>
-      <div>
-        <div class="text-xs font-black text-white flex items-center gap-2">
-          <span>${totalCount} Item${totalCount > 1 ? 's' : ''} in Cart</span>
-          <span class="text-emerald-400 font-mono text-sm font-bold">₹ ${totals.total.toLocaleString('en-IN')}.00</span>
-        </div>
-        <p class="text-[10px] text-slate-400">Doorstep delivery across Bangalore</p>
-      </div>
-    </div>
-    <button onclick="appState.setView('cart')" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow-lg flex items-center gap-1.5 shrink-0">
-      <span>View Cart</span>
-      <span>➔</span>
-    </button>
-  `;
 }
 
 function handleToggleWishlist(event, prodId) {
