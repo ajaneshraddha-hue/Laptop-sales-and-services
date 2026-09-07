@@ -410,26 +410,46 @@ function renderHomeView(container, state) {
 
         <!-- Featured Card on Hero -->
         <div class="flex-1 max-w-sm lg:max-w-md w-full">
-          <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-5 shadow-2xl backdrop-blur-md relative">
-            <div class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              ⚡ TOP DEAL OF THE DAY
-            </div>
-            <div class="absolute top-3 right-3 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-              3 Yrs Warranty
-            </div>
-            <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700&auto=format&fit=crop&q=80" alt="Lenovo ThinkVision Monitor" class="w-full h-44 object-cover rounded-xl mt-6 mb-4">
-            <h3 class="font-bold text-sm text-white line-clamp-1">Lenovo ThinkVision S24e-20 23.8" FHD IPS Monitor</h3>
-            <p class="text-xs text-slate-400 mb-3">Ultra-thin bezel, HDMI/VGA, Onsite Warranty</p>
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-teal-400 font-extrabold text-xl">₹ 7,906.00</span>
-                <span class="text-xs text-red-400 line-through ml-2">₹ 20,020.00</span>
+          ${(() => {
+            const heroProdId = 'deal-lenovo-thinkvision-s24e';
+            const inCart = (state.cart || []).some(item => item.id === heroProdId);
+            const cartItem = (state.cart || []).find(item => item.id === heroProdId);
+            return `
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-5 shadow-2xl backdrop-blur-md relative">
+                <div class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  ⚡ TOP DEAL OF THE DAY
+                </div>
+                <div class="absolute top-3 right-3 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  3 Yrs Warranty
+                </div>
+                <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700&auto=format&fit=crop&q=80" alt="Lenovo ThinkVision Monitor" class="w-full h-44 object-cover rounded-xl mt-6 mb-4 cursor-pointer" onclick="appState.setView('product', { product: '${heroProdId}' })">
+                <h3 onclick="appState.setView('product', { product: '${heroProdId}' })" class="font-bold text-sm text-white line-clamp-1 hover:text-blue-400 cursor-pointer">Lenovo ThinkVision S24e-20 23.8" FHD IPS Monitor</h3>
+                <p class="text-xs text-slate-400 mb-3">Ultra-thin bezel, HDMI/VGA, Onsite Warranty</p>
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <span class="text-teal-400 font-extrabold text-xl">₹ 7,906.00</span>
+                    <span class="text-xs text-red-400 line-through ml-2">₹ 20,020.00</span>
+                  </div>
+                  ${!inCart ? `
+                    <button onclick="handleAddToCart(event, '${heroProdId}', 1)" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+                      <span>🛒</span> Add to Cart
+                    </button>
+                  ` : `
+                    <div class="flex items-center gap-2">
+                      <div class="flex items-center bg-blue-600 text-white rounded-xl p-0.5 shadow-md font-bold text-xs">
+                        <button onclick="handleUpdateCartQty(event, '${heroProdId}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 text-white rounded-lg flex items-center justify-center text-sm font-black transition">−</button>
+                        <span class="px-2 font-mono font-bold text-xs text-white">${cartItem?.quantity || 1}</span>
+                        <button onclick="handleUpdateCartQty(event, '${heroProdId}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 text-white rounded-lg flex items-center justify-center text-sm font-black transition">+</button>
+                      </div>
+                      <button onclick="appState.setView('checkout')" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-3 py-2 rounded-xl transition shadow flex items-center gap-1">
+                        <span>⚡</span> Pay ➔
+                      </button>
+                    </div>
+                  `}
+                </div>
               </div>
-              <button onclick="handleAddToCart(event, 'monitor-lenovo-thinkvision-s24e', 1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow">
-                🛒 Add to Cart
-              </button>
-            </div>
-          </div>
+            `;
+          })()}
         </div>
       </div>
     </div>
@@ -787,7 +807,6 @@ function renderListCard(p) {
         <div class="flex items-baseline gap-2.5">
           <span class="text-teal-700 font-black text-lg">₹ ${p.price.toLocaleString('en-IN')}.00</span>
           ${p.originalPrice > p.price ? `<span class="text-xs text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
-          ${p.gstITC ? `<span class="text-[10px] text-slate-400 font-medium">(GST Input: ₹${p.gstITC.toLocaleString('en-IN')})</span>` : ''}
         </div>
 
         ${inCart ? `
@@ -1029,7 +1048,6 @@ function renderProductView(container, state) {
               <span class="text-2xl md:text-3xl font-black text-teal-700">₹ ${p.price.toLocaleString('en-IN')}.00</span>
               ${p.originalPrice > p.price ? `<span class="text-sm text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
             </div>
-            ${p.gstITC ? `<span class="text-xs text-slate-500 font-medium">Eligible for GST Input Credit: <strong>₹${p.gstITC.toLocaleString('en-IN')}</strong></span>` : ''}
           </div>
           <span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">In Stock (${p.stockLeft} left)</span>
         </div>
@@ -2187,7 +2205,7 @@ function renderAdminTabContent(tab, state) {
                     </div>
                     <div class="text-right">
                       <div class="text-xl font-black text-teal-700">₹ ${o.totals.total.toLocaleString('en-IN')}</div>
-                      <div class="text-[10px] text-slate-400">Incl. GST ₹${o.totals.tax ? o.totals.tax.toFixed(0) : '0'}</div>
+                      <div class="text-[10px] text-slate-400">Total Paid</div>
                     </div>
                   </div>
 
@@ -3694,7 +3712,6 @@ function handleAddToCart(event, prodId, qty = 1) {
 
   const success = appState.addToCart(prodId, qty);
   if (success) {
-    showToast(`Added "${prod.name}" to cart!`, "🛒", "success");
     refreshCurrentViewCartState();
   }
 }
@@ -3717,10 +3734,8 @@ function handleUpdateCartQty(event, prodId, delta) {
   const newQty = cartItem.quantity + delta;
   if (newQty <= 0) {
     appState.removeFromCart(prodId);
-    showToast(`Removed "${prod ? prod.name : 'Item'}" from cart`, "🗑️", "info");
   } else {
     appState.updateCartQty(prodId, delta);
-    showToast(`Cart: ${newQty} × "${prod ? prod.name : 'Item'}"`, "🛒", "success");
   }
   refreshCurrentViewCartState();
 }
@@ -3733,7 +3748,6 @@ function handleRemoveFromCart(event, prodId) {
 
   const prod = appState.getProductById(prodId);
   appState.removeFromCart(prodId);
-  showToast(`Removed "${prod ? prod.name : 'Item'}" from cart`, "🗑️", "info");
   refreshCurrentViewCartState();
 }
 
