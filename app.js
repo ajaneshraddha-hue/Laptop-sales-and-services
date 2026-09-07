@@ -473,7 +473,6 @@ function renderHomeView(container, state) {
           { name: "Storages", icon: "💾", cat: "Storages", color: "from-purple-500/10 to-indigo-500/10 text-purple-600 border-purple-200" },
           { name: "Networking", icon: "🌐", cat: "Networking", color: "from-sky-500/10 to-blue-500/10 text-sky-600 border-sky-200" },
           { name: "Servers", icon: "🖧", cat: "Servers & Workstations", color: "from-rose-500/10 to-red-500/10 text-rose-600 border-rose-200" },
-          { name: "Consumables", icon: "🖨️", cat: "Consumables", color: "from-amber-500/10 to-yellow-500/10 text-amber-600 border-amber-200" },
           { name: "Software's", icon: "💿", cat: "Software's", color: "from-teal-500/10 to-green-500/10 text-teal-600 border-teal-200" },
         ].map(item => `
           <div onclick="appState.setSubcategoryFilter('${item.cat}', 'All')" class="bg-gradient-to-br ${item.color} border p-4 rounded-2xl cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition flex flex-col items-center text-center group">
@@ -676,39 +675,13 @@ function renderCatalogView(container, state) {
           </div>
 
           <!-- Processor Filter Accordion -->
-          <div class="py-3 border-b border-slate-100">
+          <div class="pt-3">
             <span class="text-xs font-bold text-slate-800 block mb-2">Processor</span>
             <div class="space-y-1.5 text-xs">
               ${["All", "Intel Core i7", "Intel Core i5", "Intel Core i9", "AMD Ryzen 7", "AMD Ryzen 5", "Apple M1/M2", "Intel Xeon"].map(proc => `
                 <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
                   <input type="radio" name="proc_filter" value="${proc}" ${filters.processor === proc ? 'checked' : ''} onchange="handleProcFilter('${proc}')" class="text-blue-600">
                   <span>${proc}</span>
-                </label>
-              `).join("")}
-            </div>
-          </div>
-
-          <!-- Screen Size Filter Accordion -->
-          <div class="py-3 border-b border-slate-100">
-            <span class="text-xs font-bold text-slate-800 block mb-2">Screen Size</span>
-            <div class="space-y-1.5 text-xs">
-              ${["All", "13.3\"", "14.0\"", "15.6\"", "23.8\"", "27\""].map(sz => `
-                <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
-                  <input type="radio" name="size_filter" value="${sz}" ${filters.screenSize === sz ? 'checked' : ''} onchange="handleSizeFilter('${sz}')" class="text-blue-600">
-                  <span>${sz}</span>
-                </label>
-              `).join("")}
-            </div>
-          </div>
-
-          <!-- Operating System Accordion -->
-          <div class="pt-3">
-            <span class="text-xs font-bold text-slate-800 block mb-2">Operating System</span>
-            <div class="space-y-1.5 text-xs">
-              ${["All", "Windows 11 Pro", "Windows 11 Home", "macOS", "No OS"].map(os => `
-                <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
-                  <input type="radio" name="os_filter" value="${os}" ${filters.os === os ? 'checked' : ''} onchange="handleOsFilter('${os}')" class="text-blue-600">
-                  <span>${os}</span>
                 </label>
               `).join("")}
             </div>

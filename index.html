@@ -229,17 +229,6 @@
           </div>
         </div>
 
-        <!-- Consumables Dropdown -->
-        <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Consumables', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="consumables">
-            Consumables <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
-          </button>
-          <div class="absolute left-0 mt-1.5 w-44 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Consumables', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Consumables</button>
-            <button onclick="appState.setSubcategoryFilter('Consumables', 'Cartridges & Toners')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Cartridges & Toners</button>
-          </div>
-        </div>
-
         <!-- Servers & Workstations Dropdown -->
         <div class="relative inline-block group">
           <button onclick="appState.setView('catalog', { category: 'Servers & Workstations', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="servers">

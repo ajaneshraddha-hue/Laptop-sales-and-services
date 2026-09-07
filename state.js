@@ -151,7 +151,6 @@ const DEFAULT_STATE = {
     { id: "cat-4", name: "Peripherals", icon: "🖨️", active: true },
     { id: "cat-5", name: "Storages", icon: "💾", active: true },
     { id: "cat-6", name: "Networking", icon: "🌐", active: true },
-    { id: "cat-7", name: "Consumables", icon: "🖨️", active: true },
     { id: "cat-8", name: "Servers & Workstations", icon: "🖧", active: true },
     { id: "cat-9", name: "Software's", icon: "💿", active: true }
   ],
