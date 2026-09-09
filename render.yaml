@@ -1,9 +1,9 @@
 services:
   - type: web
     name: lapro-solutions
-    env: static
-    buildCommand: ""
-    staticPublishPath: .
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
     routes:
       - type: rewrite
         source: /*
