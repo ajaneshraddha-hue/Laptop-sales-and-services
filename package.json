@@ -1,0 +1,13 @@
+﻿{
+  "name": "lapro-solutions",
+  "version": "1.0.0",
+  "description": "Lapro Solutions - IT Procurement, Hardware & Doorstep Repair Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["laptop", "repair", "ecommerce", "lapro"],
+  "author": "Lapro Solutions",
+  "license": "ISC"
+}
