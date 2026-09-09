@@ -103,7 +103,8 @@ const server = http.createServer((req, res) => {
         if (!payload || typeof payload.state !== "object") return sendJson(res, 400, { error: "Invalid state payload" });
         readSharedState((readErr, existingState) => {
           if (readErr) return sendJson(res, 500, { error: "Unable to read shared state" });
-          writeSharedState(mergeSharedState(existingState, sharedRecordsOnly(payload.state)), (err) => {
+          const nextState = payload.replaceState ? sharedRecordsOnly(payload.state) : mergeSharedState(existingState, sharedRecordsOnly(payload.state));
+          writeSharedState(nextState, (err) => {
             if (err) return sendJson(res, 500, { error: "Unable to save shared state" });
             sendJson(res, 200, { saved: true });
           });

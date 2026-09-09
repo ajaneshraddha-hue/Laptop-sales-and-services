@@ -1458,7 +1458,7 @@ function renderOrderPaymentView(container, state) {
         ${!isProcessing && !isApproved ? `<form onsubmit="handleOrderPaymentProofSubmit(event)" class="mt-6 space-y-4"><label class="block text-sm font-bold text-slate-800">Attach payment screenshot <span class="text-red-500">*</span><input id="order-payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" required class="mt-2 block w-full rounded-xl border border-slate-300 p-3 text-xs"></label><button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl">Submit payment and place order</button></form>` : ''}
         ${isApproved ? `<button onclick="appState.setView('order-confirm', { order: '${order.id}' })" class="mt-6 bg-emerald-600 text-white font-bold text-sm px-5 py-3 rounded-xl">View order confirmation</button>` : ''}
       </section>
-      <aside class="bg-[#101014] text-white rounded-3xl p-5 shadow-xl text-center border border-slate-800"><span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span><p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p><p class="text-slate-300 text-sm mt-5">Scan this QR using PhonePe</p><div class="mt-5 bg-white rounded-2xl p-3 aspect-square"><img src="phonepe-qr.png" alt="PhonePe payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p></aside>
+      <aside class="bg-[#101014] text-white rounded-3xl p-5 shadow-xl text-center border border-slate-800"><span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span><p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p><p class="text-slate-300 text-sm mt-5">Scan using any UPI app</p><div class="mt-5 bg-white rounded-2xl p-3 aspect-square"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">GPay</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">PhonePe</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Paytm</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Any UPI</span></div><p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p></aside>
     </div>`;
 }
 
@@ -1755,7 +1755,7 @@ function renderTicketPaymentView(container, state) {
         <span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span>
         <p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p>
         <p class="text-slate-300 text-sm mt-5">Scan this QR using PhonePe</p>
-        <div class="mt-5 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden"><img src="phonepe-qr.png" alt="PhonePe payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div>
+        <div class="mt-5 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">GPay</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">PhonePe</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Paytm</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Any UPI</span></div>
         <p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p>
         <p class="text-[10px] text-slate-500 mt-4">Pay ₹499.00 and upload the confirmation screenshot.</p>
       </aside>
@@ -2441,7 +2441,9 @@ function renderAdminTabContent(tab, state) {
         </div>
         ${paymentReviews.length === 0 ? `<div class="p-12 text-center text-slate-400"><div class="text-4xl mb-3">✅</div><p class="font-bold text-slate-700">No payments waiting for review</p></div>` : `
           <div class="divide-y divide-slate-100">
-            ${paymentReviews.map(t => `
+            ${paymentReviews.map(t => {
+              const proofImage = typeof t.paymentProof === 'string' && /^(data:image|https?:\/\/)/.test(t.paymentProof) ? t.paymentProof : 'lapro-logo.png';
+              return `
               <div class="p-5 grid lg:grid-cols-[1fr_260px] gap-5">
                 <div>
                   <div class="flex flex-wrap items-center gap-2"><span class="font-black text-slate-900 font-mono">${t.id}</span><span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Payment in processing</span></div>
@@ -2450,9 +2452,10 @@ function renderAdminTabContent(tab, state) {
                   <p class="text-xs text-slate-400 mt-2">Submitted: ${t.paymentSubmittedAt || '—'} · UPI: 7996389264@ybl</p>
                   <div class="flex gap-2 mt-5"><button onclick="adminVerifyPayment('${t.id}', true, '${t.paymentKind}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl">Approve & unlock</button><button onclick="adminVerifyPayment('${t.id}', false, '${t.paymentKind}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs px-4 py-2 rounded-xl">Reject proof</button></div>
                 </div>
-                <a href="${t.paymentProof || '#'}" target="_blank" rel="noopener" class="block rounded-2xl border border-slate-200 bg-slate-50 p-2 min-h-48"><img src="${t.paymentProof || 'lapro-logo.png'}" alt="Payment screenshot for ${t.id}" class="w-full h-56 object-contain rounded-xl"></a>
+                <a href="${proofImage}" target="_blank" rel="noopener" class="block rounded-2xl border border-slate-200 bg-slate-50 p-2 min-h-48"><img src="${proofImage}" alt="Payment screenshot for ${t.id}" class="w-full h-56 object-contain rounded-xl"></a>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         `}
       </div>
