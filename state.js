@@ -218,10 +218,19 @@ class StateManager {
 
   async syncToServer() {
     try {
+      const sharedState = {
+        registeredUsers: this.state.registeredUsers,
+        registeredAdmins: this.state.registeredAdmins,
+        orders: this.state.orders,
+        serviceTickets: this.state.serviceTickets,
+        products: this.state.products,
+        categories: this.state.categories,
+        notifications: this.state.notifications
+      };
       await fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ state: this.state })
+        body: JSON.stringify({ state: sharedState })
       });
     } catch (error) {
       console.warn("Shared state unavailable; browser storage remains active.", error);
@@ -237,8 +246,20 @@ class StateManager {
         await this.syncToServer();
         return false;
       }
-      const localView = this.state.currentView;
-      this.state = { ...this.state, ...payload.state, currentView: localView || "home" };
+      const localSession = {
+        currentUser: this.state.currentUser,
+        adminUser: this.state.adminUser,
+        cart: this.state.cart,
+        wishlist: this.state.wishlist,
+        compareList: this.state.compareList,
+        currentView: this.state.currentView,
+        currentProduct: this.state.currentProduct,
+        currentTicket: this.state.currentTicket,
+        currentOrder: this.state.currentOrder,
+        activeFilters: this.state.activeFilters,
+        pendingOrderPayment: this.state.pendingOrderPayment
+      };
+      this.state = { ...this.state, ...payload.state, ...localSession };
       localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
       return true;
     } catch (error) {

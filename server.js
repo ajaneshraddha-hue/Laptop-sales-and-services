@@ -60,7 +60,7 @@ function mergeRecords(existingRecords, incomingRecords, keySelector) {
 
 function mergeSharedState(existingState, incomingState) {
   if (!existingState) return incomingState;
-  const merged = { ...existingState, ...incomingState };
+  const merged = { ...existingState };
   merged.registeredUsers = mergeRecords(existingState.registeredUsers, incomingState.registeredUsers, user => user.email);
   merged.registeredAdmins = mergeRecords(existingState.registeredAdmins, incomingState.registeredAdmins, admin => admin.email);
   merged.orders = mergeRecords(existingState.orders, incomingState.orders, order => order.id);
@@ -68,6 +68,18 @@ function mergeSharedState(existingState, incomingState) {
   merged.products = mergeRecords(existingState.products, incomingState.products, product => product.id);
   merged.notifications = mergeRecords(existingState.notifications, incomingState.notifications, notification => notification.id).slice(-50);
   return merged;
+}
+
+function sharedRecordsOnly(state) {
+  return {
+    registeredUsers: state.registeredUsers || [],
+    registeredAdmins: state.registeredAdmins || [],
+    orders: state.orders || [],
+    serviceTickets: state.serviceTickets || [],
+    products: state.products || [],
+    categories: state.categories || [],
+    notifications: state.notifications || []
+  };
 }
 
 const server = http.createServer((req, res) => {
@@ -91,7 +103,7 @@ const server = http.createServer((req, res) => {
         if (!payload || typeof payload.state !== "object") return sendJson(res, 400, { error: "Invalid state payload" });
         readSharedState((readErr, existingState) => {
           if (readErr) return sendJson(res, 500, { error: "Unable to read shared state" });
-          writeSharedState(mergeSharedState(existingState, payload.state), (err) => {
+          writeSharedState(mergeSharedState(existingState, sharedRecordsOnly(payload.state)), (err) => {
             if (err) return sendJson(res, 500, { error: "Unable to save shared state" });
             sendJson(res, 200, { saved: true });
           });
