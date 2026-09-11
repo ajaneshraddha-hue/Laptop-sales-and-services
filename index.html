@@ -161,6 +161,40 @@
       max-width: 14rem;
     }
 
+    .catalog-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      align-items: start;
+      gap: 1.5rem;
+    }
+
+    .catalog-sidebar {
+      width: 240px;
+      position: sticky;
+      top: 7rem;
+      max-height: calc(100vh - 8rem);
+      overflow-y: auto;
+      font-size: .78rem;
+    }
+
+    .catalog-sidebar > div {
+      padding: .8rem;
+    }
+
+    .catalog-results {
+      min-width: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .catalog-layout { grid-template-columns: 1fr; }
+      .catalog-sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+    }
+
     @media (max-width: 640px) {
       #main-content .category-collection { padding: .8rem; border-radius: 20px; }
       #main-content .category-card { min-height: 124px; }
