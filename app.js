@@ -1428,7 +1428,13 @@ function handlePlaceOrder() {
   const selectedAddrId = document.querySelector('input[name="checkout_address"]:checked')?.value || "addr-default";
   const paymentMethod = document.querySelector('input[name="payment_opt"]:checked')?.value || "UPI QR";
   if (paymentMethod.startsWith("UPI")) {
-    appState.state.pendingOrderPayment = { selectedAddrId, paymentMethod, customerEmail: appState.state.currentUser?.email || null };
+    appState.state.currentOrder = null;
+    appState.state.pendingOrderPayment = {
+      requestId: `PAY-${Date.now()}`,
+      selectedAddrId,
+      paymentMethod,
+      customerEmail: appState.state.currentUser?.email || null
+    };
     appState.setView("order-payment");
     return;
   }
@@ -1472,6 +1478,11 @@ function handleOrderPaymentProofSubmit(event) {
   const reader = new FileReader();
   reader.onload = () => {
     const pending = appState.state.pendingOrderPayment;
+    if (!pending || !pending.requestId) {
+      showToast('Please start checkout again to upload a new payment proof.', '⚠️', 'error');
+      appState.setView('checkout');
+      return;
+    }
     const result = appState.submitOrderPaymentProof(pending.selectedAddrId, pending.paymentMethod, reader.result);
     if (result.success) { appState.setView('order-payment', { order: result.orderId }); showToast('Payment submitted for verification.', '✓', 'success'); }
   };
