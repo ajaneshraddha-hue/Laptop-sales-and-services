@@ -532,6 +532,10 @@ class StateManager {
     }
 
     this.state.currentUser = user;
+    this.state.currentOrder = null;
+    this.state.currentTicket = null;
+    this.state.pendingOrderPayment = null;
+    this.state.currentView = "home";
     this.addNotification(`Welcome back, ${user.name}!`);
     this.saveState();
     return { success: true };

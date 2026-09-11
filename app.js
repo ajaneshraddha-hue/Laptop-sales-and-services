@@ -668,10 +668,10 @@ function renderCatalogView(container, state) {
       <span class="text-slate-800 font-bold">${categoryTitle}${subcategoryTitle}</span>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-6">
+    <div class="catalog-layout">
       
       <!-- LEFT ACCORDION SIDEBAR: Categories & Filters -->
-      <aside class="w-full lg:w-64 shrink-0 select-none space-y-4">
+      <aside class="catalog-sidebar shrink-0 select-none space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
           <div class="flex justify-between items-center pb-3 border-b border-slate-100">
             <h3 class="font-extrabold text-sm text-slate-900">Categories & Filters</h3>
@@ -721,7 +721,7 @@ function renderCatalogView(container, state) {
       </aside>
 
       <!-- MAIN CATALOG RESULTS -->
-      <div class="flex-1">
+      <div class="catalog-results">
         
         <!-- Top Toolbar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 shadow-sm flex flex-wrap justify-between items-center gap-4">
@@ -1428,7 +1428,7 @@ function handlePlaceOrder() {
   const selectedAddrId = document.querySelector('input[name="checkout_address"]:checked')?.value || "addr-default";
   const paymentMethod = document.querySelector('input[name="payment_opt"]:checked')?.value || "UPI QR";
   if (paymentMethod.startsWith("UPI")) {
-    appState.state.pendingOrderPayment = { selectedAddrId, paymentMethod };
+    appState.state.pendingOrderPayment = { selectedAddrId, paymentMethod, customerEmail: appState.state.currentUser?.email || null };
     appState.setView("order-payment");
     return;
   }
@@ -1440,14 +1440,17 @@ function handlePlaceOrder() {
 
 function renderOrderPaymentView(container, state) {
   const pending = state.pendingOrderPayment;
-  const order = state.orders.find(o => o.id === state.currentOrder);
+  const currentEmail = state.currentUser?.email?.toLowerCase();
+  const ownsOrder = order => order && (!currentEmail || order.customerEmail?.toLowerCase() === currentEmail);
+  const order = ownsOrder(state.orders.find(o => o.id === state.currentOrder)) ? state.orders.find(o => o.id === state.currentOrder) : null;
+  const ownsPending = pending && (!currentEmail || pending.customerEmail?.toLowerCase() === currentEmail);
   const isProcessing = order && order.paymentStatus === "processing";
   const isApproved = order && order.paymentStatus === "approved";
-  if (!pending && !order) {
+  if (!ownsPending && !order) {
     container.innerHTML = `<div class="max-w-xl mx-auto bg-white rounded-3xl border border-slate-200 p-8 text-center"><h2 class="text-xl font-black">Payment request not found</h2><button onclick="appState.setView('cart')" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Return to cart</button></div>`;
     return;
   }
-  const total = order?.totals?.total || appState.getCartTotals().total;
+  const total = order?.totals?.total || (ownsPending ? appState.getCartTotals().total : 0);
   container.innerHTML = `
     <div class="max-w-4xl mx-auto grid lg:grid-cols-[1fr_360px] gap-6 items-start">
       <section class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm">
@@ -1458,7 +1461,7 @@ function renderOrderPaymentView(container, state) {
         ${!isProcessing && !isApproved ? `<form onsubmit="handleOrderPaymentProofSubmit(event)" class="mt-6 space-y-4"><label class="block text-sm font-bold text-slate-800">Attach payment screenshot <span class="text-red-500">*</span><input id="order-payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" required class="mt-2 block w-full rounded-xl border border-slate-300 p-3 text-xs"></label><button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl">Submit payment and place order</button></form>` : ''}
         ${isApproved ? `<button onclick="appState.setView('order-confirm', { order: '${order.id}' })" class="mt-6 bg-emerald-600 text-white font-bold text-sm px-5 py-3 rounded-xl">View order confirmation</button>` : ''}
       </section>
-      <aside class="bg-[#101014] text-white rounded-3xl p-5 shadow-xl text-center border border-slate-800"><span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span><p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p><p class="text-slate-300 text-sm mt-5">Scan using any UPI app</p><div class="mt-5 bg-white rounded-2xl p-3 aspect-square"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">GPay</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">PhonePe</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Paytm</span><span class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Any UPI</span></div><p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p></aside>
+      <aside class="bg-[#101014] text-white rounded-3xl p-5 shadow-xl text-center border border-slate-800"><span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span><p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p><p class="text-slate-300 text-sm mt-5">Scan using any UPI app</p><div class="mt-5 bg-white rounded-2xl p-3 aspect-square"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><a href="tez://upi/pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">GPay</a><a href="phonepe://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">PhonePe</a><a href="paytmmp://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Paytm</a><a href="upi://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-white/10 border border-white/15 px-2 py-2">Any UPI</a></div><p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p></aside>
     </div>`;
 }
 
@@ -1755,7 +1758,7 @@ function renderTicketPaymentView(container, state) {
         <span class="inline-flex items-center gap-2 text-sm font-bold"><span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center">पे</span> PhonePe</span>
         <p class="text-[#a855f7] font-black text-lg mt-5">ACCEPTED HERE</p>
         <p class="text-slate-300 text-sm mt-5">Scan this QR using PhonePe</p>
-        <div class="mt-5 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">GPay</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">PhonePe</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Paytm</span><span class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Any UPI</span></div>
+        <div class="mt-5 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden"><img src="phonepe-qr.png" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=upi%3A%2F%2Fpay%3Fpa%3D7996389264%2540ybl%26pn%3DSwagat%2520Mahadev%2520Avasare%26cu%3DINR';"></div><div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold"><a href="tez://upi/pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">GPay</a><a href="phonepe://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">PhonePe</a><a href="paytmmp://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Paytm</a><a href="upi://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&cu=INR" class="rounded-lg bg-slate-100 text-slate-700 px-2 py-2">Any UPI</a></div>
         <p class="mt-5 text-xs text-slate-400">UPI ID</p><p class="text-white font-bold text-base select-all">7996389264@ybl</p>
         <p class="text-[10px] text-slate-500 mt-4">Pay ₹499.00 and upload the confirmation screenshot.</p>
       </aside>
