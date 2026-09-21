@@ -211,7 +211,28 @@ class StateManager {
   }
 
   saveState() {
-    localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
+    } catch (e) {
+      console.warn("Storage quota limit reached, saving with lightweight image optimization...", e);
+      try {
+        const lightweightState = JSON.parse(JSON.stringify(this.state));
+        if (lightweightState.products) {
+          lightweightState.products = lightweightState.products.map(p => {
+            if (p.images && p.images.some(img => img && img.length > 50000)) {
+              return {
+                ...p,
+                images: p.images.map(img => (img && img.length > 50000) ? "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80" : img)
+              };
+            }
+            return p;
+          });
+        }
+        localStorage.setItem(STATE_KEY, JSON.stringify(lightweightState));
+      } catch (err2) {
+        console.error("Secondary save failed", err2);
+      }
+    }
     this.syncToServer();
     document.dispatchEvent(new CustomEvent("statechanged", { detail: this.state }));
   }
@@ -329,6 +350,9 @@ class StateManager {
       images = ["https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80"];
     }
 
+    const procVal = productData.processor || (productData.specs && productData.specs.processor) || "N/A";
+    const genVal = productData.generation || (productData.specs && productData.specs.generation) || "";
+
     const newProduct = {
       id: newId,
       name: productData.name,
@@ -351,11 +375,14 @@ class StateManager {
       rating: Number(productData.rating) || 5.0,
       reviewsCount: 1,
       screenSize: productData.screenSize || "N/A",
-      processor: productData.processor || "N/A",
+      processor: procVal,
+      generation: genVal,
       os: productData.os || "N/A",
-      specs: productData.specs || {
-        processor: productData.processor || "Standard Specs",
-        warranty: productData.warranty || "1 Year Doorstep Warranty",
+      specs: {
+        ...(productData.specs || {}),
+        processor: procVal,
+        generation: genVal,
+        warranty: productData.warranty || (productData.specs && productData.specs.warranty) || "1 Year Doorstep Warranty",
         features: productData.featuresSummary || "Certified Genuine Hardware"
       },
       images: images,
@@ -383,9 +410,21 @@ class StateManager {
         images = [updatedData.image];
       }
 
+      const proc = updatedData.processor !== undefined ? updatedData.processor : (orig.processor || (orig.specs && orig.specs.processor) || "N/A");
+      const gen = updatedData.generation !== undefined ? updatedData.generation : (orig.generation || (orig.specs && orig.specs.generation) || "");
+
       this.state.products[idx] = {
         ...orig,
         ...updatedData,
+        processor: proc,
+        generation: gen,
+        specs: {
+          ...(orig.specs || {}),
+          ...(updatedData.specs || {}),
+          processor: proc,
+          generation: gen,
+          warranty: (updatedData.specs && updatedData.specs.warranty) || updatedData.warranty || (orig.specs && orig.specs.warranty) || orig.warranty || "1 Year Warranty"
+        },
         price: price,
         originalPrice: originalPrice,
         minPrice: minPrice,

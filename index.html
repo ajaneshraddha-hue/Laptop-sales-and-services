@@ -316,17 +316,18 @@
             <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white hidden">0</span>
           </button>
 
-          <!-- Notifications Dropdown Overlay Menu -->
-          <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
-            <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center">
-              <span class="font-bold text-sm text-slate-900">Notifications</span>
-              <div class="flex gap-2">
-                <button onclick="appState.markAllNotificationsRead()" class="text-xs text-blue-600 hover:underline">Mark read</button>
+          <!-- Notifications Dropdown Overlay Menu (Mobile & Desktop Responsive) -->
+          <div id="notif-dropdown" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-16 sm:top-full mt-1 sm:mt-2 sm:w-80 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
+            <div class="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/70 rounded-t-2xl">
+              <span class="font-black text-sm text-slate-900 flex items-center gap-1.5">🔔 Notifications</span>
+              <div class="flex items-center gap-2 text-xs">
+                <button onclick="appState.markAllNotificationsRead()" class="text-blue-600 hover:underline font-semibold">Mark read</button>
                 <span class="text-slate-300">|</span>
-                <button onclick="appState.clearNotifications()" class="text-xs text-red-500 hover:underline">Clear</button>
+                <button onclick="appState.clearNotifications()" class="text-red-500 hover:underline font-semibold">Clear</button>
+                <button onclick="toggleNotificationsMenu(event)" class="sm:hidden text-slate-400 hover:text-slate-700 ml-1.5 font-bold text-sm">✕</button>
               </div>
             </div>
-            <div id="notif-items" class="max-h-60 overflow-y-auto">
+            <div id="notif-items" class="max-h-72 overflow-y-auto divide-y divide-slate-100">
               <!-- Populated by JS -->
             </div>
           </div>
@@ -520,11 +521,10 @@
         <p class="text-xs text-slate-500" id="auth-modal-subtitle">Sign in to track orders, manage doorstep repairs & checkout</p>
       </div>
 
-      <!-- Toggle Customer Login vs Register vs Admin Portal tabs -->
+      <!-- Toggle Customer Login vs Register tabs -->
       <div class="flex border-b border-slate-200 mb-5 text-xs">
         <button id="tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2.5 text-center border-b-2 border-blue-600 font-bold text-blue-600">Customer Login</button>
         <button id="tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-slate-400 font-medium hover:text-slate-600">New Register</button>
-        <button id="tab-admin" onclick="toggleAuthTab('admin')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-purple-700 font-bold hover:text-purple-900 flex items-center justify-center gap-1">🔒 Admin Portal</button>
       </div>
 
       <!-- Customer Login Form -->
@@ -544,25 +544,6 @@
           <a href="javascript:void(0)" onclick="alert('Password reset link has been dispatched to your registered email.')" class="text-blue-600 hover:underline">Forgot Password?</a>
         </div>
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Sign In</button>
-      </form>
-
-      <!-- Admin Login Form inside Modal -->
-      <form id="form-admin-modal" onsubmit="handleAdminModalLoginSubmit(event)" class="space-y-4 hidden">
-        <div class="bg-slate-900 text-white p-3.5 rounded-xl border border-slate-700 text-xs mb-3">
-          <span class="text-cyan-400 font-bold block mb-0.5">Authorized Store Administrator</span>
-          <p class="text-[11px] text-slate-300">Enter private admin credentials to manage products, stock & orders.</p>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin Email Address <span class="text-red-500">*</span></label>
-          <input type="email" id="modal-admin-email" required placeholder="Enter admin email address" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600 font-mono">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Master Admin Password <span class="text-red-500">*</span></label>
-          <input type="password" id="modal-admin-pass" required placeholder="Enter master admin password" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-purple-600">
-        </div>
-        <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">
-          🔒 Login to Admin Dashboard
-        </button>
       </form>
 
       <!-- Customer Register Form -->

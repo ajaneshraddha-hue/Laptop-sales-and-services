@@ -53,16 +53,16 @@ const MOCK_PRODUCTS = [
     features: ["Apple M1 Silicon", "Retina Display", "18-Hr Battery", "Open Box Like New"]
   },
   {
-    id: "deal-asus-rog-zephyrus",
-    name: "ASUS ROG Zephyrus G14 Gaming, 14.0\" QHD 120Hz, AMD Ryzen 7, 16GB, 1TB SSD, RTX 3060",
-    brand: "ASUS", category: "Laptops", subcategory: "Gaming Laptops",
+    id: "deal-lenovo-thinkpad-x1-carbon",
+    name: "Lenovo ThinkPad X1 Carbon Gen 10, 14.0\" 2.8K OLED, Intel Core i7 12th Gen, 16GB, 1TB SSD",
+    brand: "Lenovo", category: "Laptops", subcategory: "Business Laptops",
     condition: "Grade A+ Refurbished", isCrazyDeal: true, isNew: false,
-    price: 64990, originalPrice: 139990, discount: "54% OFF", savings: 75000,
-    gstITC: 11698, stockLeft: 1, claimedPercent: 97, rating: 4.8, reviewsCount: 168,
-    screenSize: "14.0\"", processor: "AMD Ryzen 7", os: "Windows 11 Home",
-    specs: { processor: "AMD Ryzen 7 5800HS (8 Cores, 16 Threads)", ram: "16GB DDR4 3200MHz", storage: "1TB PCIe NVMe SSD", display: "14.0\" QHD 120Hz 100% DCI-P3", graphics: "NVIDIA RTX 3060 6GB GDDR6", os: "Windows 11 Home", warranty: "1 Year Doorstep", batteryHealth: "90%" },
-    images: ["https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=700&auto=format&fit=crop&q=80"],
-    features: ["RTX 3060 6GB", "QHD 120Hz", "Ryzen 7 8-Core", "1TB SSD"]
+    price: 58990, originalPrice: 145000, discount: "59% OFF", savings: 86010,
+    gstITC: 10618, stockLeft: 2, claimedPercent: 94, rating: 4.9, reviewsCount: 194,
+    screenSize: "14.0\"", processor: "Intel Core i7", generation: "12th Gen", os: "Windows 11 Pro",
+    specs: { processor: "Intel Core i7-1260P (12 Cores, 16 Threads, up to 4.7GHz)", generation: "12th Gen", ram: "16GB LPDDR5 5200MHz", storage: "1TB PCIe Gen4 NVMe SSD", display: "14.0\" 2.8K (2880x1800) OLED 400 nits HDR500", graphics: "Intel Iris Xe Graphics", os: "Windows 11 Pro", warranty: "1 Year Doorstep", batteryHealth: "95%" },
+    images: ["https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=700&auto=format&fit=crop&q=80"],
+    features: ["Carbon Fiber Chassis", "2.8K OLED Display", "Core i7 12th Gen", "Backlit Keyboard"]
   },
   {
     id: "laptop-hp-pavilion-15",

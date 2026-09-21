@@ -554,8 +554,8 @@ function renderHomeView(container, state) {
             </div>
             <div class="space-y-1.5">
               ${!inCart ? `
-                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
-                  <span>🛒</span> ADD TO CART
+                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
+                  <span>🛒</span> <span>ADD TO CART</span>
                 </button>
               ` : `
                 <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
@@ -577,6 +577,9 @@ function renderHomeView(container, state) {
                   <span>🛒</span> View Cart
                 </button>
               `}
+              <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
+                <span>🤝</span> Negotiate Price
+              </button>
             </div>
           </div>
         `;
@@ -823,8 +826,8 @@ function renderListCard(p) {
       <!-- Actions Column -->
       <div class="w-full md:w-44 shrink-0 flex flex-col gap-2 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-4">
         ${!inCart ? `
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-3 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
-            <span>🛒</span> ADD TO CART
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-3 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
+            <span>🛒</span> <span>ADD TO CART</span>
           </button>
         ` : `
           <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
@@ -848,7 +851,7 @@ function renderListCard(p) {
         `}
 
         <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
-          <span>💬</span> Negotiate Price
+          <span>🤝</span> Negotiate Price
         </button>
 
         <div class="flex gap-1.5">
@@ -893,8 +896,8 @@ function renderGridCard(p) {
 
       <div class="space-y-2">
         ${!inCart ? `
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5">
-            <span>🛒</span> ADD TO CART
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
+            <span>🛒</span> <span>ADD TO CART</span>
           </button>
         ` : `
           <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
@@ -1056,8 +1059,8 @@ function renderProductView(container, state) {
         </div>
 
         <!-- Price Negotiation Action Button -->
-        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm py-3 rounded-xl transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
-          <span>💬</span> Make an Offer / Negotiate Price
+        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-98 text-white font-black text-sm py-3 rounded-2xl transition shadow-md shadow-amber-500/20 inline-flex items-center justify-center gap-2">
+          <span>🤝</span> <span>Make an Offer / Negotiate Price</span>
         </button>
 
         <!-- Specifications Breakdown Table -->
@@ -1089,13 +1092,13 @@ function renderProductView(container, state) {
                   +
                 </button>
               </div>
-              <button onclick="appState.setView('checkout')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2" title="Continue directly to payment and checkout">
-                <span>⚡</span> Continue to Pay ➔
+              <button onclick="appState.setView('checkout')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-lg shadow-emerald-600/25 inline-flex items-center justify-center gap-2" title="Continue directly to payment and checkout">
+                <span>⚡</span> <span>Continue to Pay ➔</span>
               </button>
             </div>
             <div class="flex gap-3">
-              <button onclick="appState.setView('cart')" class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
-                <span>🛒</span> View Cart Summary
+              <button onclick="appState.setView('cart')" class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold text-xs py-2.5 rounded-xl transition inline-flex items-center justify-center gap-1.5">
+                <span>🛒</span> <span>View Cart Summary</span>
               </button>
               <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
                 ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
@@ -1103,13 +1106,13 @@ function renderProductView(container, state) {
             </div>
           ` : `
             <div class="flex flex-col sm:flex-row gap-3">
-              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
-                <span>🛒</span> ADD TO CART
+              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-sm py-3.5 rounded-2xl transition shadow-lg shadow-blue-500/25 inline-flex items-center justify-center gap-2">
+                <span>🛒</span> <span>ADD TO CART</span>
               </button>
-              <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-black text-sm py-3.5 rounded-2xl transition shadow flex items-center justify-center gap-2">
-                <span>⚡</span> Buy Now
+              <button onclick="if(appState.addToCart('${p.id}', 1)) appState.setView('checkout');" class="flex-1 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-extrabold text-sm py-3.5 rounded-2xl transition shadow inline-flex items-center justify-center gap-2">
+                <span>⚡</span> <span>Buy Now</span>
               </button>
-              <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-xl transition font-bold" title="Toggle Wishlist">
+              <button onclick="handleToggleWishlist(event, '${p.id}')" class="p-3.5 border border-slate-200 hover:bg-slate-50 rounded-2xl transition font-bold" title="Toggle Wishlist">
                 ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 text-base">❤️</span>' : '<span class="text-slate-500 text-base">🤍</span>'}
               </button>
             </div>
@@ -2641,8 +2644,32 @@ function handleProductFilesSelect(event) {
   Array.from(files).forEach(file => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      tempUploadedImages.push(e.target.result);
-      renderProductImagePreviews();
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDim = 800;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.75);
+        tempUploadedImages.push(compressedDataUrl);
+        renderProductImagePreviews();
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
@@ -2704,7 +2731,7 @@ function openAddProductModal() {
         <form onsubmit="handleCreateProductSubmit(event)" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name <span class="text-red-500">*</span></label>
-            <input type="text" id="new-prod-name" placeholder="e.g. Dell XPS 15 9520, Core i7, 32GB RAM, 1TB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <input type="text" id="new-prod-name" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -2720,6 +2747,41 @@ function openAddProductModal() {
             </div>
           </div>
 
+          <!-- Processor & Generation Selection (User Specified Fields) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
+              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <datalist id="processor-list-options">
+                <option value="Intel Core i5">
+                <option value="Intel Core i7">
+                <option value="Intel Core i9">
+                <option value="Intel Core i3">
+                <option value="AMD Ryzen 5">
+                <option value="AMD Ryzen 7">
+                <option value="AMD Ryzen 9">
+                <option value="Apple M1 / M2 / M3">
+                <option value="Intel Xeon">
+              </datalist>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
+              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
+              <datalist id="gen-list-options">
+                <option value="8th Gen">
+                <option value="9th Gen">
+                <option value="10th Gen">
+                <option value="11th Gen">
+                <option value="12th Gen">
+                <option value="13th Gen">
+                <option value="14th Gen">
+                <option value="Apple Silicon">
+                <option value="Zen 3">
+                <option value="Zen 4">
+              </datalist>
+            </div>
+          </div>
+
           <!-- Pricing & Price Negotiation Settings -->
           <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl space-y-2">
             <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
@@ -2730,15 +2792,15 @@ function openAddProductModal() {
             <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Selling Price (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="new-prod-price" placeholder="45000" oninput="autoSuggestMinPrice(this.value)" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+                <input type="number" id="new-prod-price" placeholder="24990" oninput="autoSuggestMinPrice(this.value)" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
               </div>
               <div>
                 <label class="block font-bold text-amber-900 uppercase mb-1 text-[11px]">Negotiate Min Floor (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="new-prod-minprice" placeholder="39000" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
+                <input type="number" id="new-prod-minprice" placeholder="21991" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
               </div>
               <div>
                 <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">MRP / List Price (₹)</label>
-                <input type="number" id="new-prod-origprice" placeholder="89000" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+                <input type="number" id="new-prod-origprice" placeholder="89990" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
               </div>
             </div>
             <p class="text-[10.5px] text-amber-800">
@@ -2748,18 +2810,18 @@ function openAddProductModal() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Quantity <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-stock" value="10" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left / Quantity <span class="text-red-500">*</span></label>
+              <input type="number" id="new-prod-stock" value="5" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty <span class="text-red-500">*</span></label>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
               <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
           </div>
 
           <!-- Multi-Image Local File Upload -->
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <label class="block font-bold text-slate-800 uppercase text-[11px]">Upload Product Images (Local Files) <span class="text-red-500">*</span></label>
+            <label class="block font-bold text-slate-800 uppercase text-[11px]">Product Images (Local File Upload)</label>
             <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
             <div id="product-img-previews">
               <p class="text-slate-400 text-xs italic">Select one or multiple images from your computer.</p>
@@ -2805,16 +2867,25 @@ function handleCreateProductSubmit(event) {
 
   const priceVal = Number(document.getElementById("new-prod-price").value);
   const minPriceVal = Number(document.getElementById("new-prod-minprice").value) || Math.round(priceVal * 0.88);
+  const processorVal = document.getElementById("new-prod-processor")?.value || "Standard Specs";
+  const generationVal = document.getElementById("new-prod-generation")?.value || "";
 
   const newProduct = {
     name: document.getElementById("new-prod-name").value,
     category: document.getElementById("new-prod-category").value,
     brand: document.getElementById("new-prod-brand").value,
+    processor: processorVal,
+    generation: generationVal,
     price: priceVal,
     minPrice: minPriceVal,
     originalPrice: Number(document.getElementById("new-prod-origprice").value) || priceVal,
     stockLeft: Number(document.getElementById("new-prod-stock").value) || 10,
     warranty: document.getElementById("new-prod-warranty").value,
+    specs: {
+      processor: processorVal,
+      generation: generationVal,
+      warranty: document.getElementById("new-prod-warranty").value
+    },
     images: finalImages,
     image: finalImages[0],
     isCrazyDeal: document.getElementById("new-prod-crazy").checked,
@@ -2861,6 +2932,29 @@ function openEditProductModal(prodId) {
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
               <input type="text" id="edit-prod-brand" value="${p.brand || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            </div>
+          </div>
+
+          <!-- Processor & Generation Selection (User Specified Fields) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
+              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <datalist id="processor-list-options">
+                <option value="Intel Core i5">
+                <option value="Intel Core i7">
+                <option value="Intel Core i9">
+                <option value="Intel Core i3">
+                <option value="AMD Ryzen 5">
+                <option value="AMD Ryzen 7">
+                <option value="AMD Ryzen 9">
+                <option value="Apple M1 / M2 / M3">
+                <option value="Intel Xeon">
+              </datalist>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
+              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
             </div>
           </div>
 
@@ -2940,11 +3034,15 @@ function handleEditProductSubmit(event, prodId) {
 
   const priceVal = Number(document.getElementById("edit-prod-price").value);
   const minPriceVal = Number(document.getElementById("edit-prod-minprice").value) || Math.round(priceVal * 0.88);
+  const processorVal = document.getElementById("edit-prod-processor")?.value || "Standard Specs";
+  const generationVal = document.getElementById("edit-prod-generation")?.value || "";
 
   const updatedData = {
     name: document.getElementById("edit-prod-name").value,
     category: document.getElementById("edit-prod-category").value,
     brand: document.getElementById("edit-prod-brand").value,
+    processor: processorVal,
+    generation: generationVal,
     price: priceVal,
     minPrice: minPriceVal,
     originalPrice: Number(document.getElementById("edit-prod-origprice").value),
@@ -2953,7 +3051,11 @@ function handleEditProductSubmit(event, prodId) {
     image: finalImages[0],
     isCrazyDeal: document.getElementById("edit-prod-crazy").checked,
     isNew: document.getElementById("edit-prod-new").checked,
-    specs: { warranty: document.getElementById("edit-prod-warranty").value }
+    specs: {
+      processor: processorVal,
+      generation: generationVal,
+      warranty: document.getElementById("edit-prod-warranty").value
+    }
   };
 
   appState.updateProduct(prodId, updatedData);
