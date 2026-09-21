@@ -28,12 +28,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Initialize view: Always open Home page first on site visit
+  // Initialize view: Check URL hash/params or default to Home
   await appState.syncFromServer();
   const state = appState.state;
-  state.currentView = "home";
+  const hash = (window.location.hash || "").replace("#", "").toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const path = (window.location.pathname || "").toLowerCase();
+
+  if (hash === "admin" || hash === "admin-login" || params.get("admin") === "true" || params.get("view") === "admin" || path === "/admin" || path === "/admin-login") {
+    state.currentView = state.adminUser ? "admin" : "admin-login";
+  } else if (hash && ["catalog", "cart", "service", "wishlist", "profile", "orders"].includes(hash)) {
+    state.currentView = hash;
+  } else {
+    state.currentView = "home";
+  }
+
+  // Keyboard shortcut: Ctrl + Shift + A or Ctrl + Alt + A to access Admin login secretly
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey && e.shiftKey && (e.key === "A" || e.key === "a")) || (e.ctrlKey && e.altKey && (e.key === "A" || e.key === "a"))) {
+      e.preventDefault();
+      appState.setView(appState.state.adminUser ? "admin" : "admin-login");
+    }
+  });
+
+  // Listen to hash changes
+  window.addEventListener("hashchange", () => {
+    const newHash = (window.location.hash || "").replace("#", "").toLowerCase();
+    if (newHash === "admin" || newHash === "admin-login") {
+      appState.setView(appState.state.adminUser ? "admin" : "admin-login");
+    }
+  });
+
   updateHeaderControls(state);
-  renderView("home", state);
+  renderView(state.currentView, state);
   updateComparisonBar(state);
 });
 
@@ -1909,6 +1936,12 @@ function renderAdminLoginView(container, state) {
             Create Authorized Admin Account
           </button>
         </form>
+
+        <div class="text-center pt-2">
+          <button onclick="appState.setView('home')" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5 mx-auto">
+            <span>←</span> Back to Lapro Solutions Store
+          </button>
+        </div>
       </div>
     </div>
   `;
