@@ -2788,6 +2788,94 @@ function renderProductImagePreviews() {
   `;
 }
 
+const SUBCATEGORIES_BY_CATEGORY = {
+  "Laptops": [
+    "Business Laptops",
+    "Consumer Laptops",
+    "Gaming Laptops",
+    "MacBooks",
+    "General"
+  ],
+  "Desktops": [
+    "Mini PCs",
+    "All-in-One Desktops",
+    "Gaming Desktops",
+    "General"
+  ],
+  "Accessories": [
+    "Backpacks & Cases",
+    "Keyboards & Mouse",
+    "Docking Stations",
+    "Laptop Accessories",
+    "General"
+  ],
+  "Peripherals": [
+    "Monitors",
+    "Headphones",
+    "Speakers",
+    "Printers",
+    "General"
+  ],
+  "Storages": [
+    "SSD",
+    "HDD",
+    "External Storage",
+    "General"
+  ],
+  "Networking": [
+    "Routers & Access Points",
+    "Gigabit Switches",
+    "General"
+  ],
+  "Servers & Workstations": [
+    "Tower Servers",
+    "Workstation CPUs",
+    "General"
+  ],
+  "Software's": [
+    "Operating Systems",
+    "Productivity Software",
+    "Security Software",
+    "General"
+  ]
+};
+
+function handleModalCategoryChange(catName, targetSelectId = "new-prod-subcategory") {
+  const select = document.getElementById(targetSelectId);
+  if (!select) return;
+  const list = SUBCATEGORIES_BY_CATEGORY[catName] || ["General"];
+  select.innerHTML = list.map(sub => `<option value="${sub}">${sub}</option>`).join("");
+}
+
+function handleAutoDetectProductMeta(titleVal) {
+  const t = (titleVal || "").toLowerCase();
+  const brandEl = document.getElementById("new-prod-brand");
+  const catEl = document.getElementById("new-prod-category");
+  
+  if (brandEl && (!brandEl.value || brandEl.value === "Lapro")) {
+    if (t.includes("dell")) brandEl.value = "Dell";
+    else if (t.includes("hp") || t.includes("elitebook") || t.includes("probook")) brandEl.value = "HP";
+    else if (t.includes("lenovo") || t.includes("thinkpad") || t.includes("ideapad")) brandEl.value = "Lenovo";
+    else if (t.includes("apple") || t.includes("macbook")) brandEl.value = "Apple";
+    else if (t.includes("asus") || t.includes("rog")) brandEl.value = "ASUS";
+    else if (t.includes("samsung")) brandEl.value = "Samsung";
+  }
+
+  if (catEl) {
+    if (t.includes("laptop") || t.includes("latitude") || t.includes("thinkpad") || t.includes("macbook") || t.includes("notebook") || t.includes("vostro") || t.includes("elitebook") || t.includes("ideapad")) {
+      if (catEl.value !== "Laptops") {
+        catEl.value = "Laptops";
+        handleModalCategoryChange("Laptops", "new-prod-subcategory");
+      }
+    } else if (t.includes("optiplex") || t.includes("desktop") || t.includes("tiny pc") || t.includes("all-in-one") || t.includes("mini pc")) {
+      if (catEl.value !== "Desktops") {
+        catEl.value = "Desktops";
+        handleModalCategoryChange("Desktops", "new-prod-subcategory");
+      }
+    }
+  }
+}
+
 // ======================== ADMIN PRODUCT CRUD MODALS ========================
 function openAddProductModal() {
   const container = document.getElementById("product-modal-container");
@@ -2807,19 +2895,29 @@ function openAddProductModal() {
         <form onsubmit="handleCreateProductSubmit(event)" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name <span class="text-red-500">*</span></label>
-            <input type="text" id="new-prod-name" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="new-prod-category" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
-                ${categories.map(c => `<option value="${c.name}">${c.icon || '📦'} ${c.name}</option>`).join("")}
+              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+                ${categories.map(c => `<option value="${c.name}" ${c.name === 'Laptops' ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
+              <select id="new-prod-subcategory" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+                <option value="Business Laptops">Business Laptops</option>
+                <option value="Consumer Laptops">Consumer Laptops</option>
+                <option value="Gaming Laptops">Gaming Laptops</option>
+                <option value="MacBooks">MacBooks</option>
+                <option value="General">General / All</option>
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo, Apple" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
             </div>
           </div>
 
@@ -2920,6 +3018,7 @@ function handleCreateProductSubmit(event) {
   event.preventDefault();
   const nameEl = document.getElementById("new-prod-name");
   const catEl = document.getElementById("new-prod-category");
+  const subcatEl = document.getElementById("new-prod-subcategory");
   const brandEl = document.getElementById("new-prod-brand");
   const priceEl = document.getElementById("new-prod-price");
   const origPriceEl = document.getElementById("new-prod-origprice");
@@ -2943,15 +3042,26 @@ function handleCreateProductSubmit(event) {
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
   const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
   const generationVal = (genEl ? genEl.value : "").trim() || "";
-  const categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
   const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
   const nameVal = (nameEl ? nameEl.value : "New Product").trim() || "New Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
   const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
 
+  // Auto-normalize category based on title
+  const titleLower = nameVal.toLowerCase();
+  if ((titleLower.includes("laptop") || titleLower.includes("latitude") || titleLower.includes("thinkpad") || titleLower.includes("macbook") || titleLower.includes("notebook") || titleLower.includes("vostro")) && categoryVal === "Desktops") {
+    categoryVal = "Laptops";
+    if (subcategoryVal === "General" || subcategoryVal === "Mini PCs") {
+      subcategoryVal = "Business Laptops";
+    }
+  }
+
   const newProduct = {
     name: nameVal,
     category: categoryVal,
+    subcategory: subcategoryVal,
     brand: brandVal,
     processor: processorVal,
     generation: generationVal,
@@ -2974,7 +3084,7 @@ function handleCreateProductSubmit(event) {
   const created = appState.addProduct(newProduct);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product "${created.name}" added to catalog & saved to database!`, "✅", "success");
+  showToast(`Product "${created.name}" added to ${categoryVal} & saved to database!`, "✅", "success");
 }
 
 function openEditProductModal(prodId) {
@@ -3001,16 +3111,22 @@ function openEditProductModal(prodId) {
             <input type="text" id="edit-prod-name" value="${p.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="edit-prod-category" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
                 ${categories.map(c => `<option value="${c.name}" ${p.category === c.name ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
+              <select id="edit-prod-subcategory" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+                ${(SUBCATEGORIES_BY_CATEGORY[p.category || 'Laptops'] || ['General']).map(sub => `<option value="${sub}" ${(p.subcategory === sub) ? 'selected' : ''}>${sub}</option>`).join("")}
+              </select>
+            </div>
+            <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
             </div>
           </div>
 
@@ -3094,6 +3210,7 @@ function handleEditProductSubmit(event, prodId) {
   event.preventDefault();
   const nameEl = document.getElementById("edit-prod-name");
   const catEl = document.getElementById("edit-prod-category");
+  const subcatEl = document.getElementById("edit-prod-subcategory");
   const brandEl = document.getElementById("edit-prod-brand");
   const priceEl = document.getElementById("edit-prod-price");
   const origPriceEl = document.getElementById("edit-prod-origprice");
@@ -3113,7 +3230,8 @@ function handleEditProductSubmit(event, prodId) {
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
   const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
   const generationVal = (genEl ? genEl.value : "").trim() || "";
-  const categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
   const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
   const nameVal = (nameEl ? nameEl.value : "").trim() || "Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
@@ -3122,6 +3240,7 @@ function handleEditProductSubmit(event, prodId) {
   const updatedData = {
     name: nameVal,
     category: categoryVal,
+    subcategory: subcategoryVal,
     brand: brandVal,
     processor: processorVal,
     generation: generationVal,
@@ -3143,7 +3262,7 @@ function handleEditProductSubmit(event, prodId) {
   appState.updateProduct(prodId, updatedData);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product updated & saved to database!`, "✅", "success");
+  showToast(`Product updated in ${categoryVal} & saved to database!`, "✅", "success");
 }
 
 function handleDeleteProduct(prodId) {
