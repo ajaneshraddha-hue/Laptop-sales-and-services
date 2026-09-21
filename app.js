@@ -626,12 +626,12 @@ function renderHomeView(container, state) {
       <div class="flex justify-between items-center mb-6">
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-blue-600 text-xl font-black">💻</span>
-            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Latest Laptops & In-Stock Hardware</h2>
+            <span class="text-blue-600 text-xl font-black">⚡</span>
+            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Latest In-Stock Arrivals & Workstations</h2>
           </div>
-          <p class="text-xs text-slate-500">Newly added high-performance laptops and workstations ready for same-day delivery</p>
+          <p class="text-xs text-slate-500">Newly added laptops, desktops, and enterprise hardware ready for immediate dispatch</p>
         </div>
-        <button onclick="appState.setView('catalog', { category: 'Laptops', subcategory: 'All' })" class="text-xs font-bold text-blue-600 hover:underline">View All Laptops →</button>
+        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="text-xs font-bold text-blue-600 hover:underline">Explore All Products →</button>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -732,7 +732,9 @@ function renderCatalogView(container, state) {
     }
     // Subcategory filter
     if (filters.subcategory && filters.subcategory !== "All") {
-      if ((p.subcategory || "") !== filters.subcategory) return false;
+      const pSub = (p.subcategory || "").toLowerCase();
+      const fSub = filters.subcategory.toLowerCase();
+      if (pSub !== fSub && pSub !== "general" && pSub !== "all") return false;
     }
     // Brand filter
     if (filters.brand && filters.brand !== "All") {
@@ -763,6 +765,13 @@ function renderCatalogView(container, state) {
     filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
   } else if (filters.sort === "rating") {
     filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else {
+    // Default featured: Custom added products first
+    filtered.sort((a, b) => {
+      const aCustom = (a.id && a.id.startsWith("prod-")) ? 1 : 0;
+      const bCustom = (b.id && b.id.startsWith("prod-")) ? 1 : 0;
+      return bCustom - aCustom;
+    });
   }
 
   const categoryTitle = filters.category === "Crazy Deals" 

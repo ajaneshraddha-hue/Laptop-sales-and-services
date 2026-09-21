@@ -261,23 +261,59 @@ class StateManager {
       const localProducts = this.state.products || [];
       const deletedIds = new Set(this.state.deletedProductIds || []);
 
-      // Filter out any products that were explicitly deleted by admin
+      // Filter out deleted products
       const validServerProducts = serverProducts.filter(p => p && p.id && !deletedIds.has(p.id));
+      const validLocalProducts = localProducts.filter(p => p && p.id && !deletedIds.has(p.id));
 
-      // Combine products starting with server list
-      const productMap = new Map();
-      validServerProducts.forEach(p => productMap.set(p.id, p));
-
-      // Auto-heal: Preserve any local custom-added products if temporarily missing on server
+      // Separate custom-added products (ID starts with "prod-") from default mock products
+      const customProductsMap = new Map();
       let needServerHeal = false;
-      localProducts.forEach(p => {
-        if (p && p.id && !deletedIds.has(p.id) && !productMap.has(p.id)) {
-          productMap.set(p.id, p);
+
+      // Add local custom products first
+      validLocalProducts.forEach(p => {
+        if (p.id.startsWith("prod-")) {
+          customProductsMap.set(p.id, p);
+        }
+      });
+
+      // Add server custom products
+      validServerProducts.forEach(p => {
+        if (p.id.startsWith("prod-")) {
+          if (!customProductsMap.has(p.id)) {
+            customProductsMap.set(p.id, p);
+          }
+        }
+      });
+
+      // Check if any local custom product needs to be uploaded to heal server
+      const serverIdSet = new Set(validServerProducts.map(p => p.id));
+      customProductsMap.forEach((prod, id) => {
+        if (!serverIdSet.has(id)) {
           needServerHeal = true;
         }
       });
 
-      this.state.products = Array.from(productMap.values());
+      // Combine standard/catalog products
+      const standardProductsMap = new Map();
+      validServerProducts.forEach(p => {
+        if (!p.id.startsWith("prod-")) {
+          standardProductsMap.set(p.id, p);
+        }
+      });
+      // Fallback to local standard products if server had none
+      if (standardProductsMap.size === 0) {
+        validLocalProducts.forEach(p => {
+          if (!p.id.startsWith("prod-")) {
+            standardProductsMap.set(p.id, p);
+          }
+        });
+      }
+
+      // Final products array: ALL Custom products FIRST (newest), then standard products
+      this.state.products = [
+        ...Array.from(customProductsMap.values()),
+        ...Array.from(standardProductsMap.values())
+      ];
 
       if (payload.state.categories && payload.state.categories.length > 0) {
         this.state.categories = payload.state.categories;
@@ -344,7 +380,11 @@ class StateManager {
 
   // ======================== PRODUCT INVENTORY MANAGEMENT (ADMIN) ========================
   getProducts() {
-    return this.state.products && this.state.products.length > 0 ? this.state.products : MOCK_PRODUCTS;
+    const prods = (this.state.products && this.state.products.length > 0) ? this.state.products : MOCK_PRODUCTS;
+    // Always return custom-added products (prod- ID) first
+    const custom = prods.filter(p => p && p.id && p.id.startsWith("prod-"));
+    const standard = prods.filter(p => !p || !p.id || !p.id.startsWith("prod-"));
+    return [...custom, ...standard];
   }
 
   getProductById(id) {

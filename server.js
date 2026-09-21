@@ -216,7 +216,12 @@ function mergeSharedState(existingState, incomingState) {
   merged.registeredAdmins = mergeRecords(existingState.registeredAdmins, incomingState.registeredAdmins, admin => admin.email);
   merged.orders = mergeRecords(existingState.orders, incomingState.orders, order => order.id);
   merged.serviceTickets = mergeRecords(existingState.serviceTickets, incomingState.serviceTickets, ticket => ticket.id);
-  merged.products = mergeRecords(existingState.products, incomingState.products, product => product.id);
+  
+  const mergedProds = mergeRecords(existingState.products, incomingState.products, product => product.id);
+  const customProds = mergedProds.filter(p => p && p.id && p.id.startsWith("prod-"));
+  const standardProds = mergedProds.filter(p => !p || !p.id || !p.id.startsWith("prod-"));
+  merged.products = [...customProds, ...standardProds];
+
   merged.notifications = mergeRecords(existingState.notifications, incomingState.notifications, notification => notification.id).slice(-50);
   return merged;
 }
