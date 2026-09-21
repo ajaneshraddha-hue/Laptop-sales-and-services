@@ -62,6 +62,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateHeaderControls(state);
   renderView(state.currentView, state);
   updateComparisonBar(state);
+
+  // Background polling to keep customer portal and admin portal in live sync
+  setInterval(async () => {
+    // Only background sync if user is not actively typing in an input
+    const activeEl = document.activeElement;
+    const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+    if (!isTyping) {
+      await appState.syncFromServer();
+    }
+  }, 10000);
 });
 
 // Update static nav states, badge values, and profile buttons

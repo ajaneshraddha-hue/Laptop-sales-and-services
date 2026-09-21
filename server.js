@@ -1,4 +1,4 @@
-﻿const http = require("http");
+const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
@@ -20,6 +20,146 @@ const MIME_TYPES = {
   ".webp": "image/webp"
 };
 
+let MOCK_PRODUCTS = [];
+try {
+  const pModule = require("./products.js");
+  MOCK_PRODUCTS = pModule.MOCK_PRODUCTS || [];
+} catch (e) {
+  console.warn("Failed to load products.js in server.js:", e);
+}
+
+const INITIAL_SHARED_STATE = {
+  registeredUsers: [
+    {
+      name: "Amit Sharma",
+      email: "amit.sharma@gmail.com",
+      phone: "+91 98450 12345",
+      password: "password123",
+      notificationPreferences: { email: true, sms: true, push: true },
+      addresses: [
+        { id: "addr-1", name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038", tag: "Home", default: true },
+        { id: "addr-3", name: "Amit Sharma (Office)", phone: "+91 98450 12345", line: "Tech Park 4, Marathahalli", city: "Bangalore", state: "Karnataka", pin: "560037", tag: "Office", default: false }
+      ]
+    },
+    {
+      name: "Priya Patel",
+      email: "priya.patel@yahoo.com",
+      phone: "+91 99000 54321",
+      password: "password123",
+      notificationPreferences: { email: true, sms: true, push: true },
+      addresses: [
+        { id: "addr-2", name: "Priya Patel", phone: "+91 99000 54321", line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102", tag: "Home", default: true }
+      ]
+    }
+  ],
+  registeredAdmins: [
+    {
+      name: "Lapro System Administrator",
+      email: "admin@laprosolutions.com",
+      password: "LaproAdminSecure2026!",
+      role: "Super Admin",
+      phone: "+91 7996389264"
+    }
+  ],
+  products: MOCK_PRODUCTS.map(p => ({
+    ...p,
+    minPrice: p.minPrice || Math.round(p.price * 0.88)
+  })),
+  categories: [
+    { id: "cat-1", name: "Desktops", icon: "🖥️", active: true },
+    { id: "cat-2", name: "Laptops", icon: "💻", active: true },
+    { id: "cat-3", name: "Accessories", icon: "🎒", active: true },
+    { id: "cat-4", name: "Peripherals", icon: "🖨️", active: true },
+    { id: "cat-5", name: "Storages", icon: "💾", active: true },
+    { id: "cat-6", name: "Networking", icon: "🌐", active: true },
+    { id: "cat-8", name: "Servers & Workstations", icon: "🖧", active: true },
+    { id: "cat-9", name: "Software's", icon: "💿", active: true }
+  ],
+  orders: [
+    {
+      id: "ORD1001",
+      invoiceId: "INV-2026-001",
+      date: "04 Sep 2026",
+      time: "11:30 AM",
+      customerName: "Shraddha Ajane",
+      customerEmail: "ajaneshraddha@gmail.com",
+      customerPhone: "+91 74839 57801",
+      status: "shipped",
+      paymentMethod: "UPI QR (Instant GPay)",
+      trackingId: "LP7829104421",
+      deliveryPartner: "BlueDart Express",
+      address: { name: "Shraddha Ajane", phone: "+91 74839 57801", line: "Prakruti Layout, Doddathogur, Electronic City Phase 1", city: "Bangalore", state: "Karnataka", pin: "560100" },
+      items: [
+        { id: "deal-dell-latitude-7490", name: "Dell Latitude 7490 Touch (Core i7, 16GB RAM, 512GB SSD)", category: "Laptops", brand: "Dell", price: 24990, quantity: 1, image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=700&auto=format&fit=crop&q=80" }
+      ],
+      totals: { subtotal: 24990, discount: 0, shipping: 0, total: 24990 }
+    },
+    {
+      id: "ORD1002",
+      invoiceId: "INV-2026-002",
+      date: "06 Sep 2026",
+      time: "02:15 PM",
+      customerName: "Amit Sharma",
+      customerEmail: "amit.sharma@gmail.com",
+      customerPhone: "+91 98450 12345",
+      status: "confirmed",
+      paymentMethod: "Credit Card (Visa)",
+      trackingId: "LP9182374490",
+      deliveryPartner: "Delhivery Surface",
+      address: { name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" },
+      items: [
+        { id: "desktop-dell-optiplex-7070", name: "Dell OptiPlex 7070 Micro Tiny PC (Core i5 9th Gen)", category: "Desktops", brand: "Dell", price: 22990, quantity: 1, image: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80" }
+      ],
+      totals: { subtotal: 22990, discount: 0, shipping: 0, total: 22990 }
+    }
+  ],
+  serviceTickets: [
+    {
+      id: "TKT1001",
+      brand: "HP",
+      model: "EliteBook 840",
+      problem: "Broken Keyboard Keys",
+      preferredDate: "Sep 02, 2026",
+      status: "scheduled",
+      serialNo: "HP2002",
+      customerName: "Amit Sharma",
+      customerEmail: "amit.sharma@gmail.com",
+      address: { name: "Amit Sharma", phone: "+91 98450 12345", line: "12, Maple Drive, Indiranagar", city: "Bangalore", state: "Karnataka", pin: "560038" },
+      estimate: {
+        items: [
+          { desc: "Replacement OEM HP Keyboard", amount: 2500 },
+          { desc: "Technician Doorstep Labor Charges", amount: 499 }
+        ],
+        total: 2999
+      },
+      paymentStatus: "pending"
+    },
+    {
+      id: "TKT1002",
+      brand: "Dell",
+      model: "Latitude 7490",
+      problem: "Screen flickering & horizontal lines",
+      preferredDate: "Aug 29, 2026",
+      status: "repair_progress",
+      serialNo: "DEL1001",
+      customerName: "Priya Patel",
+      customerEmail: "priya.patel@yahoo.com",
+      address: { name: "Priya Patel", phone: "+91 99000 54321", line: "Sector 4, HSR Layout", city: "Bangalore", state: "Karnataka", pin: "560102" },
+      estimate: {
+        items: [
+          { desc: "14.0 Inch FHD IPS Touch Replacement Display", amount: 5500 },
+          { desc: "Technician Doorstep Labor Charges", amount: 499 }
+        ],
+        total: 5999
+      },
+      paymentStatus: "paid"
+    }
+  ],
+  notifications: [
+    { id: "notif-1", text: "⚡ Welcome to Lapro Solutions! Genuine hardware & doorstep repair services.", time: "Just now", read: false }
+  ]
+};
+
 function sendJson(res, statusCode, payload) {
   const body = JSON.stringify(payload);
   res.writeHead(statusCode, {
@@ -31,12 +171,23 @@ function sendJson(res, statusCode, payload) {
 
 function readSharedState(callback) {
   fs.readFile(DATA_FILE, "utf8", (err, content) => {
-    if (err && err.code === "ENOENT") return callback(null, null);
+    if (err && err.code === "ENOENT") {
+      writeSharedState(INITIAL_SHARED_STATE, (writeErr) => {
+        if (writeErr) return callback(null, INITIAL_SHARED_STATE);
+        callback(null, INITIAL_SHARED_STATE);
+      });
+      return;
+    }
     if (err) return callback(err);
     try {
-      callback(null, JSON.parse(content));
+      const parsed = JSON.parse(content);
+      if (!parsed || !parsed.products || parsed.products.length === 0) {
+        callback(null, INITIAL_SHARED_STATE);
+      } else {
+        callback(null, parsed);
+      }
     } catch (parseErr) {
-      callback(parseErr);
+      callback(null, INITIAL_SHARED_STATE);
     }
   });
 }

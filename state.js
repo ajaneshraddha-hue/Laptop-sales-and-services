@@ -132,7 +132,7 @@ const DEFAULT_STATE = {
   currentOrder: null,
   activeFilters: { 
     search: "", 
-    category: "Desktops", 
+    category: "All", 
     subcategory: "All",
     brand: "All", 
     price: 200000, 
@@ -210,11 +210,11 @@ class StateManager {
     }
   }
 
-  saveState() {
+  saveLocalOnly() {
     try {
       localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
     } catch (e) {
-      console.warn("Storage quota limit reached, saving with lightweight image optimization...", e);
+      console.warn("Storage quota limit reached in local-only save...", e);
       try {
         const lightweightState = JSON.parse(JSON.stringify(this.state));
         if (lightweightState.products) {
@@ -230,14 +230,18 @@ class StateManager {
         }
         localStorage.setItem(STATE_KEY, JSON.stringify(lightweightState));
       } catch (err2) {
-        console.error("Secondary save failed", err2);
+        console.error("Secondary local save failed", err2);
       }
     }
-    this.syncToServer();
+  }
+
+  saveState(replaceServer = false) {
+    this.saveLocalOnly();
+    this.syncToServer(replaceServer);
     document.dispatchEvent(new CustomEvent("statechanged", { detail: this.state }));
   }
 
-  async syncToServer() {
+  async syncToServer(replace = false) {
     try {
       const sharedState = {
         registeredUsers: this.state.registeredUsers,
@@ -251,7 +255,7 @@ class StateManager {
       await fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ state: sharedState })
+        body: JSON.stringify({ state: sharedState, replaceState: replace })
       });
     } catch (error) {
       console.warn("Shared state unavailable; browser storage remains active.", error);
@@ -264,24 +268,35 @@ class StateManager {
       if (!response.ok) return false;
       const payload = await response.json();
       if (!payload.state) {
-        await this.syncToServer();
+        await this.syncToServer(true);
         return false;
       }
-      const localSession = {
-        currentUser: this.state.currentUser,
-        adminUser: this.state.adminUser,
-        cart: this.state.cart,
-        wishlist: this.state.wishlist,
-        compareList: this.state.compareList,
-        currentView: this.state.currentView,
-        currentProduct: this.state.currentProduct,
-        currentTicket: this.state.currentTicket,
-        currentOrder: this.state.currentOrder,
-        activeFilters: this.state.activeFilters,
-        pendingOrderPayment: this.state.pendingOrderPayment
-      };
-      this.state = { ...this.state, ...payload.state, ...localSession };
-      localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
+      
+      const serverProducts = payload.state.products || [];
+      if (serverProducts.length > 0) {
+        this.state.products = serverProducts;
+      }
+      if (payload.state.categories && payload.state.categories.length > 0) {
+        this.state.categories = payload.state.categories;
+      }
+      if (payload.state.registeredUsers) {
+        this.state.registeredUsers = payload.state.registeredUsers;
+      }
+      if (payload.state.registeredAdmins) {
+        this.state.registeredAdmins = payload.state.registeredAdmins;
+      }
+      if (payload.state.orders) {
+        this.state.orders = payload.state.orders;
+      }
+      if (payload.state.serviceTickets) {
+        this.state.serviceTickets = payload.state.serviceTickets;
+      }
+      if (payload.state.notifications) {
+        this.state.notifications = payload.state.notifications;
+      }
+
+      this.saveLocalOnly();
+      document.dispatchEvent(new CustomEvent("statechanged", { detail: this.state }));
       return true;
     } catch (error) {
       console.warn("Shared state unavailable; using browser storage.", error);
@@ -391,7 +406,7 @@ class StateManager {
 
     this.state.products.unshift(newProduct);
     this.addNotification(`Product "${newProduct.name}" added to inventory.`);
-    this.saveState();
+    this.saveState(true);
     return newProduct;
   }
 
@@ -437,7 +452,7 @@ class StateManager {
       };
 
       this.addNotification(`Product "${this.state.products[idx].name}" updated.`);
-      this.saveState();
+      this.saveState(true);
       return true;
     }
     return false;
@@ -450,7 +465,7 @@ class StateManager {
     // Also remove from cart if present
     this.state.cart = this.state.cart.filter(item => item.id !== id);
     this.addNotification(`Product "${name}" deleted from catalog.`);
-    this.saveState();
+    this.saveState(true);
   }
 
   // ======================== CATEGORY CRUD (ADMIN) ========================
@@ -468,7 +483,7 @@ class StateManager {
     };
     this.state.categories.push(newCat);
     this.addNotification(`Category "${trimmed}" added.`);
-    this.saveState();
+    this.saveState(true);
     return { success: true, category: newCat };
   }
 
@@ -487,7 +502,7 @@ class StateManager {
     });
 
     this.addNotification(`Category "${oldName}" renamed to "${cat.name}".`);
-    this.saveState();
+    this.saveState(true);
     return { success: true };
   }
 
@@ -496,7 +511,7 @@ class StateManager {
     if (!cat) return { success: false, message: "Category not found." };
     this.state.categories = this.state.categories.filter(c => c.id !== cat.id && c.name !== cat.name);
     this.addNotification(`Category "${cat.name}" deleted.`);
-    this.saveState();
+    this.saveState(true);
     return { success: true };
   }
 

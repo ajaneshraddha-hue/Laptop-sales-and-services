@@ -531,3 +531,7 @@ const MOCK_REVIEWS = {
     { user: "Vikram N. (Designer)", rating: 5, date: "Aug 30, 2026", comment: "Unbelievable deal at ₹58,990. Battery health is 100% with only 2 cycle counts!" }
   ]
 };
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { MOCK_PRODUCTS, ALL_PRODUCTS, MOCK_REVIEWS };
+}
