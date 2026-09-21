@@ -364,6 +364,11 @@ class StateManager {
     if (params.subcategory) {
       this.state.activeFilters.subcategory = params.subcategory;
     }
+    if (params.brand) {
+      this.state.activeFilters.brand = params.brand;
+      if (!params.category) this.state.activeFilters.category = "All";
+      if (!params.subcategory) this.state.activeFilters.subcategory = "All";
+    }
     if (params.tab) {
       this.state.profileActiveTab = params.tab;
     }
@@ -374,6 +379,15 @@ class StateManager {
   setSubcategoryFilter(category, subcategory) {
     this.state.activeFilters.category = category;
     this.state.activeFilters.subcategory = subcategory;
+    this.state.activeFilters.brand = "All";
+    this.state.activeFilters.search = "";
+    this.setView("catalog");
+  }
+
+  setBrandFilter(brand) {
+    this.state.activeFilters.brand = brand;
+    this.state.activeFilters.category = "All";
+    this.state.activeFilters.subcategory = "All";
     this.state.activeFilters.search = "";
     this.setView("catalog");
   }

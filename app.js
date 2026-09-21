@@ -550,6 +550,43 @@ function renderHomeView(container, state) {
       </div>
     </div>
 
+    <!-- Shop by Top Enterprise Brands -->
+    <div class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-blue-600 mb-1">Ecosystems & Manufacturers</p>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Shop by Top Enterprise Brands</h2>
+          <p class="text-xs text-slate-500">Official laptops, desktops, workstations, and peripherals from trusted brands</p>
+        </div>
+        <button onclick="appState.setBrandFilter('All')" class="text-xs font-bold text-blue-600 hover:underline">All Brands →</button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        ${[
+          { name: "Dell", logo: "🖥️", tag: "OptiPlex & Latitude", bg: "hover:border-blue-500 hover:bg-blue-50/50" },
+          { name: "HP", logo: "💻", tag: "EliteBook & ProDesk", bg: "hover:border-cyan-500 hover:bg-cyan-50/50" },
+          { name: "Lenovo", logo: "💼", tag: "ThinkPad & ThinkVision", bg: "hover:border-red-500 hover:bg-red-50/50" },
+          { name: "Apple", logo: "🍎", tag: "MacBook Air & Pro", bg: "hover:border-slate-800 hover:bg-slate-50" },
+          { name: "Samsung", logo: "📱", tag: "Displays & NVMe SSDs", bg: "hover:border-indigo-500 hover:bg-indigo-50/50" },
+          { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-emerald-500 hover:bg-emerald-50/50" }
+        ].map(b => {
+          const count = products.filter(p => (p.brand || "").toLowerCase() === b.name.toLowerCase()).length;
+          return `
+            <div onclick="appState.setBrandFilter('${b.name}')" class="bg-white border border-slate-200 rounded-2xl p-4 cursor-pointer transition shadow-sm hover:shadow-md flex flex-col items-center text-center group ${b.bg}">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition duration-300">
+                ${b.logo}
+              </div>
+              <span class="font-extrabold text-sm text-slate-900 group-hover:text-blue-600 transition">${b.name}</span>
+              <span class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${b.tag}</span>
+              <span class="mt-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                ${count} in stock
+              </span>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+
     <!-- Crazy Deals Section -->
     <div class="mb-12">
       <div class="flex justify-between items-center mb-6">
@@ -774,20 +811,37 @@ function renderCatalogView(container, state) {
     });
   }
 
-  const categoryTitle = filters.category === "Crazy Deals" 
+  // Dynamic brands from active product inventory
+  const uniqueBrands = Array.from(new Set(allProducts.map(p => (p.brand || "").trim()).filter(Boolean)));
+  const standardBrandList = ["Dell", "HP", "Lenovo", "Apple", "ASUS", "Samsung", "Kingston", "TP-Link", "Microsoft", "Logitech"];
+  const allBrandSet = new Set([...standardBrandList, ...uniqueBrands]);
+  const availableBrands = ["All", ...Array.from(allBrandSet)];
+
+  let categoryTitle = filters.category === "Crazy Deals" 
     ? "Crazy Deals & Flash Offers" 
     : (filters.category !== "All" ? filters.category : "All Products");
 
+  if (filters.brand && filters.brand !== "All") {
+    categoryTitle = filters.category !== "All" 
+      ? `${filters.brand} ${filters.category}` 
+      : `${filters.brand} Products & Hardware`;
+  }
+
   const subcategoryTitle = filters.subcategory && filters.subcategory !== "All" ? ` › ${filters.subcategory}` : "";
+
+  let breadcrumbCategory = categoryTitle;
+  if (filters.brand && filters.brand !== "All" && filters.category === "All") {
+    breadcrumbCategory = `Brands / ${filters.brand}`;
+  }
 
   let html = `
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-4 select-none">
       <span onclick="appState.setView('home')" class="hover:text-blue-600 cursor-pointer">Home</span>
       <span>/</span>
-      <span onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="hover:text-blue-600 cursor-pointer">Products</span>
+      <span onclick="appState.setView('catalog', { category: 'All', subcategory: 'All', brand: 'All' })" class="hover:text-blue-600 cursor-pointer">Products</span>
       <span>/</span>
-      <span class="text-slate-800 font-bold">${categoryTitle}${subcategoryTitle}</span>
+      <span class="text-slate-800 font-bold">${breadcrumbCategory}${subcategoryTitle}</span>
     </div>
 
     <div class="catalog-layout">
@@ -815,14 +869,24 @@ function renderCatalogView(container, state) {
 
           <!-- Brand Filter Accordion -->
           <div class="py-3 border-b border-slate-100">
-            <span class="text-xs font-bold text-slate-800 block mb-2">Brand</span>
-            <div class="space-y-1.5 max-h-36 overflow-y-auto text-xs">
-              ${["All", "Dell", "HP", "Lenovo", "Apple", "ASUS", "Kingston", "Samsung", "TP-Link", "Microsoft", "Logitech"].map(brand => `
-                <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
-                  <input type="radio" name="brand_filter" value="${brand}" ${filters.brand === brand ? 'checked' : ''} onchange="handleBrandFilter('${brand}')" class="text-blue-600">
-                  <span>${brand}</span>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-slate-800 block">Brand Ecosystem</span>
+              ${filters.brand && filters.brand !== 'All' ? `<button onclick="handleBrandFilter('All')" class="text-[10px] text-blue-600 font-semibold hover:underline">Clear</button>` : ''}
+            </div>
+            <div class="space-y-1 max-h-48 overflow-y-auto text-xs pr-1">
+              ${availableBrands.map(brand => {
+                const count = brand === "All" ? allProducts.length : allProducts.filter(p => (p.brand || "").toLowerCase() === brand.toLowerCase()).length;
+                if (brand !== "All" && count === 0) return "";
+                return `
+                <label class="flex items-center justify-between gap-2 cursor-pointer text-slate-600 hover:text-slate-900 py-1 px-1 rounded-lg hover:bg-slate-50 transition">
+                  <span class="flex items-center gap-2">
+                    <input type="radio" name="brand_filter" value="${brand}" ${filters.brand === brand ? 'checked' : ''} onchange="handleBrandFilter('${brand}')" class="text-blue-600">
+                    <span class="font-medium ${filters.brand === brand ? 'text-blue-600 font-bold' : ''}">${brand}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">(${count})</span>
                 </label>
-              `).join("")}
+              `;
+              }).join("")}
             </div>
           </div>
 
@@ -2290,6 +2354,21 @@ function renderAdminTabContent(tab, state) {
           </button>
         </div>
 
+        <!-- Filter & Search Toolbar -->
+        <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center gap-3 text-xs">
+          <div class="flex-1 min-w-[200px]">
+            <input type="text" id="admin-prod-search" placeholder="Search by product name, specs, ID..." oninput="handleAdminProductFilter()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-600 text-xs font-medium">
+          </div>
+          <select id="admin-prod-brand-filter" onchange="handleAdminProductFilter()" class="bg-white border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-700 focus:outline-none focus:border-blue-600 text-xs">
+            <option value="All">🏷️ All Brands</option>
+            ${Array.from(new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))).map(b => `<option value="${b}">${b}</option>`).join("")}
+          </select>
+          <select id="admin-prod-cat-filter" onchange="handleAdminProductFilter()" class="bg-white border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-700 focus:outline-none focus:border-blue-600 text-xs">
+            <option value="All">📦 All Categories</option>
+            ${Array.from(new Set(products.map(p => (p.category || '').trim()).filter(Boolean))).map(c => `<option value="${c}">${c}</option>`).join("")}
+          </select>
+        </div>
+
         <div class="overflow-x-auto px-4 pb-4">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
@@ -2303,7 +2382,7 @@ function renderAdminTabContent(tab, state) {
                 <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody id="admin-products-tbody" class="divide-y divide-slate-100">
               ${products.map(p => `
                 <tr class="hover:bg-slate-50 transition">
                   <td class="p-3 flex items-center gap-3">
@@ -3082,6 +3161,57 @@ function handleDeleteProduct(prodId) {
       showToast("Product deleted successfully.", "🗑️", "info");
     }
   });
+}
+
+function handleAdminProductFilter() {
+  const search = (document.getElementById("admin-prod-search")?.value || "").toLowerCase().trim();
+  const brand = document.getElementById("admin-prod-brand-filter")?.value || "All";
+  const cat = document.getElementById("admin-prod-cat-filter")?.value || "All";
+
+  const products = appState.getProducts();
+  const filtered = products.filter(p => {
+    if (search) {
+      const matchName = (p.name || "").toLowerCase().includes(search);
+      const matchId = (p.id || "").toLowerCase().includes(search);
+      const matchBrand = (p.brand || "").toLowerCase().includes(search);
+      const matchSpecs = JSON.stringify(p.specs || {}).toLowerCase().includes(search);
+      if (!matchName && !matchId && !matchBrand && !matchSpecs) return false;
+    }
+    if (brand !== "All" && (p.brand || "").toLowerCase() !== brand.toLowerCase()) return false;
+    if (cat !== "All" && (p.category || "").toLowerCase() !== cat.toLowerCase()) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById("admin-products-tbody");
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-semibold">No products found matching the selected brand/category filters.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr class="hover:bg-slate-50 transition">
+      <td class="p-3 flex items-center gap-3">
+        <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
+        <div class="min-w-0">
+          <p class="font-bold text-slate-900 line-clamp-1">${p.name}</p>
+          <span class="text-[10px] text-slate-400 font-mono">${p.id}</span>
+        </div>
+      </td>
+      <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
+      <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
+      <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
+      <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
+      <td class="p-3">
+        ${p.isCrazyDeal ? `<span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Crazy Deal</span>` : `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Standard</span>`}
+      </td>
+      <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+        <button onclick="openEditProductModal('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">✏️ Edit</button>
+        <button onclick="handleDeleteProduct('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">🗑️ Delete</button>
+      </td>
+    </tr>
+  `).join("");
 }
 
 function closeProductModal() {
