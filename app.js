@@ -1880,20 +1880,15 @@ function renderAdminLoginView(container, state) {
         <form id="admin-form-login" onsubmit="handleAdminLoginSubmit(event)" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Private Admin Email</label>
-            <input type="email" id="admin-login-email" value="admin@laprosolutions.com" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 font-mono">
+            <input type="email" id="admin-login-email" placeholder="admin@laprosolutions.com" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 font-mono">
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Private Master Password</label>
-            <input type="password" id="admin-login-pass" value="LaproAdminSecure2026!" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500">
+            <input type="password" id="admin-login-pass" placeholder="••••••••••••" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500">
           </div>
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition shadow-lg shadow-blue-600/30">
             Authenticate & Open Dashboard
           </button>
-          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-[11px] text-slate-400">
-            <span class="text-cyan-400 font-bold block mb-0.5">Default Admin Credentials:</span>
-            <span>Email: <strong class="text-white">admin@laprosolutions.com</strong></span><br>
-            <span>Password: <strong class="text-white">LaproAdminSecure2026!</strong></span>
-          </div>
         </form>
 
         <!-- Admin Register Form -->
@@ -1912,7 +1907,7 @@ function renderAdminLoginView(container, state) {
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Master Admin Secret Key</label>
-            <input type="password" id="admin-reg-secret" value="LAPRO_ADMIN_SECRET_2026" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500 font-mono">
+            <input type="password" id="admin-reg-secret" placeholder="Enter master admin secret key" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500 font-mono">
           </div>
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition shadow-lg">
             Create Authorized Admin Account
