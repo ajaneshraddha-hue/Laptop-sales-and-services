@@ -234,14 +234,16 @@ function sharedRecordsOnly(state) {
 }
 
 const server = http.createServer((req, res) => {
+  // API: Get full shared state
   if (req.url === "/api/state" && req.method === "GET") {
     readSharedState((err, state) => {
       if (err) return sendJson(res, 500, { error: "Unable to read shared state" });
-      sendJson(res, 200, { state });
+      sendJson(res, 200, { state: state || INITIAL_SHARED_STATE });
     });
     return;
   }
 
+  // API: Save full shared state
   if (req.url === "/api/state" && req.method === "PUT") {
     let body = "";
     req.on("data", chunk => {
@@ -253,11 +255,81 @@ const server = http.createServer((req, res) => {
         const payload = JSON.parse(body);
         if (!payload || typeof payload.state !== "object") return sendJson(res, 400, { error: "Invalid state payload" });
         readSharedState((readErr, existingState) => {
-          if (readErr) return sendJson(res, 500, { error: "Unable to read shared state" });
-          const nextState = payload.replaceState ? sharedRecordsOnly(payload.state) : mergeSharedState(existingState, sharedRecordsOnly(payload.state));
+          const baseState = (!readErr && existingState) ? existingState : INITIAL_SHARED_STATE;
+          const nextState = payload.replaceState ? sharedRecordsOnly(payload.state) : mergeSharedState(baseState, sharedRecordsOnly(payload.state));
           writeSharedState(nextState, (err) => {
             if (err) return sendJson(res, 500, { error: "Unable to save shared state" });
-            sendJson(res, 200, { saved: true });
+            sendJson(res, 200, { saved: true, productsCount: nextState.products.length });
+          });
+        });
+      } catch (err) {
+        sendJson(res, 400, { error: "Invalid JSON payload" });
+      }
+    });
+    return;
+  }
+
+  // API: Get products
+  if (req.url === "/api/products" && req.method === "GET") {
+    readSharedState((err, state) => {
+      const currentState = (!err && state) ? state : INITIAL_SHARED_STATE;
+      sendJson(res, 200, { products: currentState.products || [] });
+    });
+    return;
+  }
+
+  // API: Add new product directly
+  if (req.url === "/api/products" && req.method === "POST") {
+    let body = "";
+    req.on("data", chunk => {
+      body += chunk;
+      if (body.length > 25 * 1024 * 1024) req.destroy();
+    });
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        if (!payload || !payload.product || !payload.product.name) {
+          return sendJson(res, 400, { error: "Invalid product data" });
+        }
+        readSharedState((readErr, existingState) => {
+          const baseState = (!readErr && existingState) ? existingState : JSON.parse(JSON.stringify(INITIAL_SHARED_STATE));
+          const existingProds = baseState.products || [];
+          // Prepend product or replace if already exists
+          const updatedProds = [payload.product, ...existingProds.filter(p => p.id !== payload.product.id)];
+          baseState.products = updatedProds;
+          writeSharedState(baseState, (err) => {
+            if (err) return sendJson(res, 500, { error: "Unable to save product" });
+            sendJson(res, 200, { success: true, product: payload.product, total: updatedProds.length });
+          });
+        });
+      } catch (err) {
+        sendJson(res, 400, { error: "Invalid JSON payload" });
+      }
+    });
+    return;
+  }
+
+  // API: Delete product directly
+  if (req.url.startsWith("/api/products") && req.method === "DELETE") {
+    let body = "";
+    req.on("data", chunk => { body += chunk; });
+    req.on("end", () => {
+      try {
+        const urlParams = new URL(req.url, `http://${req.headers.host}`);
+        let prodId = urlParams.searchParams.get("id");
+        if (!prodId && body) {
+          const parsed = JSON.parse(body);
+          prodId = parsed.id;
+        }
+        if (!prodId) {
+          return sendJson(res, 400, { error: "Product ID required" });
+        }
+        readSharedState((readErr, existingState) => {
+          const baseState = (!readErr && existingState) ? existingState : JSON.parse(JSON.stringify(INITIAL_SHARED_STATE));
+          baseState.products = (baseState.products || []).filter(p => p.id !== prodId);
+          writeSharedState(baseState, (err) => {
+            if (err) return sendJson(res, 500, { error: "Unable to delete product" });
+            sendJson(res, 200, { success: true, deletedId: prodId, total: baseState.products.length });
           });
         });
       } catch (err) {

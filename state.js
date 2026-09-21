@@ -13,10 +13,7 @@ const DEFAULT_STATE = {
       phone: "+91 7996389264"
     }
   ],
-  products: MOCK_PRODUCTS.map(p => ({
-    ...p,
-    minPrice: p.minPrice || Math.round(p.price * 0.88)
-  })),
+  products: MOCK_PRODUCTS.map(p => ({ ...p })),
   cart: [],
   registeredUsers: [
     {
@@ -178,16 +175,7 @@ class StateManager {
     try {
       const parsed = JSON.parse(raw);
       if (!parsed.products || parsed.products.length === 0) {
-        parsed.products = MOCK_PRODUCTS.map(p => ({
-          ...p,
-          minPrice: p.minPrice || Math.round(p.price * 0.88)
-        }));
-      } else {
-        // ensure minPrice exists on all products
-        parsed.products = parsed.products.map(p => ({
-          ...p,
-          minPrice: p.minPrice || Math.round(p.price * 0.88)
-        }));
+        parsed.products = MOCK_PRODUCTS.map(p => ({ ...p }));
       }
       if (!parsed.categories || parsed.categories.length === 0) {
         parsed.categories = DEFAULT_STATE.categories;
@@ -267,15 +255,30 @@ class StateManager {
       const response = await fetch("/api/state", { cache: "no-store" });
       if (!response.ok) return false;
       const payload = await response.json();
-      if (!payload.state) {
-        await this.syncToServer(true);
-        return false;
-      }
+      if (!payload || !payload.state) return false;
       
       const serverProducts = payload.state.products || [];
-      if (serverProducts.length > 0) {
-        this.state.products = serverProducts;
-      }
+      const localProducts = this.state.products || [];
+      const deletedIds = new Set(this.state.deletedProductIds || []);
+
+      // Filter out any products that were explicitly deleted by admin
+      const validServerProducts = serverProducts.filter(p => p && p.id && !deletedIds.has(p.id));
+
+      // Combine products starting with server list
+      const productMap = new Map();
+      validServerProducts.forEach(p => productMap.set(p.id, p));
+
+      // Auto-heal: Preserve any local custom-added products if temporarily missing on server
+      let needServerHeal = false;
+      localProducts.forEach(p => {
+        if (p && p.id && !deletedIds.has(p.id) && !productMap.has(p.id)) {
+          productMap.set(p.id, p);
+          needServerHeal = true;
+        }
+      });
+
+      this.state.products = Array.from(productMap.values());
+
       if (payload.state.categories && payload.state.categories.length > 0) {
         this.state.categories = payload.state.categories;
       }
@@ -296,6 +299,9 @@ class StateManager {
       }
 
       this.saveLocalOnly();
+      if (needServerHeal) {
+        this.syncToServer(true);
+      }
       document.dispatchEvent(new CustomEvent("statechanged", { detail: this.state }));
       return true;
     } catch (error) {
@@ -353,7 +359,11 @@ class StateManager {
     const newId = "prod-" + Date.now();
     const dealPrice = Number(productData.price) || 0;
     const mrpPrice = Number(productData.originalPrice) || dealPrice;
-    const minPrice = Number(productData.minPrice) || Math.round(dealPrice * 0.88);
+
+    // Remove from deleted list if present
+    if (this.state.deletedProductIds) {
+      this.state.deletedProductIds = this.state.deletedProductIds.filter(id => id !== newId);
+    }
 
     // Multi-image array support from local file uploads or text URLs
     let images = [];
@@ -367,6 +377,8 @@ class StateManager {
 
     const procVal = productData.processor || (productData.specs && productData.specs.processor) || "N/A";
     const genVal = productData.generation || (productData.specs && productData.specs.generation) || "";
+    const osVal = productData.os || (productData.specs && productData.specs.os) || "Windows 11 Pro 64-Bit";
+    const screenVal = productData.screenSize || (productData.specs && productData.specs.screenSize) || "14.0 - 15.6 Inch";
 
     const newProduct = {
       id: newId,
@@ -379,7 +391,6 @@ class StateManager {
       isNew: Boolean(productData.isNew !== undefined ? productData.isNew : true),
       price: dealPrice,
       originalPrice: mrpPrice,
-      minPrice: minPrice, // Minimum acceptable price for customer negotiation
       discount: mrpPrice > dealPrice 
         ? Math.round(((mrpPrice - dealPrice) / mrpPrice) * 100) + "% OFF"
         : "0% OFF",
@@ -389,14 +400,16 @@ class StateManager {
       claimedPercent: Math.floor(Math.random() * 30) + 10,
       rating: Number(productData.rating) || 5.0,
       reviewsCount: 1,
-      screenSize: productData.screenSize || "N/A",
+      screenSize: screenVal,
       processor: procVal,
       generation: genVal,
-      os: productData.os || "N/A",
+      os: osVal,
       specs: {
         ...(productData.specs || {}),
         processor: procVal,
         generation: genVal,
+        os: osVal,
+        screenSize: screenVal,
         warranty: productData.warranty || (productData.specs && productData.specs.warranty) || "1 Year Doorstep Warranty",
         features: productData.featuresSummary || "Certified Genuine Hardware"
       },
@@ -407,6 +420,14 @@ class StateManager {
     this.state.products.unshift(newProduct);
     this.addNotification(`Product "${newProduct.name}" added to inventory.`);
     this.saveState(true);
+
+    // Also send direct REST POST to server to guarantee immediate disk save
+    fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product: newProduct })
+    }).catch(err => console.warn("Direct product POST notification warning:", err));
+
     return newProduct;
   }
 
@@ -416,7 +437,6 @@ class StateManager {
       const orig = this.state.products[idx];
       const price = updatedData.price !== undefined ? Number(updatedData.price) : orig.price;
       const originalPrice = updatedData.originalPrice !== undefined ? Number(updatedData.originalPrice) : orig.originalPrice;
-      const minPrice = updatedData.minPrice !== undefined ? Number(updatedData.minPrice) : (orig.minPrice || Math.round(price * 0.88));
       
       let images = orig.images;
       if (Array.isArray(updatedData.images) && updatedData.images.length > 0) {
@@ -427,22 +447,27 @@ class StateManager {
 
       const proc = updatedData.processor !== undefined ? updatedData.processor : (orig.processor || (orig.specs && orig.specs.processor) || "N/A");
       const gen = updatedData.generation !== undefined ? updatedData.generation : (orig.generation || (orig.specs && orig.specs.generation) || "");
+      const osVal = updatedData.os !== undefined ? updatedData.os : (orig.os || "Windows 11 Pro 64-Bit");
+      const screenVal = updatedData.screenSize !== undefined ? updatedData.screenSize : (orig.screenSize || "14.0 - 15.6 Inch");
 
       this.state.products[idx] = {
         ...orig,
         ...updatedData,
         processor: proc,
         generation: gen,
+        os: osVal,
+        screenSize: screenVal,
         specs: {
           ...(orig.specs || {}),
           ...(updatedData.specs || {}),
           processor: proc,
           generation: gen,
+          os: osVal,
+          screenSize: screenVal,
           warranty: (updatedData.specs && updatedData.specs.warranty) || updatedData.warranty || (orig.specs && orig.specs.warranty) || orig.warranty || "1 Year Warranty"
         },
         price: price,
         originalPrice: originalPrice,
-        minPrice: minPrice,
         images: images,
         discount: originalPrice > price 
           ? Math.round(((originalPrice - price) / originalPrice) * 100) + "% OFF"
@@ -453,6 +478,14 @@ class StateManager {
 
       this.addNotification(`Product "${this.state.products[idx].name}" updated.`);
       this.saveState(true);
+
+      // Also send direct REST POST to overwrite product on server
+      fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product: this.state.products[idx] })
+      }).catch(err => console.warn("Direct product update notification warning:", err));
+
       return true;
     }
     return false;
@@ -461,11 +494,22 @@ class StateManager {
   deleteProduct(id) {
     const prod = this.state.products.find(p => p.id === id);
     const name = prod ? prod.name : id;
+
+    if (!this.state.deletedProductIds) this.state.deletedProductIds = [];
+    if (!this.state.deletedProductIds.includes(id)) {
+      this.state.deletedProductIds.push(id);
+    }
+
     this.state.products = this.state.products.filter(p => p.id !== id);
     // Also remove from cart if present
     this.state.cart = this.state.cart.filter(item => item.id !== id);
     this.addNotification(`Product "${name}" deleted from catalog.`);
     this.saveState(true);
+
+    // Also send direct REST DELETE to server
+    fetch(`/api/products?id=${encodeURIComponent(id)}`, {
+      method: "DELETE"
+    }).catch(err => console.warn("Direct product DELETE warning:", err));
   }
 
   // ======================== CATEGORY CRUD (ADMIN) ========================
@@ -799,7 +843,7 @@ class StateManager {
     this.saveState();
   }
 
-  // ======================== CART, WISHLIST & PRICE NEGOTIATION ========================
+  // ======================== CART & WISHLIST ========================
   addToCart(productId, qty = 1, customPrice = null) {
     // ENFORCE AUTHENTICATION GATE
     if (!this.state.currentUser && !this.state.adminUser) {
@@ -819,59 +863,18 @@ class StateManager {
       existing.quantity += qty;
       if (customPrice !== null) {
         existing.price = finalPrice;
-        existing.isNegotiated = true;
       }
     } else {
       this.state.cart.push({
         id: productId,
         quantity: qty,
         price: finalPrice,
-        originalPrice: prod.price,
-        isNegotiated: customPrice !== null
+        originalPrice: prod.price
       });
     }
     this.addNotification(`${prod.name} added to cart!`);
     this.saveState();
     return true;
-  }
-
-  // PRICE NEGOTIATION / MAKE AN OFFER
-  negotiatePrice(productId, offerAmount) {
-    // ENFORCE AUTHENTICATION GATE
-    if (!this.state.currentUser && !this.state.adminUser) {
-      if (typeof openAuthModal === 'function') {
-        openAuthModal('login');
-      }
-      return { success: false, needsLogin: true, message: "Please sign in or register to submit a price offer." };
-    }
-
-    const prod = this.getProductById(productId);
-    if (!prod) return { success: false, message: "Product not found." };
-
-    const offer = Number(offerAmount);
-    if (!offer || offer <= 0) {
-      return { success: false, message: "Please enter a valid offer amount in Rupees." };
-    }
-
-    // Minimum acceptable threshold set by Admin
-    const minAcceptable = prod.minPrice || Math.round(prod.price * 0.88);
-
-    if (offer >= minAcceptable) {
-      // Offer Accepted!
-      this.addToCart(productId, 1, offer);
-      return {
-        success: true,
-        acceptedPrice: offer,
-        savings: prod.price - offer,
-        message: `🎉 Offer Accepted! Your special price of ₹ ${offer.toLocaleString('en-IN')} has been approved and added to your cart.`
-      };
-    } else {
-      // Offer Declined: Below seller's minimum reserve price
-      return {
-        success: false,
-        message: `⚠️ Counter Offer of ₹ ${offer.toLocaleString('en-IN')} was declined. The minimum price threshold for this product is higher. Please submit a higher counter-offer.`
-      };
-    }
   }
 
   updateCartQty(productId, qty) {
@@ -1015,7 +1018,6 @@ class StateManager {
         brand: prod ? prod.brand : "Lapro",
         price: item.price,
         quantity: item.quantity,
-        isNegotiated: Boolean(item.isNegotiated),
         discount: prod ? prod.discount : "0% OFF",
         image: prod && prod.images ? prod.images[0] : ""
       };

@@ -614,9 +614,76 @@ function renderHomeView(container, state) {
                   <span>🛒</span> View Cart
                 </button>
               `}
-              <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
-                <span>🤝</span> Negotiate Price
-              </button>
+            </div>
+          </div>
+        `;
+        }).join("")}
+      </div>
+    </div>
+
+    <!-- Latest Arrivals & In-Stock Hardware Section -->
+    <div class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-blue-600 text-xl font-black">💻</span>
+            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Latest Laptops & In-Stock Hardware</h2>
+          </div>
+          <p class="text-xs text-slate-500">Newly added high-performance laptops and workstations ready for same-day delivery</p>
+        </div>
+        <button onclick="appState.setView('catalog', { category: 'Laptops', subcategory: 'All' })" class="text-xs font-bold text-blue-600 hover:underline">View All Laptops →</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        ${products.slice(0, 8).map(p => {
+          const inCart = (appState.state.cart || []).some(item => item.id === p.id);
+          const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
+          const pImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
+          return `
+          <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
+            <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
+              ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
+            </button>
+            <div class="relative mb-3 cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
+              ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">NEW</span>` : ''}
+              <img src="${pImg}" alt="${p.name}" class="w-full h-40 object-cover rounded-2xl group-hover:scale-102 transition duration-300">
+            </div>
+            <div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">${p.brand || 'Lapro'} • ${p.category || 'Laptops'}</div>
+              <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-800 hover:text-blue-600 cursor-pointer line-clamp-2 mb-1 leading-snug">${p.name}</h3>
+              <p class="text-[11px] text-slate-500 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.generation ? '• ' + p.generation : ''}</p>
+              <div class="flex items-baseline gap-2 mb-3">
+                <span class="text-teal-700 font-black text-base font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}.00</span>
+                ${p.originalPrice > p.price ? `<span class="text-[11px] text-red-500 line-through font-mono">₹ ${Number(p.originalPrice).toLocaleString('en-IN')}.00</span>` : ''}
+              </div>
+              ${inCart ? `
+                <div class="mb-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                  <span>✓ In Cart (${cartItem?.quantity || 1})</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="space-y-1.5">
+              ${!inCart ? `
+                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
+                  <span>🛒</span> <span>ADD TO CART</span>
+                </button>
+              ` : `
+                <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+                  <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
+                    −
+                  </button>
+                  <div class="px-1 text-center font-mono font-black text-xs text-white">
+                    <span>${cartItem.quantity}</span>
+                    <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
+                  </div>
+                  <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
+                    +
+                  </button>
+                </div>
+                <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20">
+                  <span>⚡</span> Continue to Pay ➔
+                </button>
+              `}
             </div>
           </div>
         `;
@@ -647,37 +714,43 @@ function renderCatalogView(container, state) {
 
   // Filter logic
   let filtered = allProducts.filter(p => {
+    if (!p) return false;
     // Search query
-    if (filters.search && !p.name.toLowerCase().includes(filters.search.toLowerCase()) && !p.brand.toLowerCase().includes(filters.search.toLowerCase()) && !p.category.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const matchName = (p.name || "").toLowerCase().includes(q);
+      const matchBrand = (p.brand || "").toLowerCase().includes(q);
+      const matchCat = (p.category || "").toLowerCase().includes(q);
+      const matchProc = (p.processor || "").toLowerCase().includes(q);
+      if (!matchName && !matchBrand && !matchCat && !matchProc) return false;
     }
     // Category filter
     if (filters.category === "Crazy Deals") {
       if (!p.isCrazyDeal) return false;
     } else if (filters.category && filters.category !== "All") {
-      if (p.category !== filters.category) return false;
+      if ((p.category || "").toLowerCase() !== filters.category.toLowerCase()) return false;
     }
     // Subcategory filter
     if (filters.subcategory && filters.subcategory !== "All") {
-      if (p.subcategory !== filters.subcategory) return false;
+      if ((p.subcategory || "") !== filters.subcategory) return false;
     }
     // Brand filter
     if (filters.brand && filters.brand !== "All") {
-      if (p.brand.toLowerCase() !== filters.brand.toLowerCase()) return false;
+      if ((p.brand || "").toLowerCase() !== filters.brand.toLowerCase()) return false;
     }
     // Price filter
-    if (p.price > filters.price) return false;
+    if (p.price && p.price > filters.price) return false;
     // Processor filter
     if (filters.processor && filters.processor !== "All") {
-      if (!p.processor.toLowerCase().includes(filters.processor.toLowerCase())) return false;
+      if (!(p.processor || "").toLowerCase().includes(filters.processor.toLowerCase())) return false;
     }
     // OS filter
     if (filters.os && filters.os !== "All") {
-      if (!p.os.toLowerCase().includes(filters.os.toLowerCase())) return false;
+      if (!(p.os || "").toLowerCase().includes(filters.os.toLowerCase())) return false;
     }
     // Screen size filter
     if (filters.screenSize && filters.screenSize !== "All") {
-      if (!p.screenSize.includes(filters.screenSize)) return false;
+      if (!(p.screenSize || "").includes(filters.screenSize)) return false;
     }
 
     return true;
@@ -685,11 +758,11 @@ function renderCatalogView(container, state) {
 
   // Sorting
   if (filters.sort === "price-low") {
-    filtered.sort((a, b) => a.price - b.price);
+    filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
   } else if (filters.sort === "price-high") {
-    filtered.sort((a, b) => b.price - a.price);
+    filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
   } else if (filters.sort === "rating") {
-    filtered.sort((a, b) => b.rating - a.rating);
+    filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   }
 
   const categoryTitle = filters.category === "Crazy Deals" 
@@ -887,10 +960,6 @@ function renderListCard(p) {
           </button>
         `}
 
-        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm" title="Negotiate Price with Seller">
-          <span>🤝</span> Negotiate Price
-        </button>
-
         <div class="flex gap-1.5">
           <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1.5 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
             ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 font-bold">❤️ Saved</span>' : '<span class="text-slate-400">🤍 Wishlist</span>'}
@@ -956,9 +1025,6 @@ function renderGridCard(p) {
             <span>🛒</span> View Cart
           </button>
         `}
-        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs py-1.5 rounded-xl transition flex items-center justify-center gap-1">
-          <span>💬</span> Make an Offer
-        </button>
         <button onclick="appState.setView('product', { product: '${p.id}' })" class="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs py-1.5 rounded-xl transition">
           View Specifications
         </button>
@@ -1095,11 +1161,6 @@ function renderProductView(container, state) {
           <span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">In Stock (${p.stockLeft} left)</span>
         </div>
 
-        <!-- Price Negotiation Action Button -->
-        <button onclick="openNegotiateModal('${p.id}')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-98 text-white font-black text-sm py-3 rounded-2xl transition shadow-md shadow-amber-500/20 inline-flex items-center justify-center gap-2">
-          <span>🤝</span> <span>Make an Offer / Negotiate Price</span>
-        </button>
-
         <!-- Specifications Breakdown Table -->
         <div class="space-y-2 pt-2">
           <h4 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Specifications & Key Highlights</h4>
@@ -1160,104 +1221,6 @@ function renderProductView(container, state) {
   `;
 
   container.innerHTML = html;
-}
-
-// ======================== PRICE NEGOTIATION MODAL SYSTEM ========================
-function openNegotiateModal(prodId) {
-  if (!appState.state.currentUser && !appState.state.adminUser) {
-    openAuthModal('login');
-    showToast("Please sign in or register to negotiate prices and make offers!", "🔒", "info");
-    return;
-  }
-  const p = appState.getProductById(prodId);
-  if (!p) return;
-
-  const modal = document.getElementById("negotiate-modal");
-  if (!modal) return;
-
-  modal.innerHTML = `
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in relative border border-slate-200">
-      <button onclick="closeNegotiateModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 font-bold text-base">✕</button>
-
-      <div class="text-center mb-5">
-        <div class="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl shadow-sm">💬</div>
-        <h3 class="font-black text-lg text-slate-900">Make an Offer / Negotiate Price</h3>
-        <p class="text-xs text-slate-500">Submit your proposed counter-offer directly to the seller</p>
-      </div>
-
-      <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 mb-4 flex items-center gap-3">
-        <img src="${p.images[0]}" alt="${p.name}" class="w-16 h-16 object-cover rounded-xl border border-slate-200 shrink-0">
-        <div class="min-w-0">
-          <span class="text-[10px] font-bold text-slate-400 uppercase">${p.brand} • ${p.category}</span>
-          <h4 class="font-bold text-xs text-slate-900 line-clamp-1">${p.name}</h4>
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-xs text-slate-500">Listed Price:</span>
-            <span class="font-black text-sm text-teal-700">₹ ${p.price.toLocaleString('en-IN')}</span>
-          </div>
-        </div>
-      </div>
-
-      <form onsubmit="handleNegotiateOfferSubmit(event, '${p.id}')" class="space-y-4 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Your Proposed Offer Price (₹) <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">₹</span>
-            <input type="number" id="negotiate-offer-input" min="1" max="${p.price}" placeholder="e.g. ${Math.round(p.price * 0.9)}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-8 pr-4 font-black text-base text-slate-900 focus:outline-none focus:border-amber-500 font-mono shadow-inner">
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1">Offers close to the listed price have the highest chance of instant approval.</p>
-        </div>
-
-        <div id="negotiate-feedback" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
-
-        <div class="flex gap-2.5 pt-1">
-          <button type="button" onclick="closeNegotiateModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition">Cancel</button>
-          <button type="submit" id="negotiate-submit-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-black py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-            <span>⚡</span> Submit Offer
-          </button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
-
-function closeNegotiateModal() {
-  const modal = document.getElementById("negotiate-modal");
-  if (modal) {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-  }
-}
-
-function handleNegotiateOfferSubmit(event, prodId) {
-  event.preventDefault();
-  const input = document.getElementById("negotiate-offer-input");
-  const feedback = document.getElementById("negotiate-feedback");
-  const submitBtn = document.getElementById("negotiate-submit-btn");
-  if (!input || !feedback) return;
-
-  const offer = Number(input.value);
-  const res = appState.negotiatePrice(prodId, offer);
-
-  feedback.classList.remove("hidden", "bg-green-50", "text-green-800", "border-green-200", "bg-red-50", "text-red-800", "border-red-200");
-
-  if (res.success) {
-    feedback.className = "p-3 rounded-xl text-xs font-bold bg-green-50 text-green-800 border border-green-200";
-    feedback.innerHTML = res.message;
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "✅ Offer Accepted!";
-    }
-    setTimeout(() => {
-      closeNegotiateModal();
-      appState.setView("cart");
-    }, 1500);
-  } else {
-    feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-50 text-red-800 border border-red-200";
-    feedback.innerHTML = res.message;
-  }
 }
 
 
@@ -2330,8 +2293,7 @@ function renderAdminTabContent(tab, state) {
                 <th class="p-3">Product</th>
                 <th class="p-3">Category</th>
                 <th class="p-3">Brand</th>
-                <th class="p-3">Deal Price</th>
-                <th class="p-3">Min Offer (Floor)</th>
+                <th class="p-3">Selling Price</th>
                 <th class="p-3">Stock</th>
                 <th class="p-3">Type</th>
                 <th class="p-3 text-right">Actions</th>
@@ -2347,11 +2309,10 @@ function renderAdminTabContent(tab, state) {
                       <span class="text-[10px] text-slate-400 font-mono">${p.id}</span>
                     </div>
                   </td>
-                  <td class="p-3 font-semibold text-slate-700">${p.category}</td>
-                  <td class="p-3 font-semibold text-slate-800">${p.brand}</td>
-                  <td class="p-3 font-bold text-teal-700 font-mono">₹ ${p.price.toLocaleString('en-IN')}</td>
-                  <td class="p-3 font-mono text-slate-500 font-bold">₹ ${(p.minPrice || Math.round(p.price * 0.88)).toLocaleString('en-IN')}</td>
-                  <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft} units</td>
+                  <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
+                  <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
+                  <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
+                  <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
                   <td class="p-3">
                     ${p.isCrazyDeal ? `<span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Crazy Deal</span>` : `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Standard</span>`}
                   </td>
@@ -2744,17 +2705,6 @@ function renderProductImagePreviews() {
   `;
 }
 
-// Helper to calculate smart suggested negotiate price floor
-function autoSuggestMinPrice(val) {
-  const minInp = document.getElementById("new-prod-minprice");
-  if (minInp && (!minInp.value || minInp.dataset.userEdited !== "true")) {
-    const num = Number(val);
-    if (num > 0) {
-      minInp.value = Math.round(num * 0.88);
-    }
-  }
-}
-
 // ======================== ADMIN PRODUCT CRUD MODALS ========================
 function openAddProductModal() {
   const container = document.getElementById("product-modal-container");
@@ -2825,30 +2775,16 @@ function openAddProductModal() {
             </div>
           </div>
 
-          <!-- Pricing & Price Negotiation Settings -->
-          <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl space-y-2">
-            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
-              <span>💬</span>
-              <span>Pricing & Customer Price Negotiation Settings</span>
+          <!-- Pricing -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="new-prod-price" placeholder="24990" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
             </div>
-            
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Selling Price (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="new-prod-price" placeholder="24990" oninput="autoSuggestMinPrice(this.value)" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
-              </div>
-              <div>
-                <label class="block font-bold text-amber-900 uppercase mb-1 text-[11px]">Negotiate Min Floor (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="new-prod-minprice" placeholder="21991" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">MRP / List Price (₹)</label>
-                <input type="number" id="new-prod-origprice" placeholder="89990" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
-              </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
+              <input type="number" id="new-prod-origprice" placeholder="49990" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
-            <p class="text-[10.5px] text-amber-800">
-              💡 <strong>Negotiate Price Floor:</strong> When customers click <em>"Make an Offer / Negotiate Price"</em>, counter-offers at or above this amount are automatically approved. Offers below this floor are rejected.
-            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -2899,8 +2835,20 @@ function openAddProductModal() {
 
 function handleCreateProductSubmit(event) {
   event.preventDefault();
+  const nameEl = document.getElementById("new-prod-name");
+  const catEl = document.getElementById("new-prod-category");
+  const brandEl = document.getElementById("new-prod-brand");
+  const priceEl = document.getElementById("new-prod-price");
+  const origPriceEl = document.getElementById("new-prod-origprice");
+  const stockEl = document.getElementById("new-prod-stock");
+  const warrantyEl = document.getElementById("new-prod-warranty");
+  const procEl = document.getElementById("new-prod-processor");
+  const genEl = document.getElementById("new-prod-generation");
+  const crazyEl = document.getElementById("new-prod-crazy");
+  const newEl = document.getElementById("new-prod-new");
   const urlImage = document.getElementById("new-prod-image-url")?.value;
-  let finalImages = [...tempUploadedImages];
+
+  let finalImages = [...(tempUploadedImages || [])];
   if (finalImages.length === 0 && urlImage) {
     finalImages.push(urlImage);
   }
@@ -2908,37 +2856,42 @@ function handleCreateProductSubmit(event) {
     finalImages.push("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
   }
 
-  const priceVal = Number(document.getElementById("new-prod-price").value);
-  const minPriceVal = Number(document.getElementById("new-prod-minprice").value) || Math.round(priceVal * 0.88);
-  const processorVal = document.getElementById("new-prod-processor")?.value || "Standard Specs";
-  const generationVal = document.getElementById("new-prod-generation")?.value || "";
+  const priceVal = Number(priceEl ? priceEl.value : 0) || 0;
+  const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
+  const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
+  const generationVal = (genEl ? genEl.value : "").trim() || "";
+  const categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
+  const nameVal = (nameEl ? nameEl.value : "New Product").trim() || "New Product";
+  const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
+  const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
 
   const newProduct = {
-    name: document.getElementById("new-prod-name").value,
-    category: document.getElementById("new-prod-category").value,
-    brand: document.getElementById("new-prod-brand").value,
+    name: nameVal,
+    category: categoryVal,
+    brand: brandVal,
     processor: processorVal,
     generation: generationVal,
     price: priceVal,
-    minPrice: minPriceVal,
-    originalPrice: Number(document.getElementById("new-prod-origprice").value) || priceVal,
-    stockLeft: Number(document.getElementById("new-prod-stock").value) || 10,
-    warranty: document.getElementById("new-prod-warranty").value,
+    originalPrice: origPriceVal,
+    stockLeft: stockVal,
+    warranty: warrantyVal,
     specs: {
       processor: processorVal,
       generation: generationVal,
-      warranty: document.getElementById("new-prod-warranty").value
+      warranty: warrantyVal
     },
     images: finalImages,
     image: finalImages[0],
-    isCrazyDeal: document.getElementById("new-prod-crazy").checked,
-    isNew: document.getElementById("new-prod-new").checked,
+    isCrazyDeal: Boolean(crazyEl?.checked),
+    isNew: Boolean(newEl ? newEl.checked : true),
     features: ["100% Genuine", "Warranty Assured", "Fast Shipping"]
   };
 
-  appState.addProduct(newProduct);
+  const created = appState.addProduct(newProduct);
   closeProductModal();
   setAdminTab("products");
+  showToast(`Product "${created.name}" added to catalog & saved to database!`, "✅", "success");
 }
 
 function openEditProductModal(prodId) {
@@ -3001,30 +2954,16 @@ function openEditProductModal(prodId) {
             </div>
           </div>
 
-          <!-- Pricing & Price Negotiation Settings -->
-          <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl space-y-2">
-            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
-              <span>💬</span>
-              <span>Pricing & Customer Price Negotiation Settings</span>
+          <!-- Pricing -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
+              <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
             </div>
-            
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Selling Price (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
-              </div>
-              <div>
-                <label class="block font-bold text-amber-900 uppercase mb-1 text-[11px]">Negotiate Min Floor (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="edit-prod-minprice" value="${p.minPrice || Math.round(p.price * 0.88)}" required class="w-full bg-white border border-amber-400 rounded-xl p-2.5 focus:outline-none focus:border-amber-600 font-mono font-bold text-amber-900 shadow-sm" title="Minimum acceptable price for customer price counter-offers">
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">MRP / List Price (₹)</label>
-                <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
-              </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
+              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
-            <p class="text-[10.5px] text-amber-800">
-              💡 <strong>Negotiate Price Floor:</strong> When customers click <em>"Make an Offer / Negotiate Price"</em>, counter-offers at or above this amount are automatically approved.
-            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -3070,40 +3009,58 @@ function openEditProductModal(prodId) {
 
 function handleEditProductSubmit(event, prodId) {
   event.preventDefault();
-  let finalImages = [...tempUploadedImages];
+  const nameEl = document.getElementById("edit-prod-name");
+  const catEl = document.getElementById("edit-prod-category");
+  const brandEl = document.getElementById("edit-prod-brand");
+  const priceEl = document.getElementById("edit-prod-price");
+  const origPriceEl = document.getElementById("edit-prod-origprice");
+  const stockEl = document.getElementById("edit-prod-stock");
+  const warrantyEl = document.getElementById("edit-prod-warranty");
+  const procEl = document.getElementById("edit-prod-processor");
+  const genEl = document.getElementById("edit-prod-generation");
+  const crazyEl = document.getElementById("edit-prod-crazy");
+  const newEl = document.getElementById("edit-prod-new");
+
+  let finalImages = [...(tempUploadedImages || [])];
   if (finalImages.length === 0) {
     finalImages.push("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
   }
 
-  const priceVal = Number(document.getElementById("edit-prod-price").value);
-  const minPriceVal = Number(document.getElementById("edit-prod-minprice").value) || Math.round(priceVal * 0.88);
-  const processorVal = document.getElementById("edit-prod-processor")?.value || "Standard Specs";
-  const generationVal = document.getElementById("edit-prod-generation")?.value || "";
+  const priceVal = Number(priceEl ? priceEl.value : 0) || 0;
+  const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
+  const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
+  const generationVal = (genEl ? genEl.value : "").trim() || "";
+  const categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
+  const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
+  const nameVal = (nameEl ? nameEl.value : "").trim() || "Product";
+  const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
+  const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
 
   const updatedData = {
-    name: document.getElementById("edit-prod-name").value,
-    category: document.getElementById("edit-prod-category").value,
-    brand: document.getElementById("edit-prod-brand").value,
+    name: nameVal,
+    category: categoryVal,
+    brand: brandVal,
     processor: processorVal,
     generation: generationVal,
     price: priceVal,
-    minPrice: minPriceVal,
-    originalPrice: Number(document.getElementById("edit-prod-origprice").value),
-    stockLeft: Number(document.getElementById("edit-prod-stock").value),
+    originalPrice: origPriceVal,
+    stockLeft: stockVal,
+    warranty: warrantyVal,
     images: finalImages,
     image: finalImages[0],
-    isCrazyDeal: document.getElementById("edit-prod-crazy").checked,
-    isNew: document.getElementById("edit-prod-new").checked,
+    isCrazyDeal: Boolean(crazyEl?.checked),
+    isNew: Boolean(newEl ? newEl.checked : true),
     specs: {
       processor: processorVal,
       generation: generationVal,
-      warranty: document.getElementById("edit-prod-warranty").value
+      warranty: warrantyVal
     }
   };
 
   appState.updateProduct(prodId, updatedData);
   closeProductModal();
   setAdminTab("products");
+  showToast(`Product updated & saved to database!`, "✅", "success");
 }
 
 function handleDeleteProduct(prodId) {
@@ -4669,16 +4626,12 @@ function generateAIResponse(rawQuery) {
     `;
   }
 
-  // 5. Price Negotiation Help
-  if (query.includes("negotiate") || query.includes("offer") || query.includes("bargain") || query.includes("counter")) {
+  // 5. Best Deals & Catalog Help
+  if (query.includes("offer") || query.includes("bargain") || query.includes("deal") || query.includes("discount")) {
     return `
-      <p class="font-bold text-slate-900">💬 How Price Negotiation Works:</p>
-      <ol class="list-decimal list-inside text-slate-600 space-y-1 text-[11px] pt-1">
-        <li>Click <strong>"Make an Offer / Negotiate Price"</strong> on any product card.</li>
-        <li>Enter your proposed counter-offer in Rupees.</li>
-        <li>If your offer meets the seller's floor price, it is <strong>instantly approved</strong> and added to your cart at your discounted price!</li>
-      </ol>
-      <button onclick="appState.setView('catalog'); toggleChatbot();" class="bg-amber-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">Try Price Negotiation on Catalog</button>
+      <p class="font-bold text-slate-900">🎁 Best Deals & Bulk Orders:</p>
+      <p class="text-slate-600 text-xs mt-1">All our laptops and accessories come with verified transparent pricing, genuine warranties, and maximum direct discounts. For bulk enterprise pricing or special requests, please contact our support team.</p>
+      <button onclick="appState.setView('catalog'); toggleChatbot();" class="bg-primary text-white font-bold py-1.5 px-3 rounded-lg text-xs mt-2 block w-full text-center">Browse All Laptop Deals</button>
     `;
   }
 

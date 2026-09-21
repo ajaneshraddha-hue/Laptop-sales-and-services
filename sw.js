@@ -23,6 +23,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.url.includes('/api/')) {
+    return; // Direct network request for live API state
+  }
   // Network first, fallback to cache
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
