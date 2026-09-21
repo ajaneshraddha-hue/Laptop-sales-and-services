@@ -419,22 +419,105 @@ function renderView(viewName, state) {
   }
 }
 
+// Reusable dark product card renderer
+function renderDarkProductCard(p, state) {
+  if (!p) return "";
+  const inCart = (state.cart || []).some(item => item.id === p.id);
+  const cartItem = (state.cart || []).find(item => item.id === p.id);
+  const isWishlisted = (state.wishlist || []).includes(p.id);
+  const pImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
+  const isCustom = p.id && p.id.startsWith("prod-");
+
+  return `
+    <div class="bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-4 shadow-xl hover:shadow-cyan-500/10 transition duration-300 flex flex-col justify-between group relative backdrop-blur-sm">
+      <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-950/80 border border-slate-700 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110 hover:border-cyan-400" title="Wishlist">
+        ${isWishlisted ? '<span class="text-red-400">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
+      </button>
+
+      <div class="relative mb-3 cursor-pointer overflow-hidden rounded-xl bg-slate-950/60 border border-slate-800/80" onclick="appState.setView('product', { product: '${p.id}' })">
+        ${p.isCrazyDeal ? `
+          <span class="absolute top-2 left-2 bg-gradient-to-r from-red-600 to-amber-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full shadow-md z-10">🔥 ${p.discount || 'DEAL'}</span>
+        ` : (isCustom || p.isNew ? `
+          <span class="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-black text-[9.5px] px-2 py-0.5 rounded-full shadow-md z-10">✨ NEW IN STOCK</span>
+        ` : `
+          <span class="absolute top-2 left-2 bg-slate-800/90 border border-slate-700 text-cyan-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow z-10">1-Yr Warranty</span>
+        `)}
+        
+        <img src="${pImg}" alt="${p.name}" class="w-full h-40 object-cover rounded-xl group-hover:scale-105 transition duration-300">
+      </div>
+
+      <div class="flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider">${p.brand || 'Lapro'} • ${p.category || 'Hardware'}</span>
+            <span class="text-[10px] text-amber-300 font-bold flex items-center gap-0.5">★ 5.0</span>
+          </div>
+          <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-white group-hover:text-cyan-300 cursor-pointer line-clamp-2 mb-1.5 leading-snug transition">${p.name}</h3>
+          <p class="text-[11px] text-slate-400 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.generation ? '• ' + p.generation : ''} ${p.ram ? '• ' + p.ram : ''}</p>
+        </div>
+
+        <div>
+          <div class="flex items-baseline gap-2 mb-3">
+            <span class="text-cyan-400 font-black text-base font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}.00</span>
+            ${p.originalPrice && p.originalPrice > p.price ? `<span class="text-[11px] text-slate-500 line-through font-mono">₹ ${Number(p.originalPrice).toLocaleString('en-IN')}.00</span>` : ''}
+          </div>
+
+          ${inCart ? `
+            <div class="mb-2 inline-flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-lg w-full justify-center">
+              <span>✓ In Cart (${cartItem?.quantity || 1})</span>
+            </div>
+          ` : ''}
+
+          <div class="space-y-1.5">
+            ${!inCart ? `
+              <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-lg shadow-blue-900/40 inline-flex items-center justify-center gap-2">
+                <span>🛒</span> <span>ADD TO CART</span>
+              </button>
+            ` : `
+              <div class="flex items-center justify-between bg-slate-950 border border-cyan-500/40 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+                <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
+                  −
+                </button>
+                <div class="px-1 text-center font-mono font-black text-xs text-cyan-300">
+                  <span>${cartItem?.quantity || 1} in cart</span>
+                </div>
+                <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
+                  +
+                </button>
+              </div>
+              <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/40">
+                <span>⚡</span> Continue to Pay ➔
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // ======================== 1. HOME VIEW ========================
 function renderHomeView(container, state) {
   const products = appState.getProducts();
   const crazyDeals = products.filter(p => p.isCrazyDeal).slice(0, 4);
 
+  // Dedicated Brand Product Lists (Custom added products automatically come first)
+  const dellProducts = products.filter(p => (p.brand || "").toLowerCase() === "dell");
+  const hpProducts = products.filter(p => (p.brand || "").toLowerCase() === "hp");
+  const lenovoProducts = products.filter(p => (p.brand || "").toLowerCase() === "lenovo");
+  const appleProducts = products.filter(p => (p.brand || "").toLowerCase() === "apple");
+
   let html = `
-    <!-- Hero Banner -->
-    <div class="relative bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 rounded-3xl text-white overflow-hidden shadow-2xl p-6 md:p-12 mb-10 border border-slate-800">
+    <!-- Hero Banner (Luxury Tech Dark Style) -->
+    <div class="relative bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 rounded-3xl text-white overflow-hidden shadow-2xl p-6 md:p-12 mb-12 border border-slate-800">
       <div class="absolute -right-20 -top-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
         <div class="flex-1 space-y-5 text-center lg:text-left">
           <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
-            <span class="bg-cyan-300/15 text-cyan-200 border border-cyan-200/25 font-extrabold text-[11px] uppercase px-3 py-1.5 rounded-full tracking-wider shadow-md flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span> LAPRO SOLUTIONS ENTERPRISE
+            <span class="bg-cyan-400/10 text-cyan-300 border border-cyan-400/30 font-black text-[11px] uppercase px-3.5 py-1.5 rounded-full tracking-wider shadow-md flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LAPRO SOLUTIONS ENTERPRISE
             </span>
             <div class="bg-black/60 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-mono font-bold text-cyan-300 flex items-center gap-1.5">
               <span>🔥 Crazy Deals:</span>
@@ -442,30 +525,30 @@ function renderHomeView(container, state) {
             </div>
           </div>
 
-          <p class="text-cyan-200/80 text-[11px] font-bold uppercase tracking-[.2em] mb-3">One reliable partner for every workstation</p>
+          <p class="text-cyan-300/80 text-[11px] font-bold uppercase tracking-[.2em]">One reliable partner for every workstation</p>
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-white">
             IT HARDWARE<br>PROCUREMENT & <br>
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">CERTIFIED REPAIR SERVICES</span>
           </h1>
 
           <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-            Your single destination for enterprise-grade <strong>Laptops, Desktops, Servers, Storages, Networking & Doorstep Repairs</strong>. Tested across 32 quality checkpoints with 1-Year Onsite Warranty.
+            Your single destination for certified <strong>Laptops, Desktops, Servers, Storages, Networking & Doorstep Repairs</strong>. Tested across 32 quality checkpoints with 1-Year Onsite Warranty.
           </p>
 
-          <div class="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 text-[11px] font-bold text-slate-300/90">
-            <span class="flex items-center gap-2"><span class="text-emerald-300">●</span> 32-point quality check</span>
-            <span class="flex items-center gap-2"><span class="text-amber-300">●</span> 1-year onsite warranty</span>
-            <span class="flex items-center gap-2"><span class="text-sky-300">●</span> Bangalore doorstep service</span>
+          <div class="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 text-[11px] font-bold text-slate-300">
+            <span class="flex items-center gap-2"><span class="text-emerald-400">●</span> 32-point quality check</span>
+            <span class="flex items-center gap-2"><span class="text-amber-400">●</span> 1-year onsite warranty</span>
+            <span class="flex items-center gap-2"><span class="text-cyan-400">●</span> Bangalore doorstep service</span>
           </div>
 
           <div class="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
-            <button onclick="appState.setView('catalog', { category: 'Desktops', subcategory: 'All' })" class="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
-              <span>🖥️</span> SHOP DESKTOPS
+            <button onclick="appState.setBrandFilter('Dell')" class="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
+              <span>🖥️</span> DELL HARDWARE
             </button>
-            <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
-              EXPLORE CATALOG
+            <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="bg-slate-800/90 hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
+              EXPLORE ALL BRANDS
             </button>
-            <button onclick="appState.setView('service')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md">
+            <button onclick="appState.setView('service')" class="bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-bold text-sm px-5 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md">
               <span>🛠️</span> BOOK DOORSTEP REPAIR
             </button>
           </div>
@@ -474,111 +557,43 @@ function renderHomeView(container, state) {
         <!-- Featured Card on Hero -->
         <div class="flex-1 max-w-sm lg:max-w-md w-full">
           ${(() => {
-            const heroProdId = 'deal-lenovo-thinkpad-x1-carbon';
-            const inCart = (state.cart || []).some(item => item.id === heroProdId);
-            const cartItem = (state.cart || []).find(item => item.id === heroProdId);
-            return `
-              <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-5 shadow-2xl backdrop-blur-md relative">
-                <div class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  ⚡ TOP DEAL OF THE DAY
-                </div>
-                <div class="absolute top-3 right-3 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  1 Yr Warranty
-                </div>
-                <img src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=900&auto=format&fit=crop&q=88" alt="Lenovo ThinkPad X1 Carbon Gen 10" class="w-full h-44 object-cover rounded-xl mt-6 mb-4 cursor-pointer" onclick="appState.setView('product', { product: '${heroProdId}' })">
-                <h3 onclick="appState.setView('product', { product: '${heroProdId}' })" class="font-bold text-sm text-white line-clamp-1 hover:text-blue-400 cursor-pointer">Lenovo ThinkPad X1 Carbon Gen 10</h3>
-                <p class="text-xs text-slate-400 mb-3">14.0" 2.8K OLED, Core i7 12th Gen, 16GB, 1TB SSD</p>
-                <div class="flex items-center justify-between gap-3">
-                  <div>
-                    <span class="text-teal-400 font-extrabold text-xl">₹ 58,990.00</span>
-                    <span class="text-xs text-red-400 line-through ml-2">₹ 1,45,000.00</span>
-                  </div>
-                  ${!inCart ? `
-                    <button onclick="handleAddToCart(event, '${heroProdId}', 1)" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow inline-flex items-center gap-1.5">
-                      <span>🛒</span> <span>Add to Cart</span>
-                    </button>
-                  ` : `
-                    <div class="flex items-center gap-2">
-                      <div class="flex items-center bg-blue-600 text-white rounded-xl p-0.5 shadow-md font-bold text-xs">
-                        <button onclick="handleUpdateCartQty(event, '${heroProdId}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 text-white rounded-lg flex items-center justify-center text-sm font-black transition">−</button>
-                        <span class="px-2 font-mono font-bold text-xs text-white">${cartItem?.quantity || 1}</span>
-                        <button onclick="handleUpdateCartQty(event, '${heroProdId}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 text-white rounded-lg flex items-center justify-center text-sm font-black transition">+</button>
-                      </div>
-                      <button onclick="appState.setView('checkout')" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-3 py-2 rounded-xl transition shadow flex items-center gap-1">
-                        <span>⚡</span> Pay ➔
-                      </button>
-                    </div>
-                  `}
-                </div>
-              </div>
-            `;
+            const heroProd = dellProducts[0] || products[0];
+            if (!heroProd) return '';
+            return renderDarkProductCard(heroProd, state);
           })()}
         </div>
       </div>
     </div>
 
-    <!-- Category Highlights Grid -->
-    <div class="mb-12 pt-2">
+    <!-- Shop by Top Enterprise Brands (Pill Modules) -->
+    <div class="mb-14">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-blue-600 mb-1">Browse the collection</p>
-          <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Find your next setup</h2>
-          <p class="text-xs text-slate-500">Curated hardware for work, play, and the spaces between.</p>
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-cyan-400 mb-1">Ecosystems & Manufacturers</p>
+          <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Shop by Brand Ecosystem</h2>
+          <p class="text-xs text-slate-400">Certified enterprise laptops, desktops, workstations, and peripherals</p>
         </div>
-        <button onclick="appState.setView('catalog', { category: 'All' })" class="text-xs font-bold text-blue-600 hover:underline">View All →</button>
-      </div>
-
-      <div class="category-collection">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
-        ${[
-          { name: "Laptops", description: "Business, gaming & student devices", icon: "💻", cat: "Laptops", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&auto=format&fit=crop&q=85", color: "from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-200" },
-          { name: "Desktops", description: "Compact, office & all-in-one systems", icon: "🖥️", cat: "Desktops", image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=900&auto=format&fit=crop&q=85", color: "from-slate-500/10 to-gray-500/10 text-slate-700 border-slate-200" },
-          { name: "Accessories", description: "Bags, docks, keyboards & more", icon: "🎒", cat: "Accessories", image: "https://images.unsplash.com/photo-1625842268584-8f3296236761?w=900&auto=format&fit=crop&q=85", color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-200" },
-          { name: "Peripherals", description: "Displays, audio & office essentials", icon: "🖨️", cat: "Peripherals", image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=900&auto=format&fit=crop&q=85", color: "from-cyan-500/10 to-blue-500/10 text-cyan-600 border-cyan-200" },
-          { name: "Storages", description: "Fast SSDs, HDDs & portable drives", icon: "💾", cat: "Storages", image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=900&auto=format&fit=crop&q=85", color: "from-purple-500/10 to-indigo-500/10 text-purple-600 border-purple-200" },
-          { name: "Networking", description: "Reliable connectivity for every room", icon: "🌐", cat: "Networking", image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=900&auto=format&fit=crop&q=85", color: "from-sky-500/10 to-blue-500/10 text-sky-600 border-sky-200" },
-          { name: "Servers", description: "Workstations and business infrastructure", icon: "🖧", cat: "Servers & Workstations", image: "https://images.unsplash.com/photo-1551808525-51a94da548ce?w=900&auto=format&fit=crop&q=85", color: "from-rose-500/10 to-red-500/10 text-rose-600 border-rose-200" },
-          { name: "Software's", description: "Productivity, security & OS licenses", icon: "💿", cat: "Software's", image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=900&auto=format&fit=crop&q=85", color: "from-teal-500/10 to-green-500/10 text-teal-600 border-teal-200" },
-        ].map(item => `
-          <div onclick="appState.setSubcategoryFilter('${item.cat}', 'All')" style="background-image: linear-gradient(90deg, rgba(255,255,255,.94), rgba(255,255,255,.58)), url('${item.image}')" class="category-card bg-gradient-to-br ${item.color} border rounded-2xl cursor-pointer group flex flex-col justify-start">
-            <span class="category-icon text-2xl mb-3">${item.icon}</span>
-            <span class="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition">${item.name}</span>
-            <span class="category-description">${item.description}</span>
-          </div>
-        `).join("")}
-      </div>
-      </div>
-    </div>
-
-    <!-- Shop by Top Enterprise Brands -->
-    <div class="mb-12">
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-blue-600 mb-1">Ecosystems & Manufacturers</p>
-          <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Shop by Top Enterprise Brands</h2>
-          <p class="text-xs text-slate-500">Official laptops, desktops, workstations, and peripherals from trusted brands</p>
-        </div>
-        <button onclick="appState.setBrandFilter('All')" class="text-xs font-bold text-blue-600 hover:underline">All Brands →</button>
+        <button onclick="appState.setBrandFilter('All')" class="text-xs font-bold text-cyan-400 hover:underline">All Brands →</button>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         ${[
-          { name: "Dell", logo: "🖥️", tag: "OptiPlex & Latitude", bg: "hover:border-blue-500 hover:bg-blue-50/50" },
-          { name: "HP", logo: "💻", tag: "EliteBook & ProDesk", bg: "hover:border-cyan-500 hover:bg-cyan-50/50" },
-          { name: "Lenovo", logo: "💼", tag: "ThinkPad & ThinkVision", bg: "hover:border-red-500 hover:bg-red-50/50" },
-          { name: "Apple", logo: "🍎", tag: "MacBook Air & Pro", bg: "hover:border-slate-800 hover:bg-slate-50" },
-          { name: "Samsung", logo: "📱", tag: "Displays & NVMe SSDs", bg: "hover:border-indigo-500 hover:bg-indigo-50/50" },
-          { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-emerald-500 hover:bg-emerald-50/50" }
+          { name: "Dell", logo: "🖥️", tag: "OptiPlex & Latitude", bg: "hover:border-cyan-500 hover:bg-slate-800/80", color: "text-cyan-400" },
+          { name: "HP", logo: "💻", tag: "EliteBook & ProDesk", bg: "hover:border-blue-500 hover:bg-slate-800/80", color: "text-blue-400" },
+          { name: "Lenovo", logo: "💼", tag: "ThinkPad & Legion", bg: "hover:border-red-500 hover:bg-slate-800/80", color: "text-red-400" },
+          { name: "Apple", logo: "🍎", tag: "MacBook Air & Pro", bg: "hover:border-slate-400 hover:bg-slate-800/80", color: "text-slate-200" },
+          { name: "Samsung", logo: "📱", tag: "Displays & NVMe SSDs", bg: "hover:border-indigo-500 hover:bg-slate-800/80", color: "text-indigo-400" },
+          { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-emerald-500 hover:bg-slate-800/80", color: "text-emerald-400" }
         ].map(b => {
           const count = products.filter(p => (p.brand || "").toLowerCase() === b.name.toLowerCase()).length;
           return `
-            <div onclick="appState.setBrandFilter('${b.name}')" class="bg-white border border-slate-200 rounded-2xl p-4 cursor-pointer transition shadow-sm hover:shadow-md flex flex-col items-center text-center group ${b.bg}">
-              <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition duration-300">
+            <div onclick="appState.setBrandFilter('${b.name}')" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 cursor-pointer transition shadow-lg hover:shadow-cyan-500/10 flex flex-col items-center text-center group ${b.bg}">
+              <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition duration-300">
                 ${b.logo}
               </div>
-              <span class="font-extrabold text-sm text-slate-900 group-hover:text-blue-600 transition">${b.name}</span>
+              <span class="font-extrabold text-sm text-white group-hover:${b.color} transition">${b.name}</span>
               <span class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${b.tag}</span>
-              <span class="mt-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+              <span class="mt-2 text-[10px] font-bold text-cyan-300 bg-cyan-950/60 px-2.5 py-0.5 rounded-full border border-cyan-600/30">
                 ${count} in stock
               </span>
             </div>
@@ -587,155 +602,290 @@ function renderHomeView(container, state) {
       </div>
     </div>
 
+    <!-- ================= 1. DELL BRAND SHOWCASE SECTION ================= -->
+    <div class="mb-14" id="section-dell-brand">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-xl">
+            🖥️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-black text-white tracking-tight">Dell Enterprise & Workstations Showcase</h2>
+              <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">Official Dell Fleet</span>
+            </div>
+            <p class="text-xs text-slate-400">Dell Latitude, OptiPlex & Precision laptops with 1-Year Lapro Onsite Warranty</p>
+          </div>
+        </div>
+        <button onclick="appState.setBrandFilter('Dell')" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+          See All Dell (${dellProducts.length}) →
+        </button>
+      </div>
+
+      ${dellProducts.length === 0 ? `
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+          No Dell products in stock currently. Use Admin portal to add Dell laptops.
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          ${dellProducts.slice(0, 4).map(p => renderDarkProductCard(p, state)).join("")}
+        </div>
+      `}
+    </div>
+
+    <!-- ================= 2. HP BRAND SHOWCASE SECTION ================= -->
+    <div class="mb-14" id="section-hp-brand">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-500/40 flex items-center justify-center text-xl">
+            💻
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-black text-white tracking-tight">HP EliteBook & ProBook Series</h2>
+              <span class="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">HP Commercial</span>
+            </div>
+            <p class="text-xs text-slate-400">Sleek HP ultrabooks and ProDesk enterprise workstations</p>
+          </div>
+        </div>
+        <button onclick="appState.setBrandFilter('HP')" class="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+          See All HP (${hpProducts.length}) →
+        </button>
+      </div>
+
+      ${hpProducts.length === 0 ? `
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+          No HP products in stock currently.
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          ${hpProducts.slice(0, 4).map(p => renderDarkProductCard(p, state)).join("")}
+        </div>
+      `}
+    </div>
+
+    <!-- ================= 3. LENOVO BRAND SHOWCASE SECTION ================= -->
+    <div class="mb-14" id="section-lenovo-brand">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-950/80 border border-red-500/40 flex items-center justify-center text-xl">
+            💼
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-black text-white tracking-tight">Lenovo ThinkPad & Legion Fleet</h2>
+              <span class="bg-red-500/20 text-red-300 border border-red-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">Military-Grade Durability</span>
+            </div>
+            <p class="text-xs text-slate-400">World-famous ThinkPad keyboards and Legion gaming workstations</p>
+          </div>
+        </div>
+        <button onclick="appState.setBrandFilter('Lenovo')" class="text-xs font-bold text-red-400 hover:text-red-300 flex items-center gap-1">
+          See All Lenovo (${lenovoProducts.length}) →
+        </button>
+      </div>
+
+      ${lenovoProducts.length === 0 ? `
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+          No Lenovo products in stock currently.
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          ${lenovoProducts.slice(0, 4).map(p => renderDarkProductCard(p, state)).join("")}
+        </div>
+      `}
+    </div>
+
+    <!-- ================= 4. APPLE BRAND SHOWCASE SECTION ================= -->
+    <div class="mb-14" id="section-apple-brand">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center text-xl">
+            🍎
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-black text-white tracking-tight">Apple MacBooks & Ultrabooks</h2>
+              <span class="bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">Apple Silicon M1 / M2</span>
+            </div>
+            <p class="text-xs text-slate-400">Retina displays, incredible battery endurance, and premium unibody chassis</p>
+          </div>
+        </div>
+        <button onclick="appState.setBrandFilter('Apple')" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+          See All Apple (${appleProducts.length}) →
+        </button>
+      </div>
+
+      ${appleProducts.length === 0 ? `
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+          No Apple products in stock currently.
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          ${appleProducts.slice(0, 4).map(p => renderDarkProductCard(p, state)).join("")}
+        </div>
+      `}
+    </div>
+
+    <!-- ================= 5. LAPTOP & DESKTOP REPAIR SOLUTIONS (Clean TechBuddy Reference) ================= -->
+    <div class="mb-14">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 bg-gradient-to-r from-emerald-950/60 to-cyan-950/60 border border-emerald-500/30 p-4 rounded-2xl">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 text-xl font-black">🛠️</span>
+            <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Laptop & Desktop Repair Solutions</h2>
+            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Bangalore Onsite</span>
+          </div>
+          <p class="text-xs text-slate-400">Certified chip-level diagnostics, screen replacement, high-speed SSD/RAM upgrades</p>
+        </div>
+        <button onclick="appState.setView('service')" class="text-xs font-bold text-emerald-400 hover:underline">See all repair services →</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        ${[
+          {
+            title: "Laptop Display / Screen Replacement",
+            desc: "Cracked display, flickering screen, lines on screen, black display",
+            price: "₹ 1,899.00",
+            icon: "🖥️",
+            serviceType: "Display Repair"
+          },
+          {
+            title: "Motherboard Chip-Level Repair",
+            desc: "No power, liquid spill, sudden shutdown, BIOS corrupted",
+            price: "₹ 999.00",
+            icon: "⚡",
+            serviceType: "Motherboard Repair"
+          },
+          {
+            title: "High-Speed NVMe SSD & RAM Upgrade",
+            desc: "Boost boot speed by 10x with Kingston / Samsung NVMe SSDs",
+            price: "₹ 1,499.00",
+            icon: "🚀",
+            serviceType: "Hardware Upgrade"
+          },
+          {
+            title: "Battery Replacement & Power Fix",
+            desc: "Low battery backup, battery not charging, swollen battery",
+            price: "₹ 1,299.00",
+            icon: "🔋",
+            serviceType: "Battery Replacement"
+          },
+          {
+            title: "Deep Thermal Cleaning & Fan Service",
+            desc: "Overheating laptop, fan noise, fresh thermal paste application",
+            price: "₹ 499.00",
+            icon: "❄️",
+            serviceType: "General Servicing"
+          },
+          {
+            title: "OS Installation & Enterprise IT Setup",
+            desc: "Genuine Windows 11 Pro, data backup, antivirus & software setup",
+            price: "₹ 399.00",
+            icon: "💿",
+            serviceType: "Software & OS Setup"
+          }
+        ].map(s => `
+          <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-5 shadow-xl transition flex flex-col justify-between group backdrop-blur-sm">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">Popular</span>
+                <span class="text-amber-300 text-xs font-bold">★★★★★ 5.0</span>
+              </div>
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl">${s.icon}</span>
+                <h3 class="font-extrabold text-sm text-white group-hover:text-emerald-300 transition">${s.title}</h3>
+              </div>
+              <p class="text-xs text-slate-400 mb-4 leading-relaxed">${s.desc}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-500 block uppercase font-bold">Starts at</span>
+                <span class="text-emerald-400 font-extrabold text-base font-mono">${s.price}</span>
+              </div>
+              <button onclick="appState.setView('service', { prefillService: '${s.serviceType}' })" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-950/50 flex items-center gap-1.5">
+                <span>Book Now</span> <span>→</span>
+              </button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
     <!-- Crazy Deals Section -->
-    <div class="mb-12">
+    <div class="mb-14">
       <div class="flex justify-between items-center mb-6">
         <div>
           <div class="flex items-center gap-2">
             <span class="text-orange-500 text-xl font-black">🔥</span>
-            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Crazy Deals & Flash Offers</h2>
+            <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Crazy Deals & Flash Offers</h2>
           </div>
-          <p class="text-xs text-slate-500">Unbeatable discounts on high-end laptops & components</p>
+          <p class="text-xs text-slate-400">Unbeatable discounts on high-end laptops & components</p>
         </div>
-        <button onclick="appState.setView('catalog', { category: 'Crazy Deals', subcategory: 'All' })" class="text-xs font-bold text-orange-600 hover:underline">Explore All Deals →</button>
+        <button onclick="appState.setView('catalog', { category: 'Crazy Deals', subcategory: 'All' })" class="text-xs font-bold text-orange-400 hover:underline">Explore All Deals →</button>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        ${crazyDeals.map(p => {
-          const inCart = (appState.state.cart || []).some(item => item.id === p.id);
-          const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
-          return `
-          <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
-            <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
-              ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
-            </button>
-            <div class="relative mb-3 cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
-              <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${p.discount}</span>
-              <img src="${p.images[0]}" alt="${p.name}" class="w-full h-40 object-cover rounded-2xl group-hover:scale-102 transition duration-300">
-            </div>
-            <div>
-              <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">${p.brand} • ${p.category}</div>
-              <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-800 hover:text-blue-600 cursor-pointer line-clamp-2 mb-2 leading-snug">${p.name}</h3>
-              <div class="flex items-baseline gap-2 mb-3">
-                <span class="text-teal-700 font-black text-base">₹ ${p.price.toLocaleString('en-IN')}.00</span>
-                <span class="text-[11px] text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>
-              </div>
-              ${inCart ? `
-                <div class="mb-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
-                  <span>✓ Added to Cart (${cartItem?.quantity || 1})</span>
-                </div>
-              ` : ''}
-            </div>
-            <div class="space-y-1.5">
-              ${!inCart ? `
-                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
-                  <span>🛒</span> <span>ADD TO CART</span>
-                </button>
-              ` : `
-                <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
-                  <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
-                    −
-                  </button>
-                  <div class="px-1 text-center font-mono font-black text-xs text-white">
-                    <span>${cartItem.quantity}</span>
-                    <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
-                  </div>
-                  <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
-                    +
-                  </button>
-                </div>
-                <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
-                  <span>⚡</span> Continue to Pay ➔
-                </button>
-                <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
-                  <span>🛒</span> View Cart
-                </button>
-              `}
-            </div>
-          </div>
-        `;
-        }).join("")}
+        ${crazyDeals.map(p => renderDarkProductCard(p, state)).join("")}
       </div>
     </div>
 
     <!-- Latest Arrivals & In-Stock Hardware Section -->
-    <div class="mb-12">
+    <div class="mb-14">
       <div class="flex justify-between items-center mb-6">
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-blue-600 text-xl font-black">⚡</span>
-            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Latest In-Stock Arrivals & Workstations</h2>
+            <span class="text-cyan-400 text-xl font-black">⚡</span>
+            <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Latest In-Stock Arrivals</h2>
           </div>
-          <p class="text-xs text-slate-500">Newly added laptops, desktops, and enterprise hardware ready for immediate dispatch</p>
+          <p class="text-xs text-slate-400">Newly added hardware ready for immediate dispatch across Bangalore</p>
         </div>
-        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="text-xs font-bold text-blue-600 hover:underline">Explore All Products →</button>
+        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="text-xs font-bold text-cyan-400 hover:underline">Explore All Products →</button>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        ${products.slice(0, 8).map(p => {
-          const inCart = (appState.state.cart || []).some(item => item.id === p.id);
-          const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
-          const pImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
-          return `
-          <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
-            <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
-              ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
-            </button>
-            <div class="relative mb-3 cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
-              ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">NEW</span>` : ''}
-              <img src="${pImg}" alt="${p.name}" class="w-full h-40 object-cover rounded-2xl group-hover:scale-102 transition duration-300">
-            </div>
-            <div>
-              <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">${p.brand || 'Lapro'} • ${p.category || 'Laptops'}</div>
-              <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-800 hover:text-blue-600 cursor-pointer line-clamp-2 mb-1 leading-snug">${p.name}</h3>
-              <p class="text-[11px] text-slate-500 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.generation ? '• ' + p.generation : ''}</p>
-              <div class="flex items-baseline gap-2 mb-3">
-                <span class="text-teal-700 font-black text-base font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}.00</span>
-                ${p.originalPrice > p.price ? `<span class="text-[11px] text-red-500 line-through font-mono">₹ ${Number(p.originalPrice).toLocaleString('en-IN')}.00</span>` : ''}
-              </div>
-              ${inCart ? `
-                <div class="mb-2.5 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
-                  <span>✓ In Cart (${cartItem?.quantity || 1})</span>
-                </div>
-              ` : ''}
-            </div>
-            <div class="space-y-1.5">
-              ${!inCart ? `
-                <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
-                  <span>🛒</span> <span>ADD TO CART</span>
-                </button>
-              ` : `
-                <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
-                  <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
-                    −
-                  </button>
-                  <div class="px-1 text-center font-mono font-black text-xs text-white">
-                    <span>${cartItem.quantity}</span>
-                    <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
-                  </div>
-                  <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
-                    +
-                  </button>
-                </div>
-                <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20">
-                  <span>⚡</span> Continue to Pay ➔
-                </button>
-              `}
-            </div>
-          </div>
-        `;
-        }).join("")}
+        ${products.slice(0, 8).map(p => renderDarkProductCard(p, state)).join("")}
       </div>
     </div>
 
-    <!-- Doorstep Repair Banner -->
-    <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-900 rounded-3xl p-6 md:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="space-y-2 text-center md:text-left">
-        <span class="bg-white/20 text-white font-black text-[10px] uppercase px-3 py-1 rounded-full">CERTIFIED LAPRO SERVICE NETWORK</span>
-        <h3 class="text-2xl font-black">Need Laptop Repair or Hardware Upgrades?</h3>
-        <p class="text-xs md:text-sm text-blue-100 max-w-xl">Free doorstep pickup & delivery across Bangalore. Genuine spare parts with 1-Year Assured Warranty and live repair ticket tracking.</p>
+    <!-- Category Highlights Grid -->
+    <div class="mb-14 pt-2">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-cyan-400 mb-1">Browse the collection</p>
+          <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Browse by Hardware Category</h2>
+          <p class="text-xs text-slate-400">Curated enterprise hardware for business, programming & engineering.</p>
+        </div>
+        <button onclick="appState.setView('catalog', { category: 'All' })" class="text-xs font-bold text-cyan-400 hover:underline">View All Categories →</button>
       </div>
-      <button onclick="appState.setView('service')" class="bg-white text-blue-900 hover:bg-blue-50 font-black text-xs md:text-sm px-6 py-3.5 rounded-xl transition shadow-lg shrink-0">
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        ${[
+          { name: "Laptops", description: "Business, gaming & student devices", icon: "💻", cat: "Laptops", color: "from-blue-950/60 to-slate-900 border-blue-500/30 text-blue-300" },
+          { name: "Desktops", description: "Compact, office & all-in-one systems", icon: "🖥️", cat: "Desktops", color: "from-cyan-950/60 to-slate-900 border-cyan-500/30 text-cyan-300" },
+          { name: "Accessories", description: "Bags, docks, keyboards & more", icon: "🎒", cat: "Accessories", color: "from-emerald-950/60 to-slate-900 border-emerald-500/30 text-emerald-300" },
+          { name: "Peripherals", description: "Displays, audio & office essentials", icon: "🖨️", cat: "Peripherals", color: "from-indigo-950/60 to-slate-900 border-indigo-500/30 text-indigo-300" },
+          { name: "Storages", description: "Fast SSDs, HDDs & portable drives", icon: "💾", cat: "Storages", color: "from-purple-950/60 to-slate-900 border-purple-500/30 text-purple-300" },
+          { name: "Networking", description: "Reliable connectivity for office & home", icon: "🌐", cat: "Networking", color: "from-sky-950/60 to-slate-900 border-sky-500/30 text-sky-300" },
+          { name: "Servers", description: "Workstations and IT infrastructure", icon: "🖧", cat: "Servers & Workstations", color: "from-rose-950/60 to-slate-900 border-rose-500/30 text-rose-300" },
+          { name: "Software's", description: "Productivity, security & OS licenses", icon: "💿", cat: "Software's", color: "from-teal-950/60 to-slate-900 border-teal-500/30 text-teal-300" },
+        ].map(item => `
+          <div onclick="appState.setSubcategoryFilter('${item.cat}', 'All')" class="bg-gradient-to-br ${item.color} border rounded-2xl p-4 cursor-pointer group flex flex-col justify-start hover:border-cyan-400/60 transition shadow-lg">
+            <span class="text-3xl mb-3">${item.icon}</span>
+            <span class="font-black text-sm text-white group-hover:text-cyan-300 transition">${item.name}</span>
+            <span class="text-[11px] text-slate-400 mt-1">${item.description}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <!-- Doorstep Repair Banner (Bangalore Hubs) -->
+    <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 rounded-3xl p-6 md:p-10 text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-cyan-500/30">
+      <div class="space-y-2 text-center md:text-left">
+        <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-black text-[10px] uppercase px-3 py-1 rounded-full">CERTIFIED LAPRO SERVICE NETWORK</span>
+        <h3 class="text-2xl font-black">Need Urgent Laptop Repair or RAM/SSD Upgrades?</h3>
+        <p class="text-xs md:text-sm text-slate-300 max-w-xl">Free doorstep pickup & delivery across all Bangalore tech hubs (HSR, Koramangala, Indiranagar, Electronic City, Whitefield). Genuine spare parts with 1-Year Assured Warranty.</p>
+      </div>
+      <button onclick="appState.setView('service')" class="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs md:text-sm px-6 py-3.5 rounded-xl transition shadow-xl shrink-0">
         🛠️ Book Doorstep Service
       </button>
     </div>
@@ -836,54 +986,54 @@ function renderCatalogView(container, state) {
 
   let html = `
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-slate-500 mb-4 select-none">
-      <span onclick="appState.setView('home')" class="hover:text-blue-600 cursor-pointer">Home</span>
-      <span>/</span>
-      <span onclick="appState.setView('catalog', { category: 'All', subcategory: 'All', brand: 'All' })" class="hover:text-blue-600 cursor-pointer">Products</span>
-      <span>/</span>
-      <span class="text-slate-800 font-bold">${breadcrumbCategory}${subcategoryTitle}</span>
+    <div class="flex items-center gap-2 text-xs text-slate-400 mb-5 select-none">
+      <span onclick="appState.setView('home')" class="hover:text-cyan-400 cursor-pointer">Home</span>
+      <span class="text-slate-600">/</span>
+      <span onclick="appState.setView('catalog', { category: 'All', subcategory: 'All', brand: 'All' })" class="hover:text-cyan-400 cursor-pointer">Products</span>
+      <span class="text-slate-600">/</span>
+      <span class="text-white font-bold">${breadcrumbCategory}${subcategoryTitle}</span>
     </div>
 
     <div class="catalog-layout">
       
       <!-- LEFT ACCORDION SIDEBAR: Categories & Filters -->
       <aside class="catalog-sidebar shrink-0 select-none space-y-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-          <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-            <h3 class="font-extrabold text-sm text-slate-900">Categories & Filters</h3>
-            <button onclick="resetFilters()" class="text-xs text-blue-600 hover:underline font-semibold">Reset</button>
+        <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 shadow-xl backdrop-blur-sm">
+          <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+            <h3 class="font-extrabold text-sm text-white flex items-center gap-1.5"><span>⚡</span> Filters</h3>
+            <button onclick="resetFilters()" class="text-xs text-cyan-400 hover:underline font-semibold">Reset</button>
           </div>
 
           <!-- Price Filter Accordion -->
-          <div class="py-3 border-b border-slate-100">
-            <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
+          <div class="py-3 border-b border-slate-800">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-200 mb-2">
               <span>Price Range</span>
-              <span class="text-blue-600 font-mono">Max: ₹ ${Number(filters.price).toLocaleString('en-IN')}</span>
+              <span class="text-cyan-400 font-mono">Max: ₹ ${Number(filters.price).toLocaleString('en-IN')}</span>
             </div>
-            <input type="range" min="1000" max="200000" step="1000" value="${filters.price}" oninput="handlePriceFilter(this.value)" class="w-full accent-blue-600 cursor-pointer">
-            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+            <input type="range" min="1000" max="200000" step="1000" value="${filters.price}" oninput="handlePriceFilter(this.value)" class="w-full accent-cyan-400 cursor-pointer bg-slate-950">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
               <span>₹1,000</span>
               <span>₹2,00,000</span>
             </div>
           </div>
 
           <!-- Brand Filter Accordion -->
-          <div class="py-3 border-b border-slate-100">
+          <div class="py-3 border-b border-slate-800">
             <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold text-slate-800 block">Brand Ecosystem</span>
-              ${filters.brand && filters.brand !== 'All' ? `<button onclick="handleBrandFilter('All')" class="text-[10px] text-blue-600 font-semibold hover:underline">Clear</button>` : ''}
+              <span class="text-xs font-bold text-slate-200 block">Brand Ecosystem</span>
+              ${filters.brand && filters.brand !== 'All' ? `<button onclick="handleBrandFilter('All')" class="text-[10px] text-cyan-400 font-semibold hover:underline">Clear</button>` : ''}
             </div>
             <div class="space-y-1 max-h-48 overflow-y-auto text-xs pr-1">
               ${availableBrands.map(brand => {
                 const count = brand === "All" ? allProducts.length : allProducts.filter(p => (p.brand || "").toLowerCase() === brand.toLowerCase()).length;
                 if (brand !== "All" && count === 0) return "";
                 return `
-                <label class="flex items-center justify-between gap-2 cursor-pointer text-slate-600 hover:text-slate-900 py-1 px-1 rounded-lg hover:bg-slate-50 transition">
+                <label class="flex items-center justify-between gap-2 cursor-pointer text-slate-300 hover:text-white py-1 px-1.5 rounded-lg hover:bg-slate-800/70 transition">
                   <span class="flex items-center gap-2">
-                    <input type="radio" name="brand_filter" value="${brand}" ${filters.brand === brand ? 'checked' : ''} onchange="handleBrandFilter('${brand}')" class="text-blue-600">
-                    <span class="font-medium ${filters.brand === brand ? 'text-blue-600 font-bold' : ''}">${brand}</span>
+                    <input type="radio" name="brand_filter" value="${brand}" ${filters.brand === brand ? 'checked' : ''} onchange="handleBrandFilter('${brand}')" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                    <span class="font-medium ${filters.brand === brand ? 'text-cyan-300 font-bold' : ''}">${brand}</span>
                   </span>
-                  <span class="text-[10px] text-slate-400 font-mono">(${count})</span>
+                  <span class="text-[10px] text-slate-500 font-mono">(${count})</span>
                 </label>
               `;
               }).join("")}
@@ -892,11 +1042,11 @@ function renderCatalogView(container, state) {
 
           <!-- Processor Filter Accordion -->
           <div class="pt-3">
-            <span class="text-xs font-bold text-slate-800 block mb-2">Processor</span>
+            <span class="text-xs font-bold text-slate-200 block mb-2">Processor</span>
             <div class="space-y-1.5 text-xs">
               ${["All", "Intel Core i7", "Intel Core i5", "Intel Core i9", "AMD Ryzen 7", "AMD Ryzen 5", "Apple M1/M2", "Intel Xeon"].map(proc => `
-                <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
-                  <input type="radio" name="proc_filter" value="${proc}" ${filters.processor === proc ? 'checked' : ''} onchange="handleProcFilter('${proc}')" class="text-blue-600">
+                <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white py-0.5">
+                  <input type="radio" name="proc_filter" value="${proc}" ${filters.processor === proc ? 'checked' : ''} onchange="handleProcFilter('${proc}')" class="text-cyan-500 bg-slate-950 border-slate-700">
                   <span>${proc}</span>
                 </label>
               `).join("")}
@@ -910,28 +1060,28 @@ function renderCatalogView(container, state) {
       <div class="catalog-results">
         
         <!-- Top Toolbar -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 mb-5 shadow-xl flex flex-wrap justify-between items-center gap-4 backdrop-blur-sm">
           <div>
-            <h1 class="text-lg font-black text-slate-900">${categoryTitle} ${subcategoryTitle}</h1>
-            <p class="text-xs text-slate-400">Showing <strong class="text-slate-700">${filtered.length}</strong> items</p>
+            <h1 class="text-lg font-black text-white">${categoryTitle} ${subcategoryTitle}</h1>
+            <p class="text-xs text-slate-400">Showing <strong class="text-cyan-400">${filtered.length}</strong> certified in-stock items</p>
           </div>
 
           <div class="flex items-center gap-3">
             <!-- Sort Dropdown -->
-            <select onchange="handleSortChange(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-600">
-              <option value="featured" ${filters.sort === 'featured' ? 'selected' : ''}>Sort: Featured</option>
+            <select onchange="handleSortChange(this.value)" class="bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-slate-200 focus:outline-none focus:border-cyan-400">
+              <option value="featured" ${filters.sort === 'featured' ? 'selected' : ''}>Sort: Featured (Newest First)</option>
               <option value="price-low" ${filters.sort === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
               <option value="price-high" ${filters.sort === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
               <option value="rating" ${filters.sort === 'rating' ? 'selected' : ''}>Customer Rating</option>
             </select>
 
             <!-- View Mode Switcher -->
-            <div class="flex border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-              <button onclick="handleViewMode('list')" class="p-1.5 ${filters.viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'} transition" title="List View">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              </button>
-              <button onclick="handleViewMode('grid')" class="p-1.5 ${filters.viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'} transition" title="Grid View">
+            <div class="flex border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
+              <button onclick="handleViewMode('grid')" class="p-2 ${filters.viewMode === 'grid' ? 'bg-cyan-500 text-black font-bold' : 'text-slate-400 hover:text-white'} transition" title="Grid View">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              </button>
+              <button onclick="handleViewMode('list')" class="p-2 ${filters.viewMode === 'list' ? 'bg-cyan-500 text-black font-bold' : 'text-slate-400 hover:text-white'} transition" title="List View">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
               </button>
             </div>
           </div>
@@ -939,16 +1089,16 @@ function renderCatalogView(container, state) {
 
         <!-- Catalog Product Items -->
         ${filtered.length === 0 ? `
-          <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
-            <div class="text-4xl mb-2">🔍</div>
-            <h3 class="font-bold text-base text-slate-800">No products found matching the selected filters</h3>
+          <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-12 text-center text-slate-400 shadow-xl">
+            <div class="text-4xl mb-3">🔍</div>
+            <h3 class="font-bold text-base text-white">No products found matching the selected filters</h3>
             <p class="text-xs text-slate-400 mt-1 mb-4">Try clearing some filters or searching for another term.</p>
-            <button onclick="resetFilters()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition">Clear Filters</button>
+            <button onclick="resetFilters()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-lg">Clear Filters</button>
           </div>
         ` : (
           filters.viewMode === 'grid' 
-            ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${filtered.map(p => renderGridCard(p)).join("")}</div>`
-            : `<div class="space-y-3.5">${filtered.map(p => renderListCard(p)).join("")}</div>`
+            ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">${filtered.map(p => renderDarkProductCard(p, state)).join("")}</div>`
+            : `<div class="space-y-4">${filtered.map(p => renderListCard(p)).join("")}</div>`
         )}
 
       </div>
@@ -958,149 +1108,89 @@ function renderCatalogView(container, state) {
   container.innerHTML = html;
 }
 
-// Card Renderers (List View & Grid View)
+// Card Renderers (List View)
 function renderListCard(p) {
   const inCart = (appState.state.cart || []).some(item => item.id === p.id);
   const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
+  const isWishlisted = (appState.state.wishlist || []).includes(p.id);
+  const pImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
+  const isCustom = p.id && p.id.startsWith("prod-");
 
   return `
-    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col md:flex-row items-center gap-5">
+    <div class="bg-slate-900/90 rounded-2xl border border-slate-800 hover:border-cyan-500/50 p-4.5 shadow-xl hover:shadow-cyan-500/10 transition duration-300 flex flex-col md:flex-row items-center gap-5 backdrop-blur-sm group">
       <!-- Thumbnail & Badges -->
-      <div class="relative w-full md:w-48 h-40 shrink-0 select-none cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
-        ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">NEW</span>` : ''}
-        ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
-        <img src="${p.images[0]}" alt="${p.name}" class="w-full h-full object-cover rounded-xl border border-slate-100">
-        <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-0.5 rounded">
-          ${p.specs?.warranty || '1 Year Warranty'}
-        </div>
+      <div class="relative w-full md:w-52 h-44 shrink-0 select-none cursor-pointer overflow-hidden rounded-xl bg-slate-950/60 border border-slate-800" onclick="appState.setView('product', { product: '${p.id}' })">
+        ${p.isCrazyDeal ? `
+          <span class="absolute top-2 left-2 bg-gradient-to-r from-red-600 to-amber-600 text-white text-[9.5px] font-black px-2 py-0.5 rounded-full shadow-md z-10">🔥 ${p.discount || 'DEAL'}</span>
+        ` : (isCustom || p.isNew ? `
+          <span class="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-black text-[9.5px] px-2 py-0.5 rounded-full shadow-md z-10">✨ NEW IN STOCK</span>
+        ` : `
+          <span class="absolute top-2 left-2 bg-slate-800/90 border border-slate-700 text-cyan-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow z-10">1-Yr Warranty</span>
+        `)}
+        
+        <img src="${pImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
       </div>
 
       <!-- Center Info -->
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-[10px] font-extrabold uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${p.brand}</span>
-          <span class="text-[10px] text-slate-400 font-medium">${p.category}</span>
-          <span class="ml-auto text-amber-500 font-bold text-xs">⭐ ${p.rating}</span>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-[10px] font-extrabold uppercase bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 px-2.5 py-0.5 rounded-full">${p.brand || 'Lapro'}</span>
+          <span class="text-[10px] text-slate-400 font-medium">${p.category || 'Hardware'}</span>
+          <span class="ml-auto text-amber-300 font-bold text-xs">★ 5.0 (Certified)</span>
         </div>
-        <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-sm text-slate-900 hover:text-blue-600 cursor-pointer line-clamp-2 leading-snug mb-2">
+        <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-sm text-white group-hover:text-cyan-300 cursor-pointer line-clamp-2 leading-snug mb-2 transition">
           ${p.name}
         </h3>
         
         <!-- Specs pills -->
         <div class="flex flex-wrap gap-1.5 mb-3">
-          ${(p.features || []).slice(0, 3).map(f => `
-            <span class="bg-slate-50 border border-slate-200 text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded-full">${f}</span>
+          ${(p.features || [p.processor, p.generation, p.ram, p.storage].filter(Boolean)).slice(0, 3).map(f => `
+            <span class="bg-slate-950 border border-slate-800 text-slate-300 text-[10px] font-medium px-2.5 py-0.5 rounded-full">${f}</span>
           `).join("")}
         </div>
 
         <div class="flex items-baseline gap-2.5">
-          <span class="text-teal-700 font-black text-lg">₹ ${p.price.toLocaleString('en-IN')}.00</span>
-          ${p.originalPrice > p.price ? `<span class="text-xs text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
+          <span class="text-cyan-400 font-black text-lg font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}.00</span>
+          ${p.originalPrice && p.originalPrice > p.price ? `<span class="text-xs text-slate-500 line-through font-mono">₹ ${Number(p.originalPrice).toLocaleString('en-IN')}.00</span>` : ''}
         </div>
 
         ${inCart ? `
-          <div class="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
-            <span>✓ Added to Cart</span>
-            <span class="font-normal text-emerald-600">(${cartItem?.quantity || 1} item${(cartItem?.quantity || 1) > 1 ? 's' : ''})</span>
+          <div class="mt-2.5 inline-flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+            <span>✓ In Cart (${cartItem?.quantity || 1})</span>
           </div>
         ` : ''}
       </div>
 
       <!-- Actions Column -->
-      <div class="w-full md:w-44 shrink-0 flex flex-col gap-2 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-100 md:pl-4">
+      <div class="w-full md:w-44 shrink-0 flex flex-col gap-2 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-slate-800 md:pl-4">
         ${!inCart ? `
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-3 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
+          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-lg shadow-blue-900/40 inline-flex items-center justify-center gap-2">
             <span>🛒</span> <span>ADD TO CART</span>
           </button>
         ` : `
-          <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
-            <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-8 h-8 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Decrease Quantity">
+          <div class="flex items-center justify-between bg-slate-950 border border-cyan-500/40 text-white rounded-xl p-1 shadow-md font-bold text-xs">
+            <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Decrease Quantity">
               −
             </button>
-            <div class="px-2 text-center font-mono font-black text-xs text-white">
+            <div class="px-2 text-center font-mono font-black text-xs text-cyan-300">
               <span>${cartItem.quantity}</span>
-              <span class="text-[10px] font-medium text-blue-100 block -mt-0.5">in cart</span>
+              <span class="text-[9px] font-medium text-slate-400 block -mt-0.5">in cart</span>
             </div>
-            <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-8 h-8 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Increase Quantity">
+            <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 active:scale-90 text-white rounded-lg flex items-center justify-center text-base font-black transition" title="Increase Quantity">
               +
             </button>
           </div>
-          <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
-            <span>⚡</span> Continue to Pay ➔
-          </button>
-          <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
-            <span>🛒</span> View Cart
+          <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/50">
+            <span>⚡</span> Pay ➔
           </button>
         `}
 
         <div class="flex gap-1.5">
-          <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg py-1.5 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
-            ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500 font-bold">❤️ Saved</span>' : '<span class="text-slate-400">🤍 Wishlist</span>'}
+          <button onclick="handleToggleWishlist(event, '${p.id}')" class="flex-1 border border-slate-800 bg-slate-950/80 hover:bg-slate-800 text-slate-300 rounded-xl py-2 text-xs transition flex items-center justify-center gap-1" title="Wishlist">
+            ${isWishlisted ? '<span class="text-red-400 font-bold">❤️ Saved</span>' : '<span class="text-slate-400">🤍 Wishlist</span>'}
           </button>
-          <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs" title="View Details">👁</button>
+          <button onclick="appState.setView('product', { product: '${p.id}' })" class="px-3 border border-slate-800 bg-slate-950/80 hover:bg-slate-800 text-slate-300 rounded-xl text-xs" title="View Details">👁</button>
         </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderGridCard(p) {
-  const inCart = (appState.state.cart || []).some(item => item.id === p.id);
-  const cartItem = (appState.state.cart || []).find(item => item.id === p.id);
-
-  return `
-    <div class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group relative">
-      <button onclick="handleToggleWishlist(event, '${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center text-xs transition z-10 hover:scale-110" title="Wishlist">
-        ${(appState.state.wishlist || []).includes(p.id) ? '<span class="text-red-500">❤️</span>' : '<span class="text-slate-400">🤍</span>'}
-      </button>
-
-      <div>
-        <div class="relative mb-3 select-none cursor-pointer" onclick="appState.setView('product', { product: '${p.id}' })">
-          ${p.isNew ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">NEW</span>` : ''}
-          ${p.discount && p.discount !== '0% OFF' ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">${p.discount}</span>` : ''}
-          <img src="${p.images[0]}" alt="${p.name}" class="w-full h-44 object-cover rounded-2xl border border-slate-100 group-hover:scale-102 transition duration-300">
-        </div>
-        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">${p.brand} • ${p.category}</div>
-        <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-slate-900 hover:text-blue-600 cursor-pointer line-clamp-2 leading-snug mb-2">${p.name}</h3>
-        <div class="flex items-baseline gap-2 mb-2">
-          <span class="text-teal-700 font-black text-base">₹ ${p.price.toLocaleString('en-IN')}.00</span>
-          ${p.originalPrice > p.price ? `<span class="text-[11px] text-red-500 line-through">₹ ${p.originalPrice.toLocaleString('en-IN')}.00</span>` : ''}
-        </div>
-        ${inCart ? `
-          <div class="mb-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-lg">
-            <span>✓ Added to Cart (${cartItem?.quantity || 1})</span>
-          </div>
-        ` : ''}
-      </div>
-
-      <div class="space-y-2">
-        ${!inCart ? `
-          <button onclick="handleAddToCart(event, '${p.id}', 1)" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-md shadow-blue-500/20 inline-flex items-center justify-center gap-2">
-            <span>🛒</span> <span>ADD TO CART</span>
-          </button>
-        ` : `
-          <div class="flex items-center justify-between bg-blue-600 text-white rounded-xl p-1 shadow-md font-bold text-xs">
-            <button onclick="handleUpdateCartQty(event, '${p.id}', -1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Decrease">
-              −
-            </button>
-            <div class="px-1 text-center font-mono font-black text-xs text-white">
-              <span>${cartItem.quantity}</span>
-              <span class="text-[9px] font-medium text-blue-100 block -mt-0.5">in cart</span>
-            </div>
-            <button onclick="handleUpdateCartQty(event, '${p.id}', 1)" class="w-7 h-7 bg-blue-700 hover:bg-blue-800 active:scale-90 text-white rounded-lg flex items-center justify-center text-sm font-black transition" title="Increase">
-              +
-            </button>
-          </div>
-          <button onclick="appState.setView('checkout')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20" title="Continue directly to payment and checkout">
-            <span>⚡</span> Continue to Pay ➔
-          </button>
-          <button onclick="appState.setView('cart')" class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-[11px] py-1 rounded-xl transition flex items-center justify-center gap-1">
-            <span>🛒</span> View Cart
-          </button>
-        `}
-        <button onclick="appState.setView('product', { product: '${p.id}' })" class="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs py-1.5 rounded-xl transition">
-          View Specifications
-        </button>
       </div>
     </div>
   `;
@@ -3014,6 +3104,24 @@ function openAddProductModal() {
   `;
 }
 
+function normalizeBrandName(str) {
+  if (!str) return "Lapro";
+  const trimmed = str.trim();
+  const lower = trimmed.toLowerCase();
+  if (lower === "dell") return "Dell";
+  if (lower === "hp") return "HP";
+  if (lower === "lenovo") return "Lenovo";
+  if (lower === "apple") return "Apple";
+  if (lower === "asus") return "ASUS";
+  if (lower === "samsung") return "Samsung";
+  if (lower === "acer") return "Acer";
+  if (lower === "tp-link" || lower === "tplink") return "TP-Link";
+  if (lower === "kingston") return "Kingston";
+  if (lower === "logitech") return "Logitech";
+  if (lower === "microsoft") return "Microsoft";
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
 function handleCreateProductSubmit(event) {
   event.preventDefault();
   const nameEl = document.getElementById("new-prod-name");
@@ -3044,7 +3152,7 @@ function handleCreateProductSubmit(event) {
   const generationVal = (genEl ? genEl.value : "").trim() || "";
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
-  const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
+  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
   const nameVal = (nameEl ? nameEl.value : "New Product").trim() || "New Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
   const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
@@ -3084,7 +3192,7 @@ function handleCreateProductSubmit(event) {
   const created = appState.addProduct(newProduct);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product "${created.name}" added to ${categoryVal} & saved to database!`, "✅", "success");
+  showToast(`Product "${created.name}" added to ${categoryVal} & saved to ${brandVal} showcase!`, "✅", "success");
 }
 
 function openEditProductModal(prodId) {
@@ -3232,7 +3340,7 @@ function handleEditProductSubmit(event, prodId) {
   const generationVal = (genEl ? genEl.value : "").trim() || "";
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
-  const brandVal = (brandEl ? brandEl.value : "Lapro").trim() || "Lapro";
+  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
   const nameVal = (nameEl ? nameEl.value : "").trim() || "Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
   const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";

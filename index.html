@@ -12,198 +12,50 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <!-- Custom CSS for layout, accessibility, and print layouts -->
+  <!-- Custom CSS for dark luxury layout, typography, and accessibility -->
   <style>
     :root {
-      --ink: #10213f;
-      --muted: #64748b;
-      --electric: #1769ff;
-      --mint: #18b99a;
-      --paper: #f5f8fc;
-      --line: #dce5f0;
-      --shadow-soft: 0 18px 50px rgba(15, 36, 69, .08);
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --electric: #3b82f6;
+      --mint: #10b981;
+      --paper: #090d16;
+      --surface: #0f172a;
+      --surface-card: #131d33;
+      --line: #1e293b;
+      --line-bright: #334155;
+      --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.12);
     }
 
     body {
-      background:
-        radial-gradient(circle at 8% 10%, rgba(23, 105, 255, .08), transparent 26rem),
-        radial-gradient(circle at 92% 32%, rgba(24, 185, 154, .07), transparent 24rem),
-        var(--paper);
-      color: var(--ink);
+      background-color: #090d16;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(59, 130, 246, 0.14), transparent 28rem),
+        radial-gradient(circle at 90% 40%, rgba(16, 185, 129, 0.1), transparent 26rem),
+        radial-gradient(circle at 50% 85%, rgba(147, 51, 234, 0.08), transparent 30rem);
+      background-attachment: fixed;
+      color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     h1, h2, h3, h4, button, input, select, textarea { font-family: inherit; }
 
     header {
-      background: rgba(255, 255, 255, .9) !important;
-      border-color: rgba(220, 229, 240, .9) !important;
-      box-shadow: 0 10px 32px rgba(16, 33, 63, .06) !important;
-      backdrop-filter: blur(18px);
+      background: rgba(11, 17, 32, 0.92) !important;
+      border-color: rgba(30, 41, 59, 0.9) !important;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45) !important;
+      backdrop-filter: blur(20px);
     }
 
     header nav {
-      background: rgba(255, 255, 255, .78) !important;
+      background: rgba(15, 23, 42, 0.88) !important;
+      border-color: rgba(30, 41, 59, 0.8) !important;
     }
 
     #main-content {
       max-width: 1440px;
-      padding-top: 2.25rem;
-      padding-bottom: 3.5rem;
-    }
-
-    #main-content .group {
-      transition: border-color .2s ease, box-shadow .2s ease;
-    }
-
-    #main-content > .relative.bg-gradient-to-r {
-      min-height: 500px;
-      border: 1px solid rgba(125, 211, 252, .22);
-      background-image: linear-gradient(90deg, rgba(3, 12, 28, .98) 0%, rgba(5, 20, 42, .9) 42%, rgba(8, 34, 61, .52) 100%), url('https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=1800&auto=format&fit=crop&q=88') !important;
-      background-size: cover;
-      background-position: center right;
-      box-shadow: 0 28px 70px rgba(14, 53, 96, .24) !important;
-      isolation: isolate;
-    }
-
-    #main-content > .relative.bg-gradient-to-r::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      opacity: .25;
-      background-image: linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
-      background-size: 34px 34px;
-      mask-image: linear-gradient(90deg, black, transparent 75%);
-    }
-
-    #main-content > .relative.bg-gradient-to-r h1 {
-      font-size: clamp(2.4rem, 5vw, 4.7rem);
-      letter-spacing: -.055em;
-      line-height: .98;
-    }
-
-    #main-content > .relative.bg-gradient-to-r h1 span {
-      background-image: linear-gradient(90deg, #7dd3fc, #5eead4 55%, #fde68a) !important;
-    }
-
-    #main-content > .relative.bg-gradient-to-r .bg-slate-900\/90 {
-      background: rgba(5, 17, 35, .76) !important;
-      border-color: rgba(148, 163, 184, .28) !important;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, .3) !important;
-    }
-
-    #main-content .rounded-3xl.border-slate-200 {
-      box-shadow: var(--shadow-soft) !important;
-      border-color: rgba(220, 229, 240, .95) !important;
-    }
-
-    #main-content .rounded-3xl.border-slate-200:hover {
-      border-color: rgba(23, 105, 255, .35) !important;
-      box-shadow: 0 24px 54px rgba(15, 65, 125, .13) !important;
-    }
-
-    #main-content img {
-      filter: saturate(1.03) contrast(1.02);
-    }
-
-    #main-content .grid > .group {
-      background-color: rgba(255, 255, 255, .72);
-      box-shadow: 0 12px 28px rgba(15, 36, 69, .06);
-    }
-
-    #main-content .category-collection {
-      background: rgba(255, 255, 255, .58);
-      border: 1px solid rgba(220, 229, 240, .8);
-      border-radius: 26px;
-      padding: 1.2rem;
-      box-shadow: 0 18px 45px rgba(15, 36, 69, .045);
-    }
-
-    #main-content .category-card {
-      min-height: 142px;
-      align-items: flex-start;
-      text-align: left;
-      padding: 1.15rem;
-      position: relative;
-      overflow: hidden;
-      background-size: cover;
-      background-position: center;
-    }
-
-    #main-content .category-card::after {
-      content: '→';
-      position: absolute;
-      right: 1rem;
-      bottom: .9rem;
-      color: currentColor;
-      font-size: 1.1rem;
-      font-weight: 700;
-      opacity: .55;
-    }
-
-    #main-content .category-card .category-icon {
-      width: 2.7rem;
-      height: 2.7rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, .72);
-      border: 1px solid rgba(255, 255, 255, .9);
-      border-radius: 14px;
-      box-shadow: 0 8px 16px rgba(15, 36, 69, .08);
-    }
-
-    #main-content .category-card .category-description {
-      color: #64748b;
-      font-size: .68rem;
-      line-height: 1.35;
-      margin-top: .25rem;
-      max-width: 14rem;
-    }
-
-    .catalog-layout {
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-      align-items: start;
-      gap: 1.5rem;
-    }
-
-    .catalog-sidebar {
-      width: 240px;
-      position: sticky;
-      top: 7rem;
-      max-height: calc(100vh - 8rem);
-      overflow-y: auto;
-      font-size: .78rem;
-    }
-
-    .catalog-sidebar > div {
-      padding: .8rem;
-    }
-
-    .catalog-results {
-      min-width: 0;
-    }
-
-    @media (max-width: 1023px) {
-      .catalog-layout { grid-template-columns: 1fr; }
-      .catalog-sidebar {
-        width: 100%;
-        position: static;
-        max-height: none;
-        overflow: visible;
-      }
-    }
-
-    @media (max-width: 640px) {
-      #main-content .category-collection { padding: .8rem; border-radius: 20px; }
-      #main-content .category-card { min-height: 124px; }
-    }
-
-    #main-content .grid > .group:hover,
-    #main-content .rounded-3xl.border-slate-200:hover {
-      outline: 2px solid rgba(23, 105, 255, .12);
-      outline-offset: 2px;
+      padding-top: 1.5rem;
+      padding-bottom: 4rem;
     }
 
     /* Custom Scrollbar */
@@ -212,14 +64,14 @@
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: #090d16;
     }
     ::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
+      background: #1e293b;
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
+      background: #334155;
     }
     
     /* Animation for active modals */
@@ -227,7 +79,7 @@
       animation: fadeIn 0.2s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
+      from { opacity: 0; transform: scale(0.96); }
       to { opacity: 1; transform: scale(1); }
     }
 
@@ -248,6 +100,8 @@
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        background: white !important;
+        color: black !important;
       }
       .no-print {
         display: none !important;
@@ -255,79 +109,95 @@
     }
   </style>
 </head>
-<body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+<body class="bg-[#090D16] text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
 
-  <!-- Lapro Solutions Main Header -->
-  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+  <!-- Bangalore Service Area Update Ticker (Topmost Bar) -->
+  <div class="bg-gradient-to-r from-blue-950/90 via-slate-900/90 to-indigo-950/90 text-cyan-300 text-[11px] font-semibold py-1.5 px-4 border-b border-slate-800 flex items-center justify-between select-none">
+    <div class="max-w-7xl mx-auto w-full flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 overflow-hidden">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+        <span class="font-black text-white uppercase tracking-wider text-[10px] bg-blue-600/40 border border-blue-400/30 px-2 py-0.5 rounded shrink-0">Bangalore Onsite</span>
+        <span class="truncate text-slate-300 text-[11px]">
+          <strong class="text-cyan-300">Service Area Update:</strong> HSR Layout • Koramangala • Indiranagar • Electronic City • Whitefield • Marathahalli • Bellandur • BTM • Jayanagar • Hebbal • All Bangalore Doorstep
+        </span>
+      </div>
+      <div class="hidden md:flex items-center gap-4 shrink-0 text-slate-400 text-[11px]">
+        <span class="flex items-center gap-1.5 text-emerald-400 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 60-Min Pickup</span>
+        <span class="flex items-center gap-1 text-amber-300 font-bold">★★★★★ 5.0 (4,800+ Reviews)</span>
+        <a href="tel:7996389264" class="text-cyan-300 font-bold hover:text-white transition">📞 +91 7996389264</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lapro Solutions Main Header (Dark Luxury Frosted Glass) -->
+  <header class="bg-slate-950/90 sticky top-0 z-40 border-b border-slate-800 shadow-xl backdrop-blur-md">
     <!-- Main Header Bar -->
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex justify-between items-center gap-4">
       <!-- Lapro Solutions Brand Logo -->
       <div onclick="appState.setView('home')" class="flex items-center gap-3 cursor-pointer select-none shrink-0 group">
-        <img src="logo.png?v=5" alt="Lapro Solutions" class="rounded-xl shadow-sm border border-slate-700 group-hover:scale-105 transition duration-200" style="height:48px;width:48px;object-fit:contain;background:#000;padding:2px;display:block;">
+        <img src="logo.png?v=5" alt="Lapro Solutions" class="rounded-xl shadow-md border border-cyan-500/30 group-hover:border-cyan-400 group-hover:scale-105 transition duration-200" style="height:46px;width:46px;object-fit:contain;background:#030712;padding:2px;display:block;">
         <div class="hidden sm:block">
-          <div class="flex items-center tracking-tight font-black text-xl text-slate-900 leading-tight">
-            <span>LAPRO</span><span class="text-blue-600 ml-1">SOLUTIONS</span>
+          <div class="flex items-center tracking-tight font-black text-xl text-white leading-tight">
+            <span>LAPRO</span><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 ml-1">SOLUTIONS</span>
           </div>
-          <span class="text-[9.5px] text-slate-500 font-bold tracking-wider block uppercase">Laptop Sales | Service | Upgrades</span>
+          <span class="text-[9.5px] text-slate-400 font-bold tracking-wider block uppercase">Laptop Sales • Service • Enterprise IT</span>
         </div>
       </div>
 
-
-      <!-- Search Bar + Home Button + AI Assistant Button -->
+      <!-- Search Bar + Home Button + WhatsApp Button -->
       <div class="flex-1 max-w-xl hidden md:flex items-center gap-2">
-        <button onclick="appState.setView('home')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-2 rounded-full border border-blue-200 transition flex items-center gap-1.5 shadow-sm shrink-0" title="Go to Home">
+        <button onclick="appState.setView('home')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs px-3.5 py-2 rounded-full border border-slate-700 transition flex items-center gap-1.5 shadow-sm shrink-0" title="Go to Home">
           <span>🏠</span> Home
         </button>
         <form id="search-form" onsubmit="handleGlobalSearch(event)" class="relative flex-1">
-          <input type="text" id="search-input" placeholder="Search laptops, desktops, servers, parts, specs..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 rounded-full px-5 py-2 pr-10 focus:outline-none focus:border-blue-600 focus:bg-white transition text-xs shadow-inner">
-          <button type="submit" class="absolute right-3.5 top-2.5 text-slate-500 hover:text-blue-600 transition">
+          <input type="text" id="search-input" placeholder="Search Dell, HP, Lenovo, MacBook, RAM, SSD, services..." class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-400 rounded-full px-5 py-2 pr-10 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition text-xs shadow-inner">
+          <button type="submit" class="absolute right-3.5 top-2.5 text-slate-400 hover:text-cyan-400 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </button>
         </form>
-        <a href="https://wa.me/917996389264?text=Hello%2C%20I%27m%20interested%20in%20your%20laptop%20services.%20I%20would%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer" class="bg-green-50 hover:bg-green-100 text-green-700 font-bold text-xs px-3 py-2 rounded-full border border-green-200 transition flex items-center gap-1.5 shadow-sm shrink-0" title="Chat with Lapro Solutions on WhatsApp">
-          <span class="text-base">◉</span> WhatsApp
+        <a href="https://wa.me/917996389264?text=Hello%20Lapro%20Solutions%2C%20I%20would%20like%20to%20inquire%20about%20laptops%20and%20doorstep%20repair%20services." target="_blank" rel="noopener noreferrer" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 font-bold text-xs px-3 py-2 rounded-full border border-emerald-600/40 transition flex items-center gap-1.5 shadow-sm shrink-0" title="Chat on WhatsApp">
+          <span class="text-base text-emerald-400">●</span> WhatsApp
         </a>
-        </button>
       </div>
 
       <!-- Quick Shortcuts: LP Coins, Cart, Wishlist, Sign In -->
       <div class="flex items-center gap-3 select-none">
         <!-- LP Coins Loyalty Badge -->
-        <div class="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-black text-[10px] shadow-sm cursor-pointer hover:bg-amber-200 transition" title="Lapro Reward Coins (LP COINS)">
-          <span class="text-amber-700 font-black">LP</span>
+        <div class="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-black text-[10px] shadow-sm cursor-pointer hover:bg-amber-500/20 transition" title="Lapro Reward Coins (LP COINS)">
+          <span class="text-amber-400 font-black">LP</span>
         </div>
 
         <!-- Cart Icon Button -->
-        <button onclick="appState.setView('cart')" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Shopping Cart">
+        <button onclick="appState.setView('cart')" class="relative p-2 hover:bg-slate-800 rounded-full transition text-slate-300 hover:text-white" title="Shopping Cart">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          <span id="cart-badge" class="absolute -top-1 -right-1 bg-slate-900 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white">0</span>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-cyan-500 text-black font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-slate-900">0</span>
         </button>
 
         <!-- Wishlist Icon Button -->
-        <button onclick="appState.setView('wishlist')" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Wishlist">
+        <button onclick="appState.setView('wishlist')" class="relative p-2 hover:bg-slate-800 rounded-full transition text-slate-300 hover:text-white" title="Wishlist">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-          <span id="wishlist-badge" class="absolute -top-1 -right-1 bg-blue-600 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white">0</span>
+          <span id="wishlist-badge" class="absolute -top-1 -right-1 bg-blue-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-slate-900">0</span>
         </button>
 
         <!-- Notifications -->
         <div class="relative">
-          <button onclick="toggleNotificationsMenu(event)" class="relative p-2 hover:bg-slate-100 rounded-full transition text-slate-700" title="Notifications">
+          <button onclick="toggleNotificationsMenu(event)" class="relative p-2 hover:bg-slate-800 rounded-full transition text-slate-300 hover:text-white" title="Notifications">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white hidden">0</span>
+            <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-slate-900 hidden">0</span>
           </button>
 
-          <!-- Notifications Dropdown Overlay Menu (Mobile & Desktop Responsive) -->
-          <div id="notif-dropdown" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-16 sm:top-full mt-1 sm:mt-2 sm:w-80 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
-            <div class="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/70 rounded-t-2xl">
-              <span class="font-black text-sm text-slate-900 flex items-center gap-1.5">🔔 Notifications</span>
+          <!-- Notifications Dropdown Overlay Menu -->
+          <div id="notif-dropdown" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-16 sm:top-full mt-1 sm:mt-2 sm:w-80 bg-slate-900 text-slate-100 rounded-2xl shadow-2xl border border-slate-800 py-2 z-50">
+            <div class="px-4 py-2.5 border-b border-slate-800 flex justify-between items-center bg-slate-950/70 rounded-t-2xl">
+              <span class="font-black text-sm text-white flex items-center gap-1.5">🔔 Notifications</span>
               <div class="flex items-center gap-2 text-xs">
-                <button onclick="appState.markAllNotificationsRead()" class="text-blue-600 hover:underline font-semibold">Mark read</button>
-                <span class="text-slate-300">|</span>
-                <button onclick="appState.clearNotifications()" class="text-red-500 hover:underline font-semibold">Clear</button>
-                <button onclick="toggleNotificationsMenu(event)" class="sm:hidden text-slate-400 hover:text-slate-700 ml-1.5 font-bold text-sm">✕</button>
+                <button onclick="appState.markAllNotificationsRead()" class="text-cyan-400 hover:underline font-semibold">Mark read</button>
+                <span class="text-slate-600">|</span>
+                <button onclick="appState.clearNotifications()" class="text-red-400 hover:underline font-semibold">Clear</button>
+                <button onclick="toggleNotificationsMenu(event)" class="sm:hidden text-slate-400 hover:text-white ml-1.5 font-bold text-sm">✕</button>
               </div>
             </div>
-            <div id="notif-items" class="max-h-72 overflow-y-auto divide-y divide-slate-100">
+            <div id="notif-items" class="max-h-72 overflow-y-auto divide-y divide-slate-800">
               <!-- Populated by JS -->
             </div>
           </div>
@@ -341,118 +211,118 @@
     </div>
 
     <!-- Navigation Menu Categories Row with Working Dropdowns for All Categories -->
-    <nav class="bg-white border-t border-slate-200 px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-none">
-      <div class="max-w-7xl mx-auto flex items-center gap-5 text-[13px] font-semibold text-slate-700">
+    <nav class="bg-slate-900/90 border-t border-slate-800 px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-none">
+      <div class="max-w-7xl mx-auto flex items-center gap-5 text-[13px] font-semibold text-slate-300">
         
         <!-- Desktops Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Desktops', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="desktops">
-            Desktops <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Desktops', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="desktops">
+            Desktops <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Desktops', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Desktops</button>
-            <button onclick="appState.setSubcategoryFilter('Desktops', 'Mini PCs')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Mini & Tiny PCs</button>
-            <button onclick="appState.setSubcategoryFilter('Desktops', 'All-in-One Desktops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">All-in-One Desktops</button>
-            <button onclick="appState.setSubcategoryFilter('Desktops', 'Gaming Desktops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gaming Desktops</button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Desktops</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'Mini PCs')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Mini & Tiny PCs</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'All-in-One Desktops')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">All-in-One Desktops</button>
+            <button onclick="appState.setSubcategoryFilter('Desktops', 'Gaming Desktops')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Gaming Desktops</button>
           </div>
         </div>
 
         <!-- Laptops Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Laptops', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="laptops">
-            Laptops <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Laptops', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="laptops">
+            Laptops <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Laptops', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Laptops</button>
-            <button onclick="appState.setSubcategoryFilter('Laptops', 'Business Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Business Laptops (Latitude / ThinkPad)</button>
-            <button onclick="appState.setSubcategoryFilter('Laptops', 'Gaming Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gaming Laptops (ROG / IdeaPad)</button>
-            <button onclick="appState.setSubcategoryFilter('Laptops', 'MacBooks')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Apple MacBooks (M1/M2)</button>
-            <button onclick="appState.setSubcategoryFilter('Laptops', 'Consumer Laptops')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Consumer & Student Laptops</button>
+          <div class="absolute left-0 mt-1.5 w-52 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Laptops', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Laptops</button>
+            <button onclick="appState.setBrandFilter('Dell')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Dell Latitude / Precision</button>
+            <button onclick="appState.setBrandFilter('HP')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">HP EliteBook / ProBook</button>
+            <button onclick="appState.setBrandFilter('Lenovo')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Lenovo ThinkPad / Legion</button>
+            <button onclick="appState.setBrandFilter('Apple')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Apple MacBooks (M1/M2)</button>
           </div>
         </div>
         
         <!-- Accessories Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Accessories', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="accessories">
-            Accessories <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Accessories', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="accessories">
+            Accessories <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Accessories', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Accessories</button>
-            <button onclick="appState.setSubcategoryFilter('Accessories', 'Backpacks & Cases')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Backpacks & Cases</button>
-            <button onclick="appState.setSubcategoryFilter('Accessories', 'Keyboards & Mouse')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Keyboards & Mouse Combos</button>
-            <button onclick="appState.setSubcategoryFilter('Accessories', 'Docking Stations')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Universal Docking Stations</button>
-            <button onclick="appState.setSubcategoryFilter('Accessories', 'Laptop Accessories')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Cooling Pads & Stands</button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Accessories</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Backpacks & Cases')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Backpacks & Cases</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Keyboards & Mouse')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Keyboards & Mouse Combos</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Docking Stations')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Universal Docking Stations</button>
+            <button onclick="appState.setSubcategoryFilter('Accessories', 'Laptop Accessories')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Cooling Pads & Stands</button>
           </div>
         </div>
 
         <!-- Peripherals Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Peripherals', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="peripherals">
-            Peripherals <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Peripherals', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="peripherals">
+            Peripherals <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Peripherals', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Peripherals</button>
-            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Monitors')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Monitors & Displays</button>
-            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Headphones')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Wireless Headsets</button>
-            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Speakers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Speaker Systems</button>
-            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Printers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Laser & Inkjet Printers</button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Peripherals</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Monitors')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Monitors & Displays</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Headphones')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Wireless Headsets</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Speakers')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Speaker Systems</button>
+            <button onclick="appState.setSubcategoryFilter('Peripherals', 'Printers')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Laser & Inkjet Printers</button>
           </div>
         </div>
 
         <!-- Storages Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Storages', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="storages">
-            Storages <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Storages', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="storages">
+            Storages <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-44 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Storages', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Storages</button>
-            <button onclick="appState.setSubcategoryFilter('Storages', 'SSD')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">NVMe & SATA SSDs</button>
-            <button onclick="appState.setSubcategoryFilter('Storages', 'HDD')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Internal Hard Drives</button>
-            <button onclick="appState.setSubcategoryFilter('Storages', 'External Storage')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Portable SSDs & Flash</button>
+          <div class="absolute left-0 mt-1.5 w-44 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Storages', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Storages</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'SSD')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">NVMe & SATA SSDs</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'HDD')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Internal Hard Drives</button>
+            <button onclick="appState.setSubcategoryFilter('Storages', 'External Storage')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Portable SSDs & Flash</button>
           </div>
         </div>
         
         <!-- Networking Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Networking', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="networking">
-            Networking <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Networking', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="networking">
+            Networking <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Networking', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Networking</button>
-            <button onclick="appState.setSubcategoryFilter('Networking', 'Routers & Access Points')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Routers & Access Points</button>
-            <button onclick="appState.setSubcategoryFilter('Networking', 'Gigabit Switches')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Gigabit & PoE Switches</button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Networking', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Networking</button>
+            <button onclick="appState.setSubcategoryFilter('Networking', 'Routers & Access Points')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Routers & Access Points</button>
+            <button onclick="appState.setSubcategoryFilter('Networking', 'Gigabit Switches')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Gigabit & PoE Switches</button>
           </div>
         </div>
 
         <!-- Servers & Workstations Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Servers & Workstations', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="servers">
-            Servers & Workstations <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Servers & Workstations', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="servers">
+            Servers & Workstations <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Servers & Workstations</button>
-            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Tower Servers')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Tower & Rack Servers</button>
-            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Workstation CPUs')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Precision & Z-Workstations</button>
+          <div class="absolute left-0 mt-1.5 w-52 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Servers & Workstations</button>
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Tower Servers')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Tower & Rack Servers</button>
+            <button onclick="appState.setSubcategoryFilter('Servers & Workstations', 'Workstation CPUs')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Precision & Z-Workstations</button>
           </div>
         </div>
 
         <!-- Software's Dropdown -->
         <div class="relative inline-block group">
-          <button onclick="appState.setView('catalog', { category: 'Software\'s', subcategory: 'All' })" class="hover:text-blue-600 transition flex items-center gap-1 nav-tab" data-view="softwares">
-            Software's <span class="text-[9px] text-slate-400 group-hover:text-blue-600">▾</span>
+          <button onclick="appState.setView('catalog', { category: 'Software\'s', subcategory: 'All' })" class="hover:text-cyan-400 transition flex items-center gap-1 nav-tab" data-view="softwares">
+            Software's <span class="text-[9px] text-slate-500 group-hover:text-cyan-400">▾</span>
           </button>
-          <div class="absolute left-0 mt-1.5 w-48 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-100 select-none">
-            <button onclick="appState.setSubcategoryFilter('Software\'s', 'All')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition font-bold">All Software</button>
-            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Operating Systems')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Windows 11 Pro Licenses</button>
-            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Office Suite')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Microsoft Office Lifetime</button>
-            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Security Software')" class="w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-600 transition">Antivirus & Cyber Security</button>
+          <div class="absolute left-0 mt-1.5 w-48 bg-slate-900 text-slate-200 rounded-xl shadow-2xl border border-slate-800 py-2 hidden group-hover:block z-50 text-xs font-medium divide-y divide-slate-800 select-none">
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'All')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition font-bold">All Software</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Operating Systems')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Windows 11 Pro Licenses</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Office Suite')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Microsoft Office Lifetime</button>
+            <button onclick="appState.setSubcategoryFilter('Software\'s', 'Security Software')" class="w-full text-left px-4 py-2 hover:bg-slate-800 hover:text-cyan-400 transition">Antivirus & Cyber Security</button>
           </div>
         </div>
 
-        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="hover:text-blue-600 transition text-sm font-bold">+</button>
+        <button onclick="appState.setView('catalog', { category: 'All', subcategory: 'All' })" class="hover:text-cyan-400 transition text-sm font-bold text-slate-400">+</button>
 
-        <!-- Services & Repair Tab (Kept Intact) -->
-        <button onclick="appState.setView('service')" class="ml-auto text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3.5 py-1.5 rounded-full border border-blue-200 transition text-xs shrink-0 shadow-sm" data-view="service">
+        <!-- Services & Repair Tab -->
+        <button onclick="appState.setView('service')" class="ml-auto text-cyan-300 hover:text-white font-bold flex items-center gap-1.5 bg-cyan-950/60 hover:bg-cyan-900/80 px-3.5 py-1.5 rounded-full border border-cyan-500/40 transition text-xs shrink-0 shadow-sm" data-view="service">
           <span>🛠️</span> Services & Repair
         </button>
       </div>
@@ -460,9 +330,9 @@
   </header>
 
   <!-- Mobile Search Bar -->
-  <div class="bg-white p-3 md:hidden shadow-inner border-b border-slate-200 flex">
+  <div class="bg-slate-950 p-3 md:hidden border-b border-slate-800 flex">
     <form onsubmit="handleGlobalSearch(event)" class="relative w-full">
-      <input type="text" id="mobile-search-input" placeholder="Search Lapro catalog..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 rounded-full px-4 py-2 pr-10 focus:outline-none focus:border-blue-600 transition text-xs">
+      <input type="text" id="mobile-search-input" placeholder="Search Dell, HP, Lenovo, Mac, SSD, repairs..." class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-400 rounded-full px-4 py-2 pr-10 focus:outline-none focus:border-cyan-400 transition text-xs">
       <button type="submit" class="absolute right-3 top-2.5 text-slate-400">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </button>
@@ -493,82 +363,82 @@
   </div>
 
   <!-- Comparison Modal Dialog -->
-  <div id="compare-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[85vh] flex flex-col shadow-2xl fade-in overflow-hidden">
-      <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
-        <h3 class="text-xl font-bold">Laptop Specifications Comparison</h3>
-        <button onclick="closeComparisonModal()" class="text-slate-200 hover:text-white p-1 hover:bg-slate-800 rounded-lg">
+  <div id="compare-modal" class="fixed inset-0 bg-black/80 items-center justify-center p-4 z-50 hidden backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 text-slate-100 rounded-2xl max-w-5xl w-full max-h-[85vh] flex flex-col shadow-2xl fade-in overflow-hidden">
+      <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950 text-white">
+        <h3 class="text-xl font-bold flex items-center gap-2"><span>📊</span> Laptop Specifications Comparison</h3>
+        <button onclick="closeComparisonModal()" class="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="p-6 overflow-auto flex-1" id="compare-table-container">
+      <div class="p-6 overflow-auto flex-1 text-slate-200" id="compare-table-container">
         <!-- Render Comparison Grid by JS -->
       </div>
     </div>
   </div>
 
-  <!-- CUSTOMER / ADMIN AUTH MODAL -->
-  <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 fade-in relative border border-slate-100">
-      <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+  <!-- CUSTOMER / ADMIN AUTH MODAL (Luxury Dark Themed) -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/80 items-center justify-center p-4 z-50 hidden backdrop-blur-md">
+    <div class="bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl p-6 fade-in relative border border-slate-800 text-slate-100">
+      <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
 
       <!-- Modal Header with Lapro Logo -->
       <div class="mb-4 text-center">
-        <img src="lapro-logo.png" alt="Lapro Solutions" class="w-16 h-16 object-contain mx-auto mb-2 rounded-2xl bg-black p-1 border border-slate-700 shadow-md">
-        <h3 class="font-extrabold text-lg text-slate-900" id="auth-modal-title">Customer Account</h3>
-        <p class="text-xs text-slate-500" id="auth-modal-subtitle">Sign in to track orders, manage doorstep repairs & checkout</p>
+        <img src="logo.png?v=5" alt="Lapro Solutions" class="w-16 h-16 object-contain mx-auto mb-2 rounded-2xl bg-black p-1 border border-cyan-500/30 shadow-md">
+        <h3 class="font-black text-lg text-white" id="auth-modal-title">Customer Account</h3>
+        <p class="text-xs text-slate-400" id="auth-modal-subtitle">Sign in to track orders, manage doorstep repairs & checkout</p>
       </div>
 
       <!-- Toggle Customer Login vs Register tabs -->
-      <div class="flex border-b border-slate-200 mb-5 text-xs">
-        <button id="tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2.5 text-center border-b-2 border-blue-600 font-bold text-blue-600">Customer Login</button>
-        <button id="tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-slate-400 font-medium hover:text-slate-600">New Register</button>
+      <div class="flex border-b border-slate-800 mb-5 text-xs">
+        <button id="tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2.5 text-center border-b-2 border-cyan-400 font-bold text-cyan-400">Customer Login</button>
+        <button id="tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-2.5 text-center border-b-2 border-transparent text-slate-400 font-medium hover:text-slate-200">New Register</button>
       </div>
 
       <!-- Customer Login Form -->
       <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
-          <input type="email" id="login-email" required placeholder="Enter your email address" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
+          <input type="email" id="login-email" required placeholder="Enter your email address" class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password <span class="text-red-500">*</span></label>
-          <input type="password" id="login-pass" required placeholder="Enter password" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
+          <input type="password" id="login-pass" required placeholder="Enter password" class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
         </div>
         <div class="flex justify-between items-center text-xs">
-          <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer">
-            <input type="checkbox" checked class="rounded text-blue-600 focus:ring-blue-600"> Remember me
+          <label class="flex items-center gap-1.5 text-slate-400 cursor-pointer">
+            <input type="checkbox" checked class="rounded bg-slate-950 border-slate-700 text-cyan-500 focus:ring-cyan-500"> Remember me
           </label>
-          <a href="javascript:void(0)" onclick="alert('Password reset link has been dispatched to your registered email.')" class="text-blue-600 hover:underline">Forgot Password?</a>
+          <a href="javascript:void(0)" onclick="alert('Password reset link has been dispatched to your registered email.')" class="text-cyan-400 hover:underline">Forgot Password?</a>
         </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Sign In</button>
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black py-2.5 px-4 rounded-lg shadow-lg transition text-sm">Sign In</button>
       </form>
 
       <!-- Customer Register Form -->
       <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name <span class="text-red-500">*</span></label>
-          <input type="text" id="reg-name" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. Ramesh Kumar">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name <span class="text-red-400">*</span></label>
+          <input type="text" id="reg-name" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. Ramesh Kumar">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
-          <input type="email" id="reg-email" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. ramesh.kumar@gmail.com">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
+          <input type="email" id="reg-email" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. ramesh.kumar@gmail.com">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number <span class="text-red-500">*</span></label>
-          <input type="tel" id="reg-phone" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="e.g. +91 98765 43210">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Mobile Number <span class="text-red-400">*</span></label>
+          <input type="tel" id="reg-phone" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. +91 98765 43210">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password <span class="text-red-500">*</span></label>
-          <input type="password" id="reg-pass" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-blue-600" placeholder="Create strong password">
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
+          <input type="password" id="reg-pass" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Create strong password">
         </div>
         <div class="flex items-center gap-1.5 text-xs py-1">
-          <input type="checkbox" id="reg-consent" required class="rounded text-blue-600">
-          <span class="text-slate-600">I agree to the <button type="button" onclick="appState.setView('privacy'); closeAuthModal();" class="underline hover:text-blue-700">Terms & Privacy Policy</button></span>
+          <input type="checkbox" id="reg-consent" required class="rounded bg-slate-950 border-slate-700 text-cyan-500">
+          <span class="text-slate-400">I agree to the <button type="button" onclick="appState.setView('privacy'); closeAuthModal();" class="underline text-cyan-400">Terms & Privacy Policy</button></span>
         </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm">Create Customer Account</button>
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black py-2.5 px-4 rounded-lg shadow-lg transition text-sm">Create Customer Account</button>
       </form>
     </div>
   </div>
@@ -663,6 +533,12 @@
       </div>
     </div>
   </footer>
+
+  <!-- Floating WhatsApp Action Pill -->
+  <a href="https://wa.me/917996389264?text=Hello%20Lapro%20Solutions%2C%20I%20would%20like%20to%20inquire%20about%20laptops%20and%20doorstep%20repair%20services." target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-40 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 border border-emerald-400/40 hover:scale-105 active:scale-95 transition group duration-200">
+    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.129-.533-1.838-.76-3.031-2.617-3.123-2.739-.092-.123-.746-.992-.746-1.893 0-.9.472-1.344.641-1.528.169-.184.368-.23.491-.23.123 0 .245.002.353.007.113.006.264-.043.413.315.153.368.522 1.272.568 1.364.046.092.077.2.015.322-.061.123-.092.2-.184.308-.092.107-.193.24-.276.322-.092.092-.188.193-.081.377.107.184.477.786 1.023 1.273.704.628 1.297.823 1.482.915.184.092.292.077.4-.046.107-.123.46-.537.583-.721.123-.184.246-.153.414-.092.169.061 1.074.507 1.258.6.184.092.307.138.353.215.046.077.046.445-.098.85zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.981-1.306A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+    <span class="tracking-wide">Book on WhatsApp</span>
+  </a>
 
   <!-- Loaded Javascript Modules -->
   <script src="products.js"></script>
