@@ -464,7 +464,7 @@ function renderHomeView(container, state) {
         <!-- Featured Card on Hero -->
         <div class="flex-1 max-w-sm lg:max-w-md w-full">
           ${(() => {
-            const heroProdId = 'deal-asus-rog-zephyrus';
+            const heroProdId = 'deal-lenovo-thinkpad-x1-carbon';
             const inCart = (state.cart || []).some(item => item.id === heroProdId);
             const cartItem = (state.cart || []).find(item => item.id === heroProdId);
             return `
@@ -473,19 +473,19 @@ function renderHomeView(container, state) {
                   ⚡ TOP DEAL OF THE DAY
                 </div>
                 <div class="absolute top-3 right-3 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  3 Yrs Warranty
+                  1 Yr Warranty
                 </div>
-                <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=900&auto=format&fit=crop&q=88" alt="ASUS ROG Zephyrus G14 Gaming Laptop" class="w-full h-44 object-cover rounded-xl mt-6 mb-4 cursor-pointer" onclick="appState.setView('product', { product: '${heroProdId}' })">
-                <h3 onclick="appState.setView('product', { product: '${heroProdId}' })" class="font-bold text-sm text-white line-clamp-1 hover:text-blue-400 cursor-pointer">ASUS ROG Zephyrus G14 Gaming Laptop</h3>
-                <p class="text-xs text-slate-400 mb-3">QHD 120Hz display, Ryzen 7, RTX 3060, 1TB SSD</p>
+                <img src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=900&auto=format&fit=crop&q=88" alt="Lenovo ThinkPad X1 Carbon Gen 10" class="w-full h-44 object-cover rounded-xl mt-6 mb-4 cursor-pointer" onclick="appState.setView('product', { product: '${heroProdId}' })">
+                <h3 onclick="appState.setView('product', { product: '${heroProdId}' })" class="font-bold text-sm text-white line-clamp-1 hover:text-blue-400 cursor-pointer">Lenovo ThinkPad X1 Carbon Gen 10</h3>
+                <p class="text-xs text-slate-400 mb-3">14.0" 2.8K OLED, Core i7 12th Gen, 16GB, 1TB SSD</p>
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <span class="text-teal-400 font-extrabold text-xl">₹ 64,990.00</span>
-                    <span class="text-xs text-red-400 line-through ml-2">₹ 1,39,990.00</span>
+                    <span class="text-teal-400 font-extrabold text-xl">₹ 58,990.00</span>
+                    <span class="text-xs text-red-400 line-through ml-2">₹ 1,45,000.00</span>
                   </div>
                   ${!inCart ? `
-                    <button onclick="handleAddToCart(event, '${heroProdId}', 1)" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
-                      <span>🛒</span> Add to Cart
+                    <button onclick="handleAddToCart(event, '${heroProdId}', 1)" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow inline-flex items-center gap-1.5">
+                      <span>🛒</span> <span>Add to Cart</span>
                     </button>
                   ` : `
                     <div class="flex items-center gap-2">

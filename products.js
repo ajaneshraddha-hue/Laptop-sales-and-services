@@ -151,14 +151,14 @@ const MOCK_PRODUCTS = [
     features: ["23.8\" FHD Touch", "All-in-One", "Brand New", "1 Year HP Warranty"]
   },
   {
-    id: "desktop-gaming-asus-rog",
-    name: "ASUS ROG Gaming Tower, Intel Core i9 12th Gen, 32GB RAM, 1TB SSD, RTX 3080",
-    brand: "ASUS", category: "Desktops", subcategory: "Gaming Desktops",
+    id: "desktop-gaming-lenovo-legion",
+    name: "Lenovo Legion Tower 7i Gaming Desktop, Intel Core i9 12th Gen, 32GB RAM, 1TB SSD, RTX 3080",
+    brand: "Lenovo", category: "Desktops", subcategory: "Gaming Desktops",
     condition: "Brand New Sealed", isCrazyDeal: true, isNew: true,
     price: 149990, originalPrice: 199990, discount: "25% OFF", savings: 50000,
     gstITC: 26998, stockLeft: 2, claimedPercent: 55, rating: 4.9, reviewsCount: 14,
-    screenSize: "N/A", processor: "Intel Core i9", os: "Windows 11 Home",
-    specs: { processor: "Intel Core i9-12900K (16 Cores, up to 5.2GHz)", ram: "32GB DDR5 5600MHz", storage: "1TB PCIe Gen4 NVMe SSD", graphics: "NVIDIA RTX 3080 10GB GDDR6X", os: "Windows 11 Home", warranty: "2 Year ASUS Warranty" },
+    screenSize: "N/A", processor: "Intel Core i9", generation: "12th Gen", os: "Windows 11 Home",
+    specs: { processor: "Intel Core i9-12900K (16 Cores, up to 5.2GHz)", generation: "12th Gen", ram: "32GB DDR5 5600MHz", storage: "1TB PCIe Gen4 NVMe SSD", graphics: "NVIDIA RTX 3080 10GB GDDR6X", os: "Windows 11 Home", warranty: "2 Year Onsite Warranty" },
     images: ["https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80"],
     features: ["RTX 3080 10GB", "Core i9 16-Core", "32GB DDR5", "Brand New"]
   },
