@@ -994,10 +994,10 @@ function renderCatalogView(container, state) {
       <span class="text-white font-bold">${breadcrumbCategory}${subcategoryTitle}</span>
     </div>
 
-    <div class="catalog-layout">
+    <div class="flex flex-col lg:flex-row gap-6 items-start">
       
-      <!-- LEFT ACCORDION SIDEBAR: Categories & Filters -->
-      <aside class="catalog-sidebar shrink-0 select-none space-y-4">
+      <!-- LEFT ACCORDION SIDEBAR: Categories & Filters (Compact small size on left side) -->
+      <aside class="w-full lg:w-64 xl:w-72 lg:shrink-0 select-none space-y-4 lg:sticky lg:top-24">
         <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 shadow-xl backdrop-blur-sm">
           <div class="flex justify-between items-center pb-3 border-b border-slate-800">
             <h3 class="font-extrabold text-sm text-white flex items-center gap-1.5"><span>⚡</span> Filters</h3>
@@ -1008,7 +1008,7 @@ function renderCatalogView(container, state) {
           <div class="py-3 border-b border-slate-800">
             <div class="flex justify-between items-center text-xs font-bold text-slate-200 mb-2">
               <span>Price Range</span>
-              <span class="text-cyan-400 font-mono">Max: ₹ ${Number(filters.price).toLocaleString('en-IN')}</span>
+              <span class="text-cyan-400 font-mono text-[11px]">Max: ₹ ${Number(filters.price).toLocaleString('en-IN')}</span>
             </div>
             <input type="range" min="1000" max="200000" step="1000" value="${filters.price}" oninput="handlePriceFilter(this.value)" class="w-full accent-cyan-400 cursor-pointer bg-slate-950">
             <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
@@ -1043,11 +1043,11 @@ function renderCatalogView(container, state) {
           <!-- Processor Filter Accordion -->
           <div class="pt-3">
             <span class="text-xs font-bold text-slate-200 block mb-2">Processor</span>
-            <div class="space-y-1.5 text-xs">
+            <div class="space-y-1.5 text-xs max-h-44 overflow-y-auto pr-1">
               ${["All", "Intel Core i7", "Intel Core i5", "Intel Core i9", "AMD Ryzen 7", "AMD Ryzen 5", "Apple M1/M2", "Intel Xeon"].map(proc => `
                 <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white py-0.5">
                   <input type="radio" name="proc_filter" value="${proc}" ${filters.processor === proc ? 'checked' : ''} onchange="handleProcFilter('${proc}')" class="text-cyan-500 bg-slate-950 border-slate-700">
-                  <span>${proc}</span>
+                  <span class="${filters.processor === proc ? 'text-cyan-300 font-bold' : ''}">${proc}</span>
                 </label>
               `).join("")}
             </div>
@@ -1056,8 +1056,8 @@ function renderCatalogView(container, state) {
         </div>
       </aside>
 
-      <!-- MAIN CATALOG RESULTS -->
-      <div class="catalog-results">
+      <!-- RIGHT SIDE: MAIN CATALOG RESULTS (Laptops & Hardware Results) -->
+      <div class="flex-1 min-w-0 w-full">
         
         <!-- Top Toolbar -->
         <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 mb-5 shadow-xl flex flex-wrap justify-between items-center gap-4 backdrop-blur-sm">
@@ -1097,7 +1097,7 @@ function renderCatalogView(container, state) {
           </div>
         ` : (
           filters.viewMode === 'grid' 
-            ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">${filtered.map(p => renderDarkProductCard(p, state)).join("")}</div>`
+            ? `<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">${filtered.map(p => renderDarkProductCard(p, state)).join("")}</div>`
             : `<div class="space-y-4">${filtered.map(p => renderListCard(p)).join("")}</div>`
         )}
 
