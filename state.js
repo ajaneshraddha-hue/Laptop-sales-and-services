@@ -1249,24 +1249,26 @@ class StateManager {
     return ticketId;
   }
 
-  submitPaymentProof(ticketId, screenshotData) {
+  submitPaymentProof(ticketId, screenshotData, utrNumber = null) {
     const ticket = (this.state.serviceTickets || []).find(t => t.id === ticketId);
     if (!ticket) return { success: false, message: "Payment request not found." };
     ticket.paymentStatus = "processing";
-    ticket.paymentProof = screenshotData;
+    ticket.paymentProof = screenshotData || (utrNumber ? `UTR Reference: ${utrNumber}` : null);
+    ticket.utrNumber = utrNumber || null;
     ticket.paymentSubmittedAt = new Date().toLocaleString('en-IN');
     this.addNotification(`Payment proof submitted for ticket ${ticketId}.`);
     this.saveState();
     return { success: true };
   }
 
-  submitOrderPaymentProof(addressId, paymentMethod, screenshotData) {
+  submitOrderPaymentProof(addressId, paymentMethod, screenshotData, utrNumber = null) {
     const orderId = this.placeOrder(addressId, paymentMethod);
     if (!orderId) return { success: false, message: "Unable to create order." };
     const order = (this.state.orders || []).find(o => o.id === orderId);
     if (!order) return { success: false, message: "Order not found." };
     order.paymentStatus = "processing";
-    order.paymentProof = screenshotData;
+    order.paymentProof = screenshotData || (utrNumber ? `UTR Reference: ${utrNumber}` : null);
+    order.utrNumber = utrNumber || null;
     order.paymentSubmittedAt = new Date().toLocaleString('en-IN');
     this.state.pendingOrderPayment = null;
     this.state.currentOrder = orderId;
