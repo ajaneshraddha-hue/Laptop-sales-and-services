@@ -1702,146 +1702,83 @@ function renderOrderPaymentView(container, state) {
   }
   const total = order?.totals?.total || (ownsPending ? appState.getCartTotals().total : 0);
   const orderRef = order?.id || pending?.requestId || `ORD-${Date.now()}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(getUpiLink('any', total, 'Order Payment', orderRef))}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(`upi://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&am=${Number(total).toFixed(2)}&cu=INR&tn=Order%20Payment`)}`;
 
   container.innerHTML = `
     <div class="max-w-4xl mx-auto grid lg:grid-cols-[1fr_360px] gap-6 items-start">
       
-      <!-- Left Column: Quick Pay Options & Verification Form -->
+      <!-- Left Column: Payment Screenshot Upload -->
       <section class="bg-slate-900/90 rounded-3xl border border-slate-800 p-6 md:p-8 shadow-2xl backdrop-blur-sm text-white">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-[10px] font-black uppercase tracking-widest text-cyan-400 bg-cyan-950/80 border border-cyan-500/30 px-3 py-1 rounded-full">⚡ Direct UPI Checkout</span>
-          <span class="text-xs font-mono text-slate-400 font-bold">Instant Verification</span>
+          <span class="text-[10px] font-black uppercase tracking-widest text-cyan-400 bg-cyan-950/80 border border-cyan-500/30 px-3 py-1 rounded-full">⚡ Secure UPI Payment</span>
+          <span class="text-xs font-mono text-slate-400 font-bold">100% Verified</span>
         </div>
         
-        <h1 class="text-2xl md:text-3xl font-black text-white mt-3">Direct App Payment</h1>
-        <p class="text-xs text-slate-400 mt-1">Total Payable: <strong class="text-cyan-400 text-lg font-mono font-black">₹ ${Number(total).toLocaleString('en-IN')}.00</strong></p>
-
-        <!-- Quick 1-Click Launch Buttons -->
-        <div class="mt-5 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-200">Tap to Pay Directly on Mobile App:</span>
-            <span class="text-[10px] text-cyan-400 font-mono font-medium">Auto-fills ₹ ${Number(total).toLocaleString('en-IN')}</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <a href="${getUpiLink('phonepe', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('phonepe', ${total}, 'Order Payment', '${orderRef}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-purple-950/70 hover:bg-purple-900/80 border border-purple-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">पे</span>
-              <span class="text-purple-200">PhonePe</span>
-            </a>
-            <a href="${getUpiLink('gpay', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('gpay', ${total}, 'Order Payment', '${orderRef}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-950/70 hover:bg-blue-900/80 border border-blue-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">G</span>
-              <span class="text-blue-200">Google Pay</span>
-            </a>
-            <a href="${getUpiLink('paytm', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('paytm', ${total}, 'Order Payment', '${orderRef}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-sky-950/70 hover:bg-sky-900/80 border border-sky-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">₹</span>
-              <span class="text-sky-200">Paytm</span>
-            </a>
-            <a href="${getUpiLink('any', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('any', ${total}, 'Order Payment', '${orderRef}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">⚡</span>
-              <span class="text-emerald-200">Any UPI</span>
-            </a>
-          </div>
-        </div>
+        <h1 class="text-2xl md:text-3xl font-black text-white mt-3">Complete Payment Before Order Confirmation</h1>
+        <p class="text-xs text-slate-400 mt-1">Scan the QR code, pay <strong class="text-cyan-400 text-lg font-mono font-black">₹ ${Number(total).toLocaleString('en-IN')}.00</strong>, then upload your payment screenshot.</p>
 
         <!-- Status Alert Box -->
-        <div class="mt-5 rounded-2xl ${isApproved ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : isProcessing ? 'bg-amber-950/60 border-amber-500/40 text-amber-300' : 'bg-slate-950/70 border-slate-800 text-slate-300'} border p-4 text-xs">
-          <strong class="text-white text-sm block mb-1">${isApproved ? '✅ Payment Approved & Order Confirmed' : isProcessing ? '⏳ Payment in Processing' : '🔒 Fast Confirmation (Enter UTR or Upload Screenshot)'}</strong>
-          <p class="text-slate-400">${isProcessing ? 'The admin team is verifying your payment submission. Order is queued for shipment.' : isApproved ? 'Your order has been verified and confirmed.' : 'After completing payment in PhonePe or Google Pay, submit your 12-digit UTR Ref number or upload screenshot below.'}</p>
+        <div class="mt-6 rounded-2xl ${isApproved ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : isProcessing ? 'bg-amber-950/60 border-amber-500/40 text-amber-300' : 'bg-slate-950/70 border-slate-800 text-slate-300'} border p-4 text-xs">
+          <strong class="text-white text-sm block mb-1">${isApproved ? '✅ Payment Approved & Order Confirmed' : isProcessing ? '⏳ Payment in Processing' : 'Order confirmation is waiting for payment verification.'}</strong>
+          <p class="text-slate-400">${isProcessing ? 'The admin team is reviewing your screenshot. Your order is queued.' : isApproved ? 'Your order has been verified and confirmed.' : 'Your order will be created after you submit the proof.'}</p>
         </div>
 
         ${!isProcessing && !isApproved ? `
-          <!-- Fast Verification Tabs: UTR Ref vs Screenshot -->
-          <div class="mt-6">
-            <div class="flex border-b border-slate-800 text-xs font-bold mb-4">
-              <button type="button" onclick="togglePaymentProofTab('utr', 'order')" id="order-proof-tab-utr" class="pb-2.5 px-4 border-b-2 border-cyan-400 text-cyan-300 font-bold transition">
-                ⚡ Option 1: 12-Digit UTR / Ref No. (Fastest)
-              </button>
-              <button type="button" onclick="togglePaymentProofTab('upload', 'order')" id="order-proof-tab-upload" class="pb-2.5 px-4 border-b-2 border-transparent text-slate-400 hover:text-white font-medium transition">
-                📸 Option 2: Upload Screenshot
-              </button>
+          <form onsubmit="handleOrderPaymentProofSubmit(event)" class="mt-6 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-2">Attach payment screenshot <span class="text-red-400">*</span></label>
+              <input id="order-payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" required class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:border-cyan-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
+              <p class="text-[11px] text-slate-400 mt-1.5">Upload a clear screenshot showing the successful UPI transaction receipt.</p>
             </div>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
+              <span>📤</span> <span>Submit payment and place order</span>
+            </button>
+          </form>
 
-            <!-- Form 1: Quick 12-Digit UTR -->
-            <form id="order-payment-form-utr" onsubmit="handleOrderUtrSubmit(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">12-Digit UPI Ref / UTR Number <span class="text-red-400">*</span></label>
-                <input type="text" id="order-payment-utr-input" placeholder="e.g. 429182749102 (from PhonePe / GPay receipt)" maxlength="24" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-400 font-mono">
-                <p class="text-[11px] text-slate-400 mt-1">Found under Transaction Details in PhonePe, Google Pay, or Paytm receipt.</p>
-              </div>
-              <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
-                <span>⚡</span> <span>Submit UTR & Place Order</span>
-              </button>
-            </form>
-
-            <!-- Form 2: File Upload Screenshot -->
-            <form id="order-payment-form-upload" onsubmit="handleOrderPaymentProofSubmit(event)" class="space-y-3 hidden">
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Attach Payment Screenshot <span class="text-red-400">*</span></label>
-                <input id="order-payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:border-cyan-400">
-              </div>
-              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
-                <span>📤</span> <span>Upload Screenshot & Place Order</span>
-              </button>
-            </form>
-
-            <!-- WhatsApp Quick Confirm Link -->
-            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs mt-3">
-              <span class="text-slate-400">Need instant WhatsApp assistance?</span>
-              <a href="${getUpiLink('whatsapp', total, 'Order Payment', orderRef)}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-                <span>●</span> WhatsApp +91 7996389264
-              </a>
-            </div>
+          <!-- WhatsApp Quick Confirm Link -->
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs mt-4">
+            <span class="text-slate-400">Need instant WhatsApp assistance?</span>
+            <a href="https://wa.me/917996389264?text=Hello%20Lapro%20Solutions%2C%20I%20have%20made%20a%20payment%20of%20Rs%20${total}%20for%20my%20order.%20Please%20verify." target="_blank" rel="noopener noreferrer" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
+              <span>●</span> WhatsApp +91 7996389264
+            </a>
           </div>
         ` : ''}
 
         ${isApproved ? `
           <button onclick="appState.setView('order-confirm', { order: '${order.id}' })" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3.5 rounded-xl transition shadow-lg shadow-emerald-950/50">
-            View Order Confirmation →
+            View order confirmation →
           </button>
         ` : ''}
       </section>
 
-      <!-- Right Column: Dark UPI QR Code Sidebar -->
+      <!-- Right Column: Clean Dark UPI QR Code Sidebar -->
       <aside class="bg-slate-950/95 text-white rounded-3xl p-5 shadow-2xl text-center border border-slate-800 lg:sticky lg:top-24">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
           <span class="inline-flex items-center gap-2 text-xs font-black text-purple-300">
-            <span class="w-6 h-6 rounded-full bg-[#8b43dc] text-white flex items-center justify-center text-xs font-bold">पे</span> PhonePe / UPI
+            <span class="w-6 h-6 rounded-full bg-[#8b43dc] text-white flex items-center justify-center text-xs font-bold">पे</span> PhonePe
           </span>
-          <span class="text-[10px] font-black uppercase text-cyan-400 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded-full">ACCEPTED</span>
+          <span class="text-[10px] font-black uppercase text-cyan-400 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded-full">ACCEPTED HERE</span>
         </div>
 
-        <p class="text-xs text-slate-400 mt-3">Scan QR with PhonePe, GPay, Paytm, or Camera</p>
+        <p class="text-xs text-slate-300 mt-3">Scan using any UPI app</p>
 
         <div class="mt-3 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden shadow-inner">
           <img src="${qrUrl}" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='phonepe-qr.png';">
         </div>
 
-        <!-- 4 Direct App Buttons under QR -->
-        <div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold">
-          <a href="${getUpiLink('gpay', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('gpay', ${total}, 'Order Payment', '${orderRef}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-blue-400 font-bold">G</span> GPay
-          </a>
-          <a href="${getUpiLink('phonepe', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('phonepe', ${total}, 'Order Payment', '${orderRef}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-purple-400 font-bold">पे</span> PhonePe
-          </a>
-          <a href="${getUpiLink('paytm', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('paytm', ${total}, 'Order Payment', '${orderRef}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-sky-400 font-bold">₹</span> Paytm
-          </a>
-          <a href="${getUpiLink('any', total, 'Order Payment', orderRef)}" onclick="openDirectUpiApp('any', ${total}, 'Order Payment', '${orderRef}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-emerald-400 font-bold">⚡</span> Any UPI
-          </a>
-        </div>
-
         <!-- UPI ID and 1-Click Copy -->
         <div class="mt-4 p-3 bg-slate-900/80 rounded-2xl border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Official UPI ID</span>
+          <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">UPI ID</span>
           <div class="flex items-center justify-between gap-2">
-            <code class="text-white font-mono font-bold text-xs">7996389264@ybl</code>
+            <code class="text-white font-mono font-bold text-xs select-all">7996389264@ybl</code>
             <button type="button" onclick="copyUpiIdToClipboard(true)" class="bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-bold text-[10px] px-2.5 py-1 rounded-lg transition" title="Copy UPI ID">
               📋 Copy
             </button>
           </div>
         </div>
+
+        <p class="text-[11px] text-slate-400 mt-3">Pay <strong class="text-cyan-400 font-mono font-bold">₹ ${Number(total).toLocaleString('en-IN')}.00</strong> & upload screenshot.</p>
       </aside>
     </div>
   `;
@@ -2144,7 +2081,7 @@ function renderTicketPaymentView(container, state) {
   const isProcessing = ticket.paymentStatus === "processing";
   const isApproved = ticket.paymentStatus === "approved";
   const amount = 499;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(getUpiLink('any', amount, `Service Consultation ${ticket.id}`, ticket.id))}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(`upi://pay?pa=7996389264@ybl&pn=Lapro%20Solutions&am=499.00&cu=INR&tn=Service%20Ticket%20${ticket.id}`)}`;
 
   container.innerHTML = `
     <div class="max-w-4xl mx-auto grid lg:grid-cols-[1fr_360px] gap-6 items-start">
@@ -2163,32 +2100,6 @@ function renderTicketPaymentView(container, state) {
           <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-500">Payment Status</span><strong class="${isApproved ? 'text-emerald-400' : isProcessing ? 'text-amber-400' : 'text-slate-400'}">${isApproved ? 'Approved ✓' : isProcessing ? 'Processing ⏳' : 'Awaiting Payment'}</strong></div>
         </div>
 
-        <!-- Quick 1-Click Launch Buttons -->
-        <div class="mt-5 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-200">Tap to Pay Directly with App:</span>
-            <span class="text-[10px] text-cyan-400 font-mono font-medium">Auto-fills ₹ 499.00</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <a href="${getUpiLink('phonepe', amount, `Service Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('phonepe', ${amount}, 'Service Ticket ${ticket.id}', '${ticket.id}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-purple-950/70 hover:bg-purple-900/80 border border-purple-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-[#8b43dc] flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">पे</span>
-              <span class="text-purple-200">PhonePe</span>
-            </a>
-            <a href="${getUpiLink('gpay', amount, `Service Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('gpay', ${amount}, 'Service Ticket ${ticket.id}', '${ticket.id}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-950/70 hover:bg-blue-900/80 border border-blue-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">G</span>
-              <span class="text-blue-200">Google Pay</span>
-            </a>
-            <a href="${getUpiLink('paytm', amount, `Service Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('paytm', ${amount}, 'Service Ticket ${ticket.id}', '${ticket.id}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-sky-950/70 hover:bg-sky-900/80 border border-sky-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">₹</span>
-              <span class="text-sky-200">Paytm</span>
-            </a>
-            <a href="${getUpiLink('any', amount, `Service Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('any', ${amount}, 'Service Ticket ${ticket.id}', '${ticket.id}')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 text-white font-bold text-xs transition active:scale-95 shadow-md group">
-              <span class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-sm font-black mb-1.5 group-hover:scale-110 transition shadow">⚡</span>
-              <span class="text-emerald-200">Any UPI</span>
-            </a>
-          </div>
-        </div>
-
         ${isApproved ? `
           <div class="mt-6 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 p-5 text-emerald-300">
             <strong class="text-white text-base">Payment Approved!</strong>
@@ -2198,111 +2109,60 @@ function renderTicketPaymentView(container, state) {
         ` : isProcessing ? `
           <div class="mt-6 rounded-2xl bg-amber-950/60 border border-amber-500/40 p-5 text-amber-300">
             <strong class="text-white text-base">Payment in Processing</strong>
-            <p class="text-xs mt-1 text-slate-300">Your submission has been sent to the admin team for quick verification.</p>
+            <p class="text-xs mt-1 text-slate-300">Your screenshot has been sent to the admin team for quick verification.</p>
           </div>
         ` : `
-          <!-- Fast Verification Tabs: UTR Ref vs Screenshot -->
-          <div class="mt-6">
-            <div class="flex border-b border-slate-800 text-xs font-bold mb-4">
-              <button type="button" onclick="togglePaymentProofTab('utr', 'ticket')" id="ticket-proof-tab-utr" class="pb-2.5 px-4 border-b-2 border-cyan-400 text-cyan-300 font-bold transition">
-                ⚡ Option 1: 12-Digit UTR / Ref No. (Instant)
-              </button>
-              <button type="button" onclick="togglePaymentProofTab('upload', 'ticket')" id="ticket-proof-tab-upload" class="pb-2.5 px-4 border-b-2 border-transparent text-slate-400 hover:text-white font-medium transition">
-                📸 Option 2: Upload Screenshot
-              </button>
+          <form onsubmit="handlePaymentProofSubmit(event, '${ticket.id}')" class="mt-6 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-2">Attach payment screenshot <span class="text-red-400">*</span></label>
+              <input id="payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" required class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:border-cyan-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-950 file:text-cyan-300 hover:file:bg-cyan-900 cursor-pointer">
+              <p class="text-[11px] text-slate-400 mt-1.5">Upload a clear screenshot showing the successful UPI payment.</p>
             </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
+              <span>📤</span> <span>Submit payment for verification</span>
+            </button>
+          </form>
 
-            <!-- Form 1: Quick 12-Digit UTR -->
-            <form id="ticket-payment-form-utr" onsubmit="handleTicketUtrSubmit(event, '${ticket.id}')" class="space-y-3">
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">12-Digit UPI Ref / UTR Number <span class="text-red-400">*</span></label>
-                <input type="text" id="ticket-payment-utr-input" placeholder="e.g. 429182749102 (from PhonePe / GPay receipt)" maxlength="24" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-400 font-mono">
-              </div>
-              <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white font-extrabold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
-                <span>⚡</span> <span>Confirm Ticket Payment with UTR</span>
-              </button>
-            </form>
-
-            <!-- Form 2: File Upload Screenshot -->
-            <form id="ticket-payment-form-upload" onsubmit="handlePaymentProofSubmit(event, '${ticket.id}')" class="space-y-3 hidden">
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Attach Payment Screenshot <span class="text-red-400">*</span></label>
-                <input id="payment-proof-file" type="file" accept="image/png,image/jpeg,image/webp" class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:border-cyan-400">
-              </div>
-              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2">
-                <span>📤</span> <span>Upload Screenshot for Verification</span>
-              </button>
-            </form>
-
-            <!-- WhatsApp Quick Confirm Link -->
-            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs mt-3">
-              <span class="text-slate-400">WhatsApp Helpdesk:</span>
-              <a href="${getUpiLink('whatsapp', amount, `Service Ticket ${ticket.id}`, ticket.id)}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-                <span>●</span> WhatsApp +91 7996389264
-              </a>
-            </div>
+          <!-- WhatsApp Quick Confirm Link -->
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs mt-4">
+            <span class="text-slate-400">WhatsApp Helpdesk:</span>
+            <a href="https://wa.me/917996389264?text=Hello%20Lapro%20Solutions%2C%20I%20have%20paid%20Rs%20499%20for%20ticket%20${ticket.id}.%20Please%20verify." target="_blank" rel="noopener noreferrer" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
+              <span>●</span> WhatsApp +91 7996389264
+            </a>
           </div>
         `}
       </section>
 
-      <!-- Right Column: Dark UPI QR Code Sidebar -->
+      <!-- Right Column: Clean Dark UPI QR Code Sidebar -->
       <aside class="bg-slate-950/95 text-white rounded-3xl p-5 shadow-2xl text-center border border-slate-800 lg:sticky lg:top-24">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
           <span class="inline-flex items-center gap-2 text-xs font-black text-purple-300">
-            <span class="w-6 h-6 rounded-full bg-[#8b43dc] text-white flex items-center justify-center text-xs font-bold">पे</span> PhonePe / UPI
+            <span class="w-6 h-6 rounded-full bg-[#8b43dc] text-white flex items-center justify-center text-xs font-bold">पे</span> PhonePe
           </span>
-          <span class="text-[10px] font-black uppercase text-cyan-400 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded-full">ACCEPTED</span>
+          <span class="text-[10px] font-black uppercase text-cyan-400 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded-full">ACCEPTED HERE</span>
         </div>
 
-        <p class="text-xs text-slate-400 mt-3">Scan QR with PhonePe, GPay, Paytm, or Camera</p>
+        <p class="text-xs text-slate-300 mt-3">Scan using any UPI app</p>
 
         <div class="mt-3 bg-white rounded-2xl p-3 aspect-square flex items-center justify-center overflow-hidden shadow-inner">
           <img src="${qrUrl}" alt="UPI payment QR code" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='phonepe-qr.png';">
         </div>
 
-        <!-- 4 Direct App Buttons under QR -->
-        <div class="grid grid-cols-2 gap-2 mt-4 text-[11px] font-bold">
-          <a href="${getUpiLink('gpay', amount, `Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('gpay', ${amount}, 'Ticket ${ticket.id}', '${ticket.id}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-blue-400 font-bold">G</span> GPay
-          </a>
-          <a href="${getUpiLink('phonepe', amount, `Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('phonepe', ${amount}, 'Ticket ${ticket.id}', '${ticket.id}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-purple-400 font-bold">पे</span> PhonePe
-          </a>
-          <a href="${getUpiLink('paytm', amount, `Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('paytm', ${amount}, 'Ticket ${ticket.id}', '${ticket.id}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-sky-400 font-bold">₹</span> Paytm
-          </a>
-          <a href="${getUpiLink('any', amount, `Ticket ${ticket.id}`, ticket.id)}" onclick="openDirectUpiApp('any', ${amount}, 'Ticket ${ticket.id}', '${ticket.id}')" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-400 text-slate-200 hover:text-white px-2 py-2.5 transition flex items-center justify-center gap-1">
-            <span class="text-emerald-400 font-bold">⚡</span> Any UPI
-          </a>
-        </div>
-
         <!-- UPI ID and 1-Click Copy -->
         <div class="mt-4 p-3 bg-slate-900/80 rounded-2xl border border-slate-800">
-          <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Official UPI ID</span>
+          <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">UPI ID</span>
           <div class="flex items-center justify-between gap-2">
-            <code class="text-white font-mono font-bold text-xs">7996389264@ybl</code>
+            <code class="text-white font-mono font-bold text-xs select-all">7996389264@ybl</code>
             <button type="button" onclick="copyUpiIdToClipboard(true)" class="bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-bold text-[10px] px-2.5 py-1 rounded-lg transition" title="Copy UPI ID">
               📋 Copy
             </button>
           </div>
         </div>
+
+        <p class="text-[11px] text-slate-400 mt-3">Pay <strong class="text-cyan-400 font-mono font-bold">₹ 499.00</strong> & upload screenshot.</p>
       </aside>
     </div>
   `;
-}
-
-function handleTicketUtrSubmit(event, ticketId) {
-  event.preventDefault();
-  const utr = (document.getElementById('ticket-payment-utr-input')?.value || "").trim();
-  if (!utr || utr.length < 6) {
-    showToast('Please enter a valid UPI Reference or UTR Number.', '⚠️', 'error');
-    return;
-  }
-  const result = appState.submitPaymentProof(ticketId, null, utr);
-  if (result.success) {
-    appState.setView('ticket-payment', { ticket: ticketId });
-    showToast(`Payment submitted with UTR: ${utr}. Verification in progress!`, '✓', 'success');
-  }
 }
 
 function handlePaymentProofSubmit(event, ticketId) {
