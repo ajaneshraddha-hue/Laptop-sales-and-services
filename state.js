@@ -265,54 +265,52 @@ class StateManager {
       const validServerProducts = serverProducts.filter(p => p && p.id && !deletedIds.has(p.id));
       const validLocalProducts = localProducts.filter(p => p && p.id && !deletedIds.has(p.id));
 
-      // Separate custom-added products (ID starts with "prod-") from default mock products
-      const customProductsMap = new Map();
+      const mergedProductsMap = new Map();
       let needServerHeal = false;
 
-      // Add local custom products first
+      // First populate with local products
       validLocalProducts.forEach(p => {
-        if (p.id.startsWith("prod-")) {
-          customProductsMap.set(p.id, p);
+        if (p && p.id) {
+          mergedProductsMap.set(p.id, p);
         }
       });
 
-      // Add server custom products
+      // Merge server products:
+      // If server product already exists locally, keep the one with newer updatedAt timestamp (or server by default)
       validServerProducts.forEach(p => {
-        if (p.id.startsWith("prod-")) {
-          if (!customProductsMap.has(p.id)) {
-            customProductsMap.set(p.id, p);
+        if (!p || !p.id) return;
+        if (!mergedProductsMap.has(p.id)) {
+          mergedProductsMap.set(p.id, p);
+        } else {
+          const localP = mergedProductsMap.get(p.id);
+          const localTime = Number(localP.updatedAt || localP.createdAt || 0);
+          const serverTime = Number(p.updatedAt || p.createdAt || 0);
+          if (serverTime >= localTime) {
+            mergedProductsMap.set(p.id, p);
+          } else {
+            // Local version is newer than server version!
+            needServerHeal = true;
           }
         }
       });
 
-      // Check if any local custom product needs to be uploaded to heal server
+      // Check if any local product is missing on server
       const serverIdSet = new Set(validServerProducts.map(p => p.id));
-      customProductsMap.forEach((prod, id) => {
+      mergedProductsMap.forEach((prod, id) => {
         if (!serverIdSet.has(id)) {
           needServerHeal = true;
         }
       });
 
-      // Combine standard/catalog products
-      const standardProductsMap = new Map();
-      validServerProducts.forEach(p => {
-        if (!p.id.startsWith("prod-")) {
-          standardProductsMap.set(p.id, p);
-        }
-      });
-      // Fallback to local standard products if server had none
-      if (standardProductsMap.size === 0) {
-        validLocalProducts.forEach(p => {
-          if (!p.id.startsWith("prod-")) {
-            standardProductsMap.set(p.id, p);
-          }
-        });
-      }
+      // Separate custom products (newest first) from standard catalog products
+      const allMerged = Array.from(mergedProductsMap.values());
+      const customProducts = allMerged.filter(p => p.id && p.id.startsWith("prod-"));
+      const standardProducts = allMerged.filter(p => !p.id || !p.id.startsWith("prod-"));
 
       // Final products array: ALL Custom products FIRST (newest), then standard products
       this.state.products = [
-        ...Array.from(customProductsMap.values()),
-        ...Array.from(standardProductsMap.values())
+        ...customProducts,
+        ...standardProducts
       ];
 
       if (payload.state.categories && payload.state.categories.length > 0) {
@@ -504,9 +502,10 @@ class StateManager {
       const osVal = updatedData.os !== undefined ? updatedData.os : (orig.os || "Windows 11 Pro 64-Bit");
       const screenVal = updatedData.screenSize !== undefined ? updatedData.screenSize : (orig.screenSize || "14.0 - 15.6 Inch");
 
-      this.state.products[idx] = {
+      const updatedProd = {
         ...orig,
         ...updatedData,
+        updatedAt: Date.now(),
         processor: proc,
         generation: gen,
         os: osVal,
@@ -530,15 +529,23 @@ class StateManager {
         gstITC: Math.round(price * 0.18)
       };
 
+      this.state.products[idx] = updatedProd;
+
       this.addNotification(`Product "${this.state.products[idx].name}" updated.`);
       this.saveState(true);
 
-      // Also send direct REST POST to overwrite product on server
-      fetch("/api/products", {
-        method: "POST",
+      // Send direct REST PUT / POST to persist updated product in server state JSON
+      fetch("/api/products/" + encodeURIComponent(id), {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: this.state.products[idx] })
-      }).catch(err => console.warn("Direct product update notification warning:", err));
+        body: JSON.stringify({ product: updatedProd })
+      }).catch(() => {
+        fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product: updatedProd })
+        }).catch(err => console.warn("Direct product update notification warning:", err));
+      });
 
       return true;
     }

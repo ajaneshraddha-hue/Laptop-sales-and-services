@@ -283,7 +283,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Add new product directly
+  // API: Add or Update product directly (POST)
   if (req.url === "/api/products" && req.method === "POST") {
     let body = "";
     req.on("data", chunk => {
@@ -299,12 +299,58 @@ const server = http.createServer((req, res) => {
         readSharedState((readErr, existingState) => {
           const baseState = (!readErr && existingState) ? existingState : JSON.parse(JSON.stringify(INITIAL_SHARED_STATE));
           const existingProds = baseState.products || [];
-          // Prepend product or replace if already exists
-          const updatedProds = [payload.product, ...existingProds.filter(p => p.id !== payload.product.id)];
+          const prodId = payload.product.id;
+          const idx = existingProds.findIndex(p => p.id === prodId);
+          let updatedProds;
+          if (idx > -1) {
+            existingProds[idx] = { ...existingProds[idx], ...payload.product };
+            updatedProds = [...existingProds];
+          } else {
+            updatedProds = [payload.product, ...existingProds];
+          }
           baseState.products = updatedProds;
           writeSharedState(baseState, (err) => {
             if (err) return sendJson(res, 500, { error: "Unable to save product" });
             sendJson(res, 200, { success: true, product: payload.product, total: updatedProds.length });
+          });
+        });
+      } catch (err) {
+        sendJson(res, 400, { error: "Invalid JSON payload" });
+      }
+    });
+    return;
+  }
+
+  // API: Update product directly (PUT)
+  if (req.url.startsWith("/api/products") && req.method === "PUT") {
+    let body = "";
+    req.on("data", chunk => {
+      body += chunk;
+      if (body.length > 25 * 1024 * 1024) req.destroy();
+    });
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const urlParts = req.url.split("/");
+        const routeId = urlParts.length > 3 ? decodeURIComponent(urlParts[3].split("?")[0]) : null;
+        const product = payload.product || payload;
+        const prodId = routeId || (product ? product.id : null);
+        if (!prodId || !product) {
+          return sendJson(res, 400, { error: "Product ID and data required" });
+        }
+        readSharedState((readErr, existingState) => {
+          const baseState = (!readErr && existingState) ? existingState : JSON.parse(JSON.stringify(INITIAL_SHARED_STATE));
+          const existingProds = baseState.products || [];
+          const idx = existingProds.findIndex(p => p.id === prodId);
+          if (idx > -1) {
+            existingProds[idx] = { ...existingProds[idx], ...product, id: prodId };
+          } else {
+            existingProds.unshift({ ...product, id: prodId });
+          }
+          baseState.products = existingProds;
+          writeSharedState(baseState, (err) => {
+            if (err) return sendJson(res, 500, { error: "Unable to update product" });
+            sendJson(res, 200, { success: true, product: existingProds[idx > -1 ? idx : 0], total: existingProds.length });
           });
         });
       } catch (err) {
@@ -375,4 +421,16 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Lapro Solutions server running at http://localhost:${PORT}`);
+
+  // Automated Keep-Alive Self-Ping (every 10 minutes) to prevent Render instance sleeping
+  const PING_INTERVAL = 10 * 60 * 1000;
+  setInterval(() => {
+    try {
+      const pingUrl = "https://laprosolutions.in/api/state";
+      const https = require("https");
+      https.get(pingUrl, (res) => {
+        res.on("data", () => {});
+      }).on("error", () => {});
+    } catch (e) {}
+  }, PING_INTERVAL);
 });
