@@ -2,5 +2,11 @@ services:
   - type: web
     name: lapro-solutions
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production

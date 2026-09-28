@@ -239,6 +239,12 @@ function sharedRecordsOnly(state) {
 }
 
 const server = http.createServer((req, res) => {
+  // Health check endpoint for Render
+  if ((req.url === "/healthz" || req.url === "/health" || req.url === "/api/health") && req.method === "GET") {
+    sendJson(res, 200, { status: "ok", uptime: process.uptime(), timestamp: Date.now() });
+    return;
+  }
+
   // API: Get full shared state
   if (req.url === "/api/state" && req.method === "GET") {
     readSharedState((err, state) => {
@@ -422,15 +428,24 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`Lapro Solutions server running at http://localhost:${PORT}`);
 
-  // Automated Keep-Alive Self-Ping (every 10 minutes) to prevent Render instance sleeping
-  const PING_INTERVAL = 10 * 60 * 1000;
+  // Automated Keep-Alive Self-Ping (every 8 minutes) to prevent Render instance sleeping
+  const PING_INTERVAL = 8 * 60 * 1000;
   setInterval(() => {
     try {
-      const pingUrl = "https://laprosolutions.in/api/state";
       const https = require("https");
-      https.get(pingUrl, (res) => {
-        res.on("data", () => {});
-      }).on("error", () => {});
+      const urlsToPing = [
+        "https://laprosolutions.in/healthz"
+      ];
+      if (process.env.RENDER_EXTERNAL_URL) {
+        urlsToPing.push(process.env.RENDER_EXTERNAL_URL.replace(/\/$/, "") + "/healthz");
+      }
+      urlsToPing.forEach(url => {
+        try {
+          https.get(url, (res) => {
+            res.on("data", () => {});
+          }).on("error", () => {});
+        } catch (err) {}
+      });
     } catch (e) {}
   }, PING_INTERVAL);
 });
