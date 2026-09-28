@@ -2980,42 +2980,71 @@ function renderAdminTabContent(tab, state) {
 // ======================== MULTI-IMAGE LOCAL FILE UPLOAD HELPER ========================
 let tempUploadedImages = [];
 
-function handleProductFilesSelect(event) {
+async function handleProductFilesSelect(event) {
   const files = event.target.files;
   if (!files || files.length === 0) return;
 
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const maxDim = 800;
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
+  const previewContainer = document.getElementById("product-img-previews");
+  if (previewContainer) {
+    previewContainer.innerHTML = `<div class="p-2 text-xs text-blue-600 font-semibold flex items-center gap-2"><span class="animate-spin">⏳</span> Uploading and saving image(s)...</div>`;
+  }
+
+  for (const file of Array.from(files)) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 1000;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
           }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+          // Upload directly to server endpoint to get a lightweight URL
+          try {
+            const resp = await fetch("/api/upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: compressedDataUrl, name: file.name })
+            });
+            if (resp.ok) {
+              const resData = await resp.json();
+              if (resData && resData.url) {
+                tempUploadedImages.push(resData.url);
+                resolve();
+                return;
+              }
+            }
+          } catch (err) {
+            console.warn("Direct upload endpoint failed, storing data url:", err);
           }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.75);
-        tempUploadedImages.push(compressedDataUrl);
-        renderProductImagePreviews();
+
+          tempUploadedImages.push(compressedDataUrl);
+          resolve();
+        };
+        img.src = e.target.result;
       };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
+      reader.readAsDataURL(file);
+    });
+  }
+
+  renderProductImagePreviews();
 }
 
 function removeTempImage(idx) {
@@ -3023,23 +3052,62 @@ function removeTempImage(idx) {
   renderProductImagePreviews();
 }
 
+function setMainTempImage(idx) {
+  if (idx > 0 && idx < tempUploadedImages.length) {
+    const [picked] = tempUploadedImages.splice(idx, 1);
+    tempUploadedImages.unshift(picked);
+    renderProductImagePreviews();
+  }
+}
+
+function clearAllTempImages() {
+  tempUploadedImages = [];
+  renderProductImagePreviews();
+}
+
+function addCustomImageUrl(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const val = input.value.trim();
+  if (val) {
+    tempUploadedImages.push(val);
+    input.value = "";
+    renderProductImagePreviews();
+  }
+}
+
 function renderProductImagePreviews() {
   const container = document.getElementById("product-img-previews");
   if (!container) return;
 
   if (tempUploadedImages.length === 0) {
-    container.innerHTML = `<p class="text-slate-400 text-xs italic">No local images chosen yet.</p>`;
+    container.innerHTML = `
+      <div class="p-3 border border-dashed border-slate-300 rounded-xl text-center">
+        <p class="text-slate-400 text-xs italic">No images chosen yet. Choose file(s) above or paste a URL below.</p>
+      </div>
+    `;
     return;
   }
 
   container.innerHTML = `
-    <div class="flex flex-wrap gap-2.5 pt-2">
-      ${tempUploadedImages.map((src, idx) => `
-        <div class="relative group w-16 h-16 rounded-xl border border-slate-300 overflow-hidden shadow-sm bg-white">
-          <img src="${src}" class="w-full h-full object-cover">
-          <button type="button" onclick="removeTempImage(${idx})" class="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-4 h-4 text-[10px] font-bold flex items-center justify-center shadow opacity-90 hover:opacity-100">✕</button>
-        </div>
-      `).join("")}
+    <div class="space-y-2 pt-1">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold text-slate-700 uppercase">Product Images (${tempUploadedImages.length}):</span>
+        <button type="button" onclick="clearAllTempImages()" class="text-[10px] font-bold text-red-600 hover:underline">Clear All</button>
+      </div>
+      <div class="flex flex-wrap gap-2.5">
+        ${tempUploadedImages.map((src, idx) => `
+          <div class="relative group w-20 h-20 rounded-xl border ${idx === 0 ? 'border-2 border-blue-600 ring-2 ring-blue-100' : 'border-slate-300'} overflow-hidden shadow-sm bg-white flex flex-col justify-between">
+            <img src="${src}" class="w-full h-full object-cover">
+            ${idx === 0 ? `
+              <span class="absolute top-0.5 left-0.5 bg-blue-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow">MAIN</span>
+            ` : `
+              <button type="button" onclick="setMainTempImage(${idx})" class="absolute bottom-0.5 left-0.5 right-0.5 bg-slate-900/80 hover:bg-blue-600 text-white text-[8px] font-bold py-0.5 rounded opacity-0 group-hover:opacity-100 transition text-center">Set Main</button>
+            `}
+            <button type="button" onclick="removeTempImage(${idx})" title="Remove image" class="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 text-[11px] font-bold flex items-center justify-center shadow opacity-90 hover:opacity-100">✕</button>
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
 }
@@ -3450,11 +3518,22 @@ function openEditProductModal(prodId) {
             </div>
           </div>
 
-          <!-- Multi-Image Local File Upload -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <label class="block font-bold text-slate-800 uppercase text-[11px]">Product Images (Local File Upload)</label>
-            <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+          <!-- Multi-Image Local File Upload & URL -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div>
+              <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1">Product Images (Local File Upload)</label>
+              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+            </div>
+            
             <div id="product-img-previews"></div>
+
+            <div class="pt-1 border-t border-slate-200">
+              <label class="block font-bold text-slate-600 text-[10px] uppercase mb-1">Or Add Image by Web URL / Link</label>
+              <div class="flex gap-2">
+                <input type="url" id="edit-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-white border border-slate-300 rounded-xl p-2 text-xs">
+                <button type="button" onclick="addCustomImageUrl('edit-prod-image-url')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-3 py-2 rounded-xl transition">Add URL</button>
+              </div>
+            </div>
           </div>
 
           <div class="flex items-center gap-4 pt-1">
@@ -3494,8 +3573,12 @@ function handleEditProductSubmit(event, prodId) {
   const genEl = document.getElementById("edit-prod-generation");
   const crazyEl = document.getElementById("edit-prod-crazy");
   const newEl = document.getElementById("edit-prod-new");
+  const urlEl = document.getElementById("edit-prod-image-url");
 
   let finalImages = [...(tempUploadedImages || [])];
+  if (urlEl && urlEl.value.trim()) {
+    finalImages.push(urlEl.value.trim());
+  }
   if (finalImages.length === 0) {
     finalImages.push("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80");
   }
@@ -3536,7 +3619,7 @@ function handleEditProductSubmit(event, prodId) {
   appState.updateProduct(prodId, updatedData);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product updated in ${categoryVal} & saved to database!`, "✅", "success");
+  showToast(`Product updated with new image & saved to database!`, "✅", "success");
 }
 
 function handleDeleteProduct(prodId) {

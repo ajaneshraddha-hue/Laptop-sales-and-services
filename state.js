@@ -202,24 +202,7 @@ class StateManager {
     try {
       localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
     } catch (e) {
-      console.warn("Storage quota limit reached in local-only save...", e);
-      try {
-        const lightweightState = JSON.parse(JSON.stringify(this.state));
-        if (lightweightState.products) {
-          lightweightState.products = lightweightState.products.map(p => {
-            if (p.images && p.images.some(img => img && img.length > 50000)) {
-              return {
-                ...p,
-                images: p.images.map(img => (img && img.length > 50000) ? "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80" : img)
-              };
-            }
-            return p;
-          });
-        }
-        localStorage.setItem(STATE_KEY, JSON.stringify(lightweightState));
-      } catch (err2) {
-        console.error("Secondary local save failed", err2);
-      }
+      console.warn("Storage quota warning in local save...", e);
     }
   }
 
@@ -522,6 +505,7 @@ class StateManager {
         price: price,
         originalPrice: originalPrice,
         images: images,
+        image: (images && images[0]) ? images[0] : (orig.image || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80"),
         discount: originalPrice > price 
           ? Math.round(((originalPrice - price) / originalPrice) * 100) + "% OFF"
           : "0% OFF",

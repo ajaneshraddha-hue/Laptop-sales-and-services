@@ -5,6 +5,10 @@ const path = require("path");
 const PORT = process.env.PORT || 8000;
 const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "lapro-state.json");
+const UPLOADS_DIR = path.join(__dirname, "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) {
+  try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (e) {}
+}
 
 const MIME_TYPES = {
   ".html": "text/html",
@@ -242,6 +246,46 @@ const server = http.createServer((req, res) => {
   // Health check endpoint for Render
   if ((req.url === "/healthz" || req.url === "/health" || req.url === "/api/health") && req.method === "GET") {
     sendJson(res, 200, { status: "ok", uptime: process.uptime(), timestamp: Date.now() });
+    return;
+  }
+
+  // API: Image Upload (saves base64 images directly to server /uploads folder)
+  if (req.url === "/api/upload" && req.method === "POST") {
+    let body = "";
+    req.on("data", chunk => {
+      body += chunk;
+      if (body.length > 25 * 1024 * 1024) req.destroy();
+    });
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const dataUrl = payload.image || payload.dataUrl || payload.file;
+        if (!dataUrl) return sendJson(res, 400, { error: "No image data provided" });
+
+        const matches = dataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        let ext = ".jpg";
+        let buffer;
+        if (matches && matches.length === 3) {
+          const mime = matches[1];
+          if (mime.includes("png")) ext = ".png";
+          else if (mime.includes("webp")) ext = ".webp";
+          else if (mime.includes("svg")) ext = ".svg";
+          buffer = Buffer.from(matches[2], "base64");
+        } else {
+          buffer = Buffer.from(dataUrl, "base64");
+        }
+
+        const filename = `prod-${Date.now()}-${Math.floor(Math.random() * 10000)}${ext}`;
+        const targetPath = path.join(UPLOADS_DIR, filename);
+        fs.writeFile(targetPath, buffer, (writeErr) => {
+          if (writeErr) return sendJson(res, 500, { error: "Failed to save image to disk" });
+          const fileUrl = `/uploads/${filename}`;
+          sendJson(res, 200, { success: true, url: fileUrl });
+        });
+      } catch (err) {
+        sendJson(res, 400, { error: "Invalid upload payload" });
+      }
+    });
     return;
   }
 
