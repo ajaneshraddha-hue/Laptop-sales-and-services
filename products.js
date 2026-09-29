@@ -12,7 +12,7 @@ const MOCK_PRODUCTS = [
     price: 24990, originalPrice: 89990, discount: "72% OFF", savings: 65000,
     gstITC: 4498, stockLeft: 2, claimedPercent: 92, rating: 4.8, reviewsCount: 184,
     screenSize: "14.0\"", processor: "Intel Core i7", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i7-8650U (Quad Core up to 4.2GHz)", ram: "16GB DDR4", storage: "512GB NVMe SSD", display: "14.0\" FHD Touchscreen", graphics: "Intel UHD 620", os: "Windows 11 Pro", warranty: "1 Year Doorstep", batteryHealth: "94%" },
+    specs: { processor: "Intel Core i7-8650U (Quad Core up to 4.2GHz)", ram: "16GB DDR4", storage: "512GB NVMe SSD", display: "14.0\" FHD Touchscreen", graphics: "Intel UHD 620", os: "Windows 11 Pro", warranty: "1 Year Warranty", batteryHealth: "94%" },
     images: ["https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=700&auto=format&fit=crop&q=80"],
     features: ["Intel Core i7", "14\" FHD Touch", "16GB / 512GB", "1 Year Warranty"]
   },
@@ -24,7 +24,7 @@ const MOCK_PRODUCTS = [
     price: 26990, originalPrice: 94990, discount: "71% OFF", savings: 68000,
     gstITC: 4858, stockLeft: 3, claimedPercent: 86, rating: 4.9, reviewsCount: 220,
     screenSize: "14.0\"", processor: "Intel Core i5", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i5-8365U vPro (Quad Core up to 4.1GHz)", ram: "16GB DDR4", storage: "512GB PCIe NVMe SSD", display: "14.0\" FHD IPS Anti-Glare", graphics: "Intel UHD 620", os: "Windows 11 Pro", warranty: "1 Year Doorstep", batteryHealth: "92%" },
+    specs: { processor: "Intel Core i5-8365U vPro (Quad Core up to 4.1GHz)", ram: "16GB DDR4", storage: "512GB PCIe NVMe SSD", display: "14.0\" FHD IPS Anti-Glare", graphics: "Intel UHD 620", os: "Windows 11 Pro", warranty: "1 Year Warranty", batteryHealth: "92%" },
     images: ["https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80"],
     features: ["B&O Audio", "Full Metal Body", "16GB RAM", "1 Year Warranty"]
   },
@@ -36,7 +36,7 @@ const MOCK_PRODUCTS = [
     price: 28490, originalPrice: 98000, discount: "71% OFF", savings: 69510,
     gstITC: 5128, stockLeft: 4, claimedPercent: 78, rating: 4.9, reviewsCount: 312,
     screenSize: "14.0\"", processor: "Intel Core i7", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i7-8565U (up to 4.6GHz)", ram: "16GB DDR4", storage: "512GB SSD", display: "14.0\" FHD IPS 300 nits", graphics: "Intel UHD 620", os: "Windows 11 Pro 64-Bit", warranty: "1 Year Doorstep", batteryHealth: "95%" },
+    specs: { processor: "Intel Core i7-8565U (up to 4.6GHz)", ram: "16GB DDR4", storage: "512GB SSD", display: "14.0\" FHD IPS 300 nits", graphics: "Intel UHD 620", os: "Windows 11 Pro 64-Bit", warranty: "1 Year Warranty", batteryHealth: "95%" },
     images: ["https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80"],
     features: ["MIL-SPEC Rugged", "TrackPoint", "16GB RAM", "1 Year Warranty"]
   },
@@ -48,7 +48,7 @@ const MOCK_PRODUCTS = [
     price: 58990, originalPrice: 99900, discount: "41% OFF", savings: 40910,
     gstITC: 10618, stockLeft: 2, claimedPercent: 95, rating: 5.0, reviewsCount: 420,
     screenSize: "13.3\"", processor: "Apple M1/M2", os: "macOS",
-    specs: { processor: "Apple M1 (8-Core CPU / 7-Core GPU)", ram: "8GB Unified Memory", storage: "256GB SSD", display: "13.3\" Retina True Tone (2560x1600)", graphics: "Apple 7-Core GPU", os: "macOS Sonoma", warranty: "1 Year Doorstep", batteryHealth: "100%" },
+    specs: { processor: "Apple M1 (8-Core CPU / 7-Core GPU)", ram: "8GB Unified Memory", storage: "256GB SSD", display: "13.3\" Retina True Tone (2560x1600)", graphics: "Apple 7-Core GPU", os: "macOS Sonoma", warranty: "1 Year Warranty", batteryHealth: "100%" },
     images: ["https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=700&auto=format&fit=crop&q=80"],
     features: ["Apple M1 Silicon", "Retina Display", "18-Hr Battery", "Open Box Like New"]
   },
@@ -60,7 +60,7 @@ const MOCK_PRODUCTS = [
     price: 58990, originalPrice: 145000, discount: "59% OFF", savings: 86010,
     gstITC: 10618, stockLeft: 2, claimedPercent: 94, rating: 4.9, reviewsCount: 194,
     screenSize: "14.0\"", processor: "Intel Core i7", generation: "12th Gen", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i7-1260P (12 Cores, 16 Threads, up to 4.7GHz)", generation: "12th Gen", ram: "16GB LPDDR5 5200MHz", storage: "1TB PCIe Gen4 NVMe SSD", display: "14.0\" 2.8K (2880x1800) OLED 400 nits HDR500", graphics: "Intel Iris Xe Graphics", os: "Windows 11 Pro", warranty: "1 Year Doorstep", batteryHealth: "95%" },
+    specs: { processor: "Intel Core i7-1260P (12 Cores, 16 Threads, up to 4.7GHz)", generation: "12th Gen", ram: "16GB LPDDR5 5200MHz", storage: "1TB PCIe Gen4 NVMe SSD", display: "14.0\" 2.8K (2880x1800) OLED 400 nits HDR500", graphics: "Intel Iris Xe Graphics", os: "Windows 11 Pro", warranty: "1 Year Warranty", batteryHealth: "95%" },
     images: ["https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=700&auto=format&fit=crop&q=80"],
     features: ["Carbon Fiber Chassis", "2.8K OLED Display", "Core i7 12th Gen", "Backlit Keyboard"]
   },
@@ -110,7 +110,7 @@ const MOCK_PRODUCTS = [
     price: 22990, originalPrice: 65000, discount: "64% OFF", savings: 42010,
     gstITC: 4138, stockLeft: 5, claimedPercent: 70, rating: 4.7, reviewsCount: 68,
     screenSize: "N/A", processor: "Intel Core i7", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i7-9700T (8 Cores, up to 4.3GHz)", ram: "16GB DDR4", storage: "512GB M.2 NVMe SSD", graphics: "Intel UHD 630 (Dual DP Out)", os: "Windows 11 Pro", warranty: "1 Year Doorstep", formFactor: "Ultra Small Form Factor Micro" },
+    specs: { processor: "Intel Core i7-9700T (8 Cores, up to 4.3GHz)", ram: "16GB DDR4", storage: "512GB M.2 NVMe SSD", graphics: "Intel UHD 630 (Dual DP Out)", os: "Windows 11 Pro", warranty: "1 Year Warranty", formFactor: "Ultra Small Form Factor Micro" },
     images: ["https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80"],
     features: ["Core i7 8-Core", "Ultra Compact", "Dual 4K DP", "1 Year Warranty"]
   },
@@ -122,7 +122,7 @@ const MOCK_PRODUCTS = [
     price: 16990, originalPrice: 48000, discount: "65% OFF", savings: 31010,
     gstITC: 3058, stockLeft: 8, claimedPercent: 55, rating: 4.6, reviewsCount: 45,
     screenSize: "N/A", processor: "Intel Core i5", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i5-9500 (6 Cores, up to 4.4GHz)", ram: "8GB DDR4", storage: "256GB SSD + 1TB HDD", graphics: "Intel UHD 630", os: "Windows 11 Pro", warranty: "1 Year Doorstep" },
+    specs: { processor: "Intel Core i5-9500 (6 Cores, up to 4.4GHz)", ram: "8GB DDR4", storage: "256GB SSD + 1TB HDD", graphics: "Intel UHD 630", os: "Windows 11 Pro", warranty: "1 Year Warranty" },
     images: ["https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80"],
     features: ["Core i5 6-Core", "Dual Storage", "SFF Desktop", "1 Year Warranty"]
   },
@@ -134,7 +134,7 @@ const MOCK_PRODUCTS = [
     price: 19990, originalPrice: 62000, discount: "68% OFF", savings: 42010,
     gstITC: 3598, stockLeft: 4, claimedPercent: 80, rating: 4.8, reviewsCount: 72,
     screenSize: "N/A", processor: "Intel Core i7", os: "Windows 11 Pro",
-    specs: { processor: "Intel Core i7-8700T (6 Cores, up to 4.0GHz)", ram: "16GB DDR4", storage: "512GB SSD", graphics: "Intel UHD 630", os: "Windows 11 Pro", warranty: "1 Year Doorstep", formFactor: "Tiny Form Factor" },
+    specs: { processor: "Intel Core i7-8700T (6 Cores, up to 4.0GHz)", ram: "16GB DDR4", storage: "512GB SSD", graphics: "Intel UHD 630", os: "Windows 11 Pro", warranty: "1 Year Warranty", formFactor: "Tiny Form Factor" },
     images: ["https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=700&auto=format&fit=crop&q=80"],
     features: ["Core i7 6-Core", "ThinkCentre Tiny", "16GB RAM", "1 Year Warranty"]
   },
@@ -458,7 +458,7 @@ const MOCK_PRODUCTS = [
     price: 84990, originalPrice: 199990, discount: "58% OFF", savings: 115000,
     gstITC: 15298, stockLeft: 2, claimedPercent: 65, rating: 4.9, reviewsCount: 12,
     screenSize: "N/A", processor: "Intel Xeon", os: "Windows 11 Pro",
-    specs: { processor: "Intel Xeon W-2123 (4 Cores, up to 3.6GHz)", ram: "32GB DDR4 ECC Registered", storage: "512GB NVMe SSD + 2TB HDD", graphics: "NVIDIA Quadro P2000 5GB GDDR5", os: "Windows 11 Pro for Workstations", warranty: "1 Year Doorstep Warranty" },
+    specs: { processor: "Intel Xeon W-2123 (4 Cores, up to 3.6GHz)", ram: "32GB DDR4 ECC Registered", storage: "512GB NVMe SSD + 2TB HDD", graphics: "NVIDIA Quadro P2000 5GB GDDR5", os: "Windows 11 Pro for Workstations", warranty: "1 Year Warranty" },
     images: ["https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=700&auto=format&fit=crop&q=80"],
     features: ["Xeon W Processor", "32GB ECC RAM", "Quadro P2000 GPU", "Refurbished Workstation"]
   },

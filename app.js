@@ -621,7 +621,7 @@ function renderHomeView(container, state) {
           { name: "HP", logo: "💻", tag: "EliteBook & ProDesk", bg: "hover:border-blue-500 hover:bg-slate-800/80", color: "text-blue-400" },
           { name: "Lenovo", logo: "💼", tag: "ThinkPad & Legion", bg: "hover:border-red-500 hover:bg-slate-800/80", color: "text-red-400" },
           { name: "Apple", logo: "🍎", tag: "MacBook Air & Pro", bg: "hover:border-slate-400 hover:bg-slate-800/80", color: "text-slate-200" },
-          { name: "Samsung", logo: "📱", tag: "Displays & NVMe SSDs", bg: "hover:border-indigo-500 hover:bg-slate-800/80", color: "text-indigo-400" },
+          { name: "ASUS", logo: "⚡", tag: "ROG, TUF & ZenBook", bg: "hover:border-purple-500 hover:bg-slate-800/80", color: "text-purple-400" },
           { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-emerald-500 hover:bg-slate-800/80", color: "text-emerald-400" }
         ].map(b => {
           const count = products.filter(p => (p.brand || "").toLowerCase() === b.name.toLowerCase()).length;
@@ -921,9 +921,9 @@ function renderCatalogView(container, state) {
 
   // Dynamic brands from active product inventory
   const uniqueBrands = Array.from(new Set(allProducts.map(p => (p.brand || "").trim()).filter(Boolean)));
-  const standardBrandList = ["Dell", "HP", "Lenovo", "Apple", "ASUS", "Samsung", "Kingston", "TP-Link", "Microsoft", "Logitech"];
+  const standardBrandList = ["Dell", "HP", "Lenovo", "Apple", "ASUS", "Acer", "MSI", "Microsoft", "Kingston", "TP-Link", "Logitech"];
   const allBrandSet = new Set([...standardBrandList, ...uniqueBrands]);
-  const availableBrands = ["All", ...Array.from(allBrandSet)];
+  const availableBrands = ["All", ...Array.from(allBrandSet).filter(b => b && b.toLowerCase() !== "samsung")];
 
   let categoryTitle = filters.category === "Crazy Deals" 
     ? "Crazy Deals & Flash Offers" 
@@ -954,60 +954,30 @@ function renderCatalogView(container, state) {
 
     <div class="flex flex-col lg:flex-row gap-6 items-start">
       
-      <!-- LEFT ACCORDION SIDEBAR: Categories & Filters (Compact small size on left side) -->
+      <!-- LEFT SIDEBAR: Brand Ecosystem Filter -->
       <aside class="w-full lg:w-64 xl:w-72 lg:shrink-0 select-none space-y-4 lg:sticky lg:top-24">
         <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4 shadow-xl backdrop-blur-sm">
           <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-            <h3 class="font-extrabold text-sm text-white flex items-center gap-1.5"><span>⚡</span> Filters</h3>
-            <button onclick="resetFilters()" class="text-xs text-cyan-400 hover:underline font-semibold">Reset</button>
+            <h3 class="font-extrabold text-sm text-white flex items-center gap-1.5"><span>⚡</span> Brand Ecosystem</h3>
+            ${filters.brand && filters.brand !== 'All' ? `<button onclick="handleBrandFilter('All')" class="text-xs text-cyan-400 hover:underline font-semibold">Reset</button>` : ''}
           </div>
 
-          <!-- Price Filter Accordion -->
-          <div class="py-3 border-b border-slate-800">
-            <div class="flex justify-between items-center text-xs font-bold text-slate-200 mb-2">
-              <span>Price Range</span>
-              <span class="text-cyan-400 font-mono text-[11px]">Max: ₹ ${Number(filters.price).toLocaleString('en-IN')}</span>
-            </div>
-            <input type="range" min="1000" max="200000" step="1000" value="${filters.price}" oninput="handlePriceFilter(this.value)" class="w-full accent-cyan-400 cursor-pointer bg-slate-950">
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-              <span>₹1,000</span>
-              <span>₹2,00,000</span>
-            </div>
-          </div>
-
-          <!-- Brand Filter Accordion -->
-          <div class="py-3 border-b border-slate-800">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold text-slate-200 block">Brand Ecosystem</span>
-              ${filters.brand && filters.brand !== 'All' ? `<button onclick="handleBrandFilter('All')" class="text-[10px] text-cyan-400 font-semibold hover:underline">Clear</button>` : ''}
-            </div>
-            <div class="space-y-1 max-h-48 overflow-y-auto text-xs pr-1">
+          <!-- Brand Filter List -->
+          <div class="pt-3">
+            <div class="space-y-1 max-h-96 overflow-y-auto text-xs pr-1">
               ${availableBrands.map(brand => {
                 const count = brand === "All" ? allProducts.length : allProducts.filter(p => (p.brand || "").toLowerCase() === brand.toLowerCase()).length;
                 if (brand !== "All" && count === 0) return "";
                 return `
-                <label class="flex items-center justify-between gap-2 cursor-pointer text-slate-300 hover:text-white py-1 px-1.5 rounded-lg hover:bg-slate-800/70 transition">
+                <label class="flex items-center justify-between gap-2 cursor-pointer text-slate-300 hover:text-white py-1.5 px-2 rounded-xl hover:bg-slate-800/70 transition ${filters.brand === brand ? 'bg-cyan-950/40 border border-cyan-800/40' : ''}">
                   <span class="flex items-center gap-2">
                     <input type="radio" name="brand_filter" value="${brand}" ${filters.brand === brand ? 'checked' : ''} onchange="handleBrandFilter('${brand}')" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
                     <span class="font-medium ${filters.brand === brand ? 'text-cyan-300 font-bold' : ''}">${brand}</span>
                   </span>
-                  <span class="text-[10px] text-slate-500 font-mono">(${count})</span>
+                  <span class="text-[10px] text-slate-500 font-mono font-bold">(${count})</span>
                 </label>
               `;
               }).join("")}
-            </div>
-          </div>
-
-          <!-- Processor Filter Accordion -->
-          <div class="pt-3">
-            <span class="text-xs font-bold text-slate-200 block mb-2">Processor</span>
-            <div class="space-y-1.5 text-xs max-h-44 overflow-y-auto pr-1">
-              ${["All", "Intel Core i7", "Intel Core i5", "Intel Core i9", "AMD Ryzen 7", "AMD Ryzen 5", "Apple M1/M2", "Intel Xeon"].map(proc => `
-                <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white py-0.5">
-                  <input type="radio" name="proc_filter" value="${proc}" ${filters.processor === proc ? 'checked' : ''} onchange="handleProcFilter('${proc}')" class="text-cyan-500 bg-slate-950 border-slate-700">
-                  <span class="${filters.processor === proc ? 'text-cyan-300 font-bold' : ''}">${proc}</span>
-                </label>
-              `).join("")}
             </div>
           </div>
 
@@ -3387,11 +3357,11 @@ const DROPDOWN_OPTIONS = {
     "Other SSD"
   ],
   warranties: [
-    "1 Year Doorstep Warranty",
-    "6 Months Doorstep Warranty",
-    "90 Days Doorstep Warranty",
+    "1 Year Warranty",
+    "6 Months Warranty",
+    "90 Days Warranty",
     "30 Days Testing Warranty",
-    "2 Year Doorstep Warranty",
+    "2 Year Warranty",
     "3 Year Enterprise Warranty",
     "1 Year Apple Care+ / Brand Warranty",
     "Brand Warranty Remaining",
@@ -3535,7 +3505,7 @@ function openAddProductModal() {
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
               <select id="new-prod-warranty" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, "1 Year Doorstep Warranty")}
+                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, "1 Year Warranty")}
               </select>
             </div>
           </div>
@@ -3827,7 +3797,7 @@ function openEditProductModal(prodId) {
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
               <select id="edit-prod-warranty" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, p.specs?.warranty || p.warranty || "1 Year Doorstep Warranty")}
+                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, (p.specs?.warranty || p.warranty || "1 Year Warranty").replace(/doorstep\s*/gi, ""))}
               </select>
             </div>
           </div>
