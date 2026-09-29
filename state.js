@@ -414,6 +414,8 @@ class StateManager {
     const genVal = productData.generation || (productData.specs && productData.specs.generation) || "";
     const osVal = productData.os || (productData.specs && productData.specs.os) || "Windows 11 Pro 64-Bit";
     const screenVal = productData.screenSize || (productData.specs && productData.specs.screenSize) || "14.0 - 15.6 Inch";
+    const ramVal = productData.ram || (productData.specs && productData.specs.ram) || "16GB DDR4";
+    const storageVal = productData.storage || (productData.specs && productData.specs.storage) || "512GB NVMe SSD";
 
     const newProduct = {
       id: newId,
@@ -438,13 +440,18 @@ class StateManager {
       screenSize: screenVal,
       processor: procVal,
       generation: genVal,
+      ram: ramVal,
+      storage: storageVal,
       os: osVal,
       specs: {
         ...(productData.specs || {}),
         processor: procVal,
         generation: genVal,
+        ram: ramVal,
+        storage: storageVal,
         os: osVal,
         screenSize: screenVal,
+        display: screenVal,
         warranty: productData.warranty || (productData.specs && productData.specs.warranty) || "1 Year Doorstep Warranty",
         features: productData.featuresSummary || "Certified Genuine Hardware"
       },
@@ -483,7 +490,9 @@ class StateManager {
       const proc = updatedData.processor !== undefined ? updatedData.processor : (orig.processor || (orig.specs && orig.specs.processor) || "N/A");
       const gen = updatedData.generation !== undefined ? updatedData.generation : (orig.generation || (orig.specs && orig.specs.generation) || "");
       const osVal = updatedData.os !== undefined ? updatedData.os : (orig.os || "Windows 11 Pro 64-Bit");
-      const screenVal = updatedData.screenSize !== undefined ? updatedData.screenSize : (orig.screenSize || "14.0 - 15.6 Inch");
+      const screenVal = updatedData.screenSize !== undefined ? updatedData.screenSize : (orig.screenSize || (orig.specs && orig.specs.screenSize) || "14.0 - 15.6 Inch");
+      const ramVal = updatedData.ram !== undefined ? updatedData.ram : (orig.ram || (orig.specs && orig.specs.ram) || "16GB DDR4");
+      const storageVal = updatedData.storage !== undefined ? updatedData.storage : (orig.storage || (orig.specs && orig.specs.storage) || "512GB NVMe SSD");
 
       const updatedProd = {
         ...orig,
@@ -493,13 +502,18 @@ class StateManager {
         generation: gen,
         os: osVal,
         screenSize: screenVal,
+        ram: ramVal,
+        storage: storageVal,
         specs: {
           ...(orig.specs || {}),
           ...(updatedData.specs || {}),
           processor: proc,
           generation: gen,
+          ram: ramVal,
+          storage: storageVal,
           os: osVal,
           screenSize: screenVal,
+          display: screenVal,
           warranty: (updatedData.specs && updatedData.specs.warranty) || updatedData.warranty || (orig.specs && orig.specs.warranty) || orig.warranty || "1 Year Warranty"
         },
         price: price,

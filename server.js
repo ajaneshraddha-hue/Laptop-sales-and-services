@@ -447,7 +447,13 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      // Fallback to index.html for SPA routing
+      // If a missing image or upload was requested, return 404 instead of HTML
+      if (reqUrl.startsWith("/uploads/") || reqUrl.startsWith("/api/") || reqUrl.match(/\.(png|jpg|jpeg|webp|gif|svg|ico)$/i)) {
+        res.writeHead(404, { "Content-Type": "text/plain" });
+        res.end("404 Asset Not Found");
+        return;
+      }
+      // Fallback to index.html for SPA frontend routing
       filePath = path.join(__dirname, "index.html");
     }
 
@@ -461,7 +467,7 @@ const server = http.createServer((req, res) => {
       } else {
         res.writeHead(200, {
           "Content-Type": contentType,
-          "Cache-Control": "no-cache"
+          "Cache-Control": reqUrl.startsWith("/uploads/") ? "public, max-age=86400" : "no-cache"
         });
         res.end(content);
       }

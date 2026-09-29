@@ -466,7 +466,7 @@ function renderDarkProductCard(p, state) {
           <span class="absolute top-2 left-2 bg-slate-800/90 border border-slate-700 text-cyan-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow z-10">1-Yr Warranty</span>
         `)}
         
-        <img src="${pImg}" alt="${p.name}" class="w-full h-40 object-cover rounded-xl group-hover:scale-105 transition duration-300">
+        <img src="${pImg}" alt="${p.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" class="w-full h-40 object-cover rounded-xl group-hover:scale-105 transition duration-300">
       </div>
 
       <div class="flex-1 flex flex-col justify-between">
@@ -476,7 +476,7 @@ function renderDarkProductCard(p, state) {
             <span class="text-[10px] text-amber-300 font-bold flex items-center gap-0.5">★ 5.0</span>
           </div>
           <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-white group-hover:text-cyan-300 cursor-pointer line-clamp-2 mb-1.5 leading-snug transition">${p.name}</h3>
-          <p class="text-[11px] text-slate-400 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.generation ? '• ' + p.generation : ''} ${p.ram ? '• ' + p.ram : ''}</p>
+          <p class="text-[11px] text-slate-400 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.ram || p.specs?.ram ? '• 💾 ' + (p.ram || p.specs?.ram) : ''} ${p.storage || p.specs?.storage ? '• 💽 ' + (p.storage || p.specs?.storage) : ''} ${p.screenSize || p.specs?.screenSize || p.specs?.display ? '• 🖥️ ' + (p.screenSize || p.specs?.screenSize || p.specs?.display) : ''} ${p.generation ? '• ' + p.generation : ''}</p>
         </div>
 
         <div>
@@ -847,7 +847,11 @@ function renderCatalogView(container, state) {
       const matchBrand = (p.brand || "").toLowerCase().includes(q);
       const matchCat = (p.category || "").toLowerCase().includes(q);
       const matchProc = (p.processor || "").toLowerCase().includes(q);
-      if (!matchName && !matchBrand && !matchCat && !matchProc) return false;
+      const matchRam = (p.ram || p.specs?.ram || "").toLowerCase().includes(q);
+      const matchStorage = (p.storage || p.specs?.storage || "").toLowerCase().includes(q);
+      const matchScreen = (p.screenSize || p.specs?.screenSize || p.specs?.display || "").toLowerCase().includes(q);
+      const matchSpecs = JSON.stringify(p.specs || {}).toLowerCase().includes(q);
+      if (!matchName && !matchBrand && !matchCat && !matchProc && !matchRam && !matchStorage && !matchScreen && !matchSpecs) return false;
     }
     // Category filter
     if (filters.category === "Crazy Deals") {
@@ -1066,7 +1070,7 @@ function renderListCard(p) {
           <span class="absolute top-2 left-2 bg-slate-800/90 border border-slate-700 text-cyan-300 text-[9px] font-bold px-2 py-0.5 rounded-full shadow z-10">1-Yr Warranty</span>
         `)}
         
-        <img src="${pImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        <img src="${pImg}" alt="${p.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
       </div>
 
       <!-- Center Info -->
@@ -1080,11 +1084,20 @@ function renderListCard(p) {
           ${p.name}
         </h3>
         
-        <!-- Specs pills -->
+        <!-- Specs pills with Screen Size -->
         <div class="flex flex-wrap gap-1.5 mb-3">
-          ${(p.features || [p.processor, p.generation, p.ram, p.storage].filter(Boolean)).slice(0, 3).map(f => `
-            <span class="bg-slate-950 border border-slate-800 text-slate-300 text-[10px] font-medium px-2.5 py-0.5 rounded-full">${f}</span>
-          `).join("")}
+          ${(() => {
+            const pills = [];
+            if (p.processor) pills.push(p.processor);
+            const scr = p.screenSize || p.specs?.screenSize || p.specs?.display;
+            if (scr) pills.push(`🖥️ ${scr}`);
+            if (p.specs?.ram || p.ram) pills.push(p.specs?.ram || p.ram);
+            if (p.specs?.storage || p.storage) pills.push(p.specs?.storage || p.storage);
+            if (pills.length < 3 && Array.isArray(p.features)) pills.push(...p.features);
+            return pills.slice(0, 4).map(f => `
+              <span class="bg-slate-950 border border-slate-800 text-slate-300 text-[10px] font-medium px-2.5 py-0.5 rounded-full">${f}</span>
+            `).join("");
+          })()}
         </div>
 
         <div class="flex items-baseline gap-2.5">
@@ -1232,22 +1245,25 @@ function renderProductView(container, state) {
       <!-- Images Gallery -->
       <div>
         <div class="relative rounded-2xl overflow-hidden border border-slate-200 mb-4 bg-slate-50">
-          <img id="main-prod-img" src="${p.images[0]}" alt="${p.name}" class="w-full h-80 md:h-96 object-cover">
+          <img id="main-prod-img" src="${(p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80')}" alt="${p.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" class="w-full h-80 md:h-96 object-cover">
           ${p.discount ? `<span class="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow">${p.discount}</span>` : ''}
         </div>
         <div class="flex gap-3 overflow-x-auto pb-1">
-          ${p.images.map((img, i) => `
-            <img src="${img}" onclick="document.getElementById('main-prod-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-slate-200 hover:border-blue-600 cursor-pointer transition shrink-0">
+          ${((p.images && p.images.length > 0) ? p.images : [p.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80']).map((img, i) => `
+            <img src="${img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" onclick="document.getElementById('main-prod-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-slate-200 hover:border-blue-600 cursor-pointer transition shrink-0">
           `).join("")}
         </div>
       </div>
 
       <!-- Product Specifications & Buy Panel -->
       <div class="space-y-4">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <span class="bg-blue-50 text-blue-700 font-extrabold text-xs px-3 py-1 rounded-full border border-blue-200">${p.brand}</span>
-          <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-full">${p.condition}</span>
-          <span class="ml-auto text-amber-500 font-bold text-sm">⭐ ${p.rating} (${p.reviewsCount} reviews)</span>
+          <span class="bg-purple-50 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full border border-purple-200 flex items-center gap-1">💾 RAM: ${p.ram || p.specs?.ram || '16GB DDR4'}</span>
+          <span class="bg-emerald-50 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1">💽 Storage: ${p.storage || p.specs?.storage || '512GB SSD'}</span>
+          <span class="bg-cyan-50 text-cyan-800 font-extrabold text-xs px-3 py-1 rounded-full border border-cyan-200 flex items-center gap-1">🖥️ Screen: ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0 Inch'}</span>
+          <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-full">${p.condition || 'Grade A+ Certified'}</span>
+          <span class="ml-auto text-amber-500 font-bold text-sm">⭐ ${p.rating || 5.0} (${p.reviewsCount || 100}+ reviews)</span>
         </div>
 
         <h1 class="text-xl md:text-2xl font-black text-slate-900 leading-snug">${p.name}</h1>
@@ -1266,7 +1282,19 @@ function renderProductView(container, state) {
         <div class="space-y-2 pt-2">
           <h4 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Specifications & Key Highlights</h4>
           <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 divide-y divide-slate-200 text-xs">
-            ${Object.entries(p.specs || {}).map(([k, v]) => `
+            <div class="py-2 flex justify-between items-center bg-cyan-50/60 -mx-3 px-3 rounded-lg font-bold">
+              <span class="text-cyan-950 font-bold flex items-center gap-1.5"><span>🖥️</span> Screen Size / Display:</span>
+              <span class="text-cyan-900 font-black text-right">${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0 Inch Full HD Display'}</span>
+            </div>
+            <div class="py-2 flex justify-between items-center bg-purple-50/60 -mx-3 px-3 rounded-lg font-bold">
+              <span class="text-purple-950 font-bold flex items-center gap-1.5"><span>💾</span> RAM / System Memory:</span>
+              <span class="text-purple-900 font-black text-right">${p.ram || p.specs?.ram || '16GB DDR4 High-Speed RAM'}</span>
+            </div>
+            <div class="py-2 flex justify-between items-center bg-emerald-50/60 -mx-3 px-3 rounded-lg font-bold">
+              <span class="text-emerald-950 font-bold flex items-center gap-1.5"><span>💽</span> Internal Storage / SSD:</span>
+              <span class="text-emerald-900 font-black text-right">${p.storage || p.specs?.storage || '512GB NVMe M.2 SSD'}</span>
+            </div>
+            ${Object.entries(p.specs || {}).filter(([k]) => !['screensize', 'display', 'ram', 'storage'].includes(k.toLowerCase())).map(([k, v]) => `
               <div class="py-1.5 flex justify-between">
                 <span class="text-slate-500 font-semibold capitalize">${k.replace(/([A-Z])/g, ' $1')}:</span>
                 <span class="text-slate-800 font-bold text-right">${v}</span>
@@ -2626,6 +2654,7 @@ function renderAdminTabContent(tab, state) {
                 <th class="p-3">Product</th>
                 <th class="p-3">Category</th>
                 <th class="p-3">Brand</th>
+                <th class="p-3">Key Specs (Display / RAM / Storage)</th>
                 <th class="p-3">Selling Price</th>
                 <th class="p-3">Stock</th>
                 <th class="p-3">Type</th>
@@ -2636,7 +2665,7 @@ function renderAdminTabContent(tab, state) {
               ${products.map(p => `
                 <tr class="hover:bg-slate-50 transition">
                   <td class="p-3 flex items-center gap-3">
-                    <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
+                    <img src="${(p.images && p.images[0]) || p.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80'}" alt="${p.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
                     <div class="min-w-0">
                       <p class="font-bold text-slate-900 line-clamp-1">${p.name}</p>
                       <span class="text-[10px] text-slate-400 font-mono">${p.id}</span>
@@ -2644,6 +2673,13 @@ function renderAdminTabContent(tab, state) {
                   </td>
                   <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
                   <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
+                  <td class="p-3">
+                    <div class="flex flex-col gap-1 items-start">
+                      <span class="bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
+                      ${(p.ram || p.specs?.ram) ? `<span class="bg-purple-50 border border-purple-200 text-purple-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💾 ${p.ram || p.specs?.ram}</span>` : ''}
+                      ${(p.storage || p.specs?.storage) ? `<span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💽 ${p.storage || p.specs?.storage}</span>` : ''}
+                    </div>
+                  </td>
                   <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
                   <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
                   <td class="p-3">
@@ -3009,7 +3045,7 @@ async function handleProductFilesSelect(event) {
 
   const previewContainer = document.getElementById("product-img-previews");
   if (previewContainer) {
-    previewContainer.innerHTML = `<div class="p-2 text-xs text-blue-600 font-semibold flex items-center gap-2"><span class="animate-spin">⏳</span> Uploading and saving image(s)...</div>`;
+    previewContainer.innerHTML = `<div class="p-2 text-xs text-cyan-400 font-semibold flex items-center gap-2"><span class="animate-spin">⏳</span> Processing and optimizing image(s)...</div>`;
   }
 
   for (const file of Array.from(files)) {
@@ -3017,52 +3053,45 @@ async function handleProductFilesSelect(event) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
-        img.onload = async () => {
-          const canvas = document.createElement("canvas");
-          const maxDim = 1000;
-          let width = img.width;
-          let height = img.height;
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
-
-          // Upload directly to server endpoint to get a lightweight URL
+        img.onload = () => {
           try {
-            const resp = await fetch("/api/upload", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ image: compressedDataUrl, name: file.name })
-            });
-            if (resp.ok) {
-              const resData = await resp.json();
-              if (resData && resData.url) {
-                tempUploadedImages.push(resData.url);
-                resolve();
-                return;
+            const canvas = document.createElement("canvas");
+            const maxDim = 800; // Optimal for sharp display and ultra-lightweight storage
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
               }
             }
-          } catch (err) {
-            console.warn("Direct upload endpoint failed, storing data url:", err);
-          }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.82);
 
-          tempUploadedImages.push(compressedDataUrl);
+            tempUploadedImages.push(compressedDataUrl);
+            resolve();
+          } catch (err) {
+            console.warn("Canvas compression fallback, using raw data url:", err);
+            tempUploadedImages.push(e.target.result);
+            resolve();
+          }
+        };
+        img.onerror = () => {
+          // If image fails to decode (e.g. unknown format), push raw data url
+          tempUploadedImages.push(e.target.result);
           resolve();
         };
         img.src = e.target.result;
       };
+      reader.onerror = () => resolve();
       reader.readAsDataURL(file);
     });
   }
@@ -3268,11 +3297,11 @@ function openAddProductModal() {
             </div>
           </div>
 
-          <!-- Processor & Generation Selection (User Specified Fields) -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Processor, Generation & Screen Size Selection (User Specified Fields) -->
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="processor-list-options">
+              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="processor-list-options">
               <datalist id="processor-list-options">
                 <option value="Intel Core i5">
                 <option value="Intel Core i7">
@@ -3287,7 +3316,7 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="gen-list-options">
+              <input type="text" id="new-prod-generation" placeholder="e.g. 11th Gen" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="gen-list-options">
               <datalist id="gen-list-options">
                 <option value="8th Gen">
                 <option value="9th Gen">
@@ -3299,6 +3328,57 @@ function openAddProductModal() {
                 <option value="Apple Silicon">
                 <option value="Zen 3">
                 <option value="Zen 4">
+              </datalist>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
+              <input type="text" id="new-prod-screensize" placeholder="e.g. 14.0 Inch / 15.6 Inch" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="screensize-list-options">
+              <datalist id="screensize-list-options">
+                <option value="14.0 Inch (14.0&quot; FHD Display)">
+                <option value="15.6 Inch (15.6&quot; FHD Display)">
+                <option value="13.3 Inch (13.3&quot; Retina / FHD)">
+                <option value="14.0 Inch Touch (14.0&quot; FHD Touchscreen)">
+                <option value="16.0 Inch (16.0&quot; WQXGA Display)">
+                <option value="12.5 Inch (12.5&quot; Ultra-Compact)">
+                <option value="17.3 Inch (17.3&quot; Creator / Gaming)">
+                <option value="24.0 Inch (All-in-One Desktop)">
+                <option value="27.0 Inch (All-in-One / Pro Display)">
+              </datalist>
+            </div>
+          </div>
+
+          <!-- RAM & Storage Options -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
+              <input type="text" id="new-prod-ram" placeholder="e.g. 16GB DDR4" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="ram-list-options">
+              <datalist id="ram-list-options">
+                <option value="8GB DDR4">
+                <option value="16GB DDR4">
+                <option value="32GB DDR4">
+                <option value="64GB DDR4">
+                <option value="8GB DDR5">
+                <option value="16GB DDR5">
+                <option value="32GB DDR5">
+                <option value="8GB Unified Memory">
+                <option value="16GB Unified Memory">
+                <option value="32GB Unified Memory">
+                <option value="4GB DDR3 / DDR4">
+              </datalist>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
+              <input type="text" id="new-prod-storage" placeholder="e.g. 512GB PCIe NVMe SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="storage-list-options">
+              <datalist id="storage-list-options">
+                <option value="256GB PCIe NVMe SSD">
+                <option value="512GB PCIe NVMe SSD">
+                <option value="1TB PCIe NVMe SSD">
+                <option value="2TB PCIe NVMe SSD">
+                <option value="128GB SSD">
+                <option value="256GB SSD + 1TB HDD">
+                <option value="512GB SSD + 1TB HDD">
+                <option value="1TB HDD">
+                <option value="2TB HDD">
               </datalist>
             </div>
           </div>
@@ -3396,6 +3476,9 @@ function handleCreateProductSubmit(event) {
   const warrantyEl = document.getElementById("new-prod-warranty");
   const procEl = document.getElementById("new-prod-processor");
   const genEl = document.getElementById("new-prod-generation");
+  const screenEl = document.getElementById("new-prod-screensize");
+  const ramEl = document.getElementById("new-prod-ram");
+  const storageEl = document.getElementById("new-prod-storage");
   const crazyEl = document.getElementById("new-prod-crazy");
   const newEl = document.getElementById("new-prod-new");
   const urlImage = document.getElementById("new-prod-image-url")?.value;
@@ -3412,6 +3495,9 @@ function handleCreateProductSubmit(event) {
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
   const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
   const generationVal = (genEl ? genEl.value : "").trim() || "";
+  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch";
+  const ramVal = (ramEl ? ramEl.value : "").trim() || "16GB DDR4";
+  const storageVal = (storageEl ? storageEl.value : "").trim() || "512GB NVMe SSD";
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
   const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
@@ -3435,6 +3521,9 @@ function handleCreateProductSubmit(event) {
     brand: brandVal,
     processor: processorVal,
     generation: generationVal,
+    screenSize: screenSizeVal,
+    ram: ramVal,
+    storage: storageVal,
     price: priceVal,
     originalPrice: origPriceVal,
     stockLeft: stockVal,
@@ -3442,13 +3531,17 @@ function handleCreateProductSubmit(event) {
     specs: {
       processor: processorVal,
       generation: generationVal,
+      screenSize: screenSizeVal,
+      display: screenSizeVal,
+      ram: ramVal,
+      storage: storageVal,
       warranty: warrantyVal
     },
     images: finalImages,
     image: finalImages[0],
     isCrazyDeal: Boolean(crazyEl?.checked),
     isNew: Boolean(newEl ? newEl.checked : true),
-    features: ["100% Genuine", "Warranty Assured", "Fast Shipping"]
+    features: [processorVal, ramVal, storageVal, screenSizeVal, "1 Year Warranty"].filter(Boolean)
   };
 
   const created = appState.addProduct(newProduct);
@@ -3500,8 +3593,8 @@ function openEditProductModal(prodId) {
             </div>
           </div>
 
-          <!-- Processor & Generation Selection (User Specified Fields) -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Processor, Generation & Screen Size Selection (User Specified Fields) -->
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
               <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" placeholder="e.g. Intel Core i5" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="processor-list-options">
@@ -3520,6 +3613,22 @@ function openEditProductModal(prodId) {
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
               <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" placeholder="e.g. 11th Gen" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="gen-list-options">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size</label>
+              <input type="text" id="edit-prod-screensize" value="${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0 Inch'}" placeholder="e.g. 14.0 Inch / 15.6 Inch" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="screensize-list-options">
+            </div>
+          </div>
+
+          <!-- RAM & Storage Options -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
+              <input type="text" id="edit-prod-ram" value="${p.ram || p.specs?.ram || ''}" placeholder="e.g. 16GB DDR4" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="ram-list-options">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
+              <input type="text" id="edit-prod-storage" value="${p.storage || p.specs?.storage || ''}" placeholder="e.g. 512GB PCIe NVMe SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="storage-list-options">
             </div>
           </div>
 
@@ -3599,6 +3708,9 @@ function handleEditProductSubmit(event, prodId) {
   const warrantyEl = document.getElementById("edit-prod-warranty");
   const procEl = document.getElementById("edit-prod-processor");
   const genEl = document.getElementById("edit-prod-generation");
+  const screenEl = document.getElementById("edit-prod-screensize");
+  const ramEl = document.getElementById("edit-prod-ram");
+  const storageEl = document.getElementById("edit-prod-storage");
   const crazyEl = document.getElementById("edit-prod-crazy");
   const newEl = document.getElementById("edit-prod-new");
   const urlEl = document.getElementById("edit-prod-image-url");
@@ -3615,6 +3727,9 @@ function handleEditProductSubmit(event, prodId) {
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
   const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
   const generationVal = (genEl ? genEl.value : "").trim() || "";
+  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch";
+  const ramVal = (ramEl ? ramEl.value : "").trim() || "16GB DDR4";
+  const storageVal = (storageEl ? storageEl.value : "").trim() || "512GB NVMe SSD";
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
   const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
@@ -3629,6 +3744,9 @@ function handleEditProductSubmit(event, prodId) {
     brand: brandVal,
     processor: processorVal,
     generation: generationVal,
+    screenSize: screenSizeVal,
+    ram: ramVal,
+    storage: storageVal,
     price: priceVal,
     originalPrice: origPriceVal,
     stockLeft: stockVal,
@@ -3640,6 +3758,10 @@ function handleEditProductSubmit(event, prodId) {
     specs: {
       processor: processorVal,
       generation: generationVal,
+      screenSize: screenSizeVal,
+      display: screenSizeVal,
+      ram: ramVal,
+      storage: storageVal,
       warranty: warrantyVal
     }
   };
@@ -3647,7 +3769,7 @@ function handleEditProductSubmit(event, prodId) {
   appState.updateProduct(prodId, updatedData);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product updated with new image & saved to database!`, "✅", "success");
+  showToast(`Product updated with new specs (RAM: ${ramVal}, Storage: ${storageVal}, Screen: ${screenSizeVal})!`, "✅", "success");
 }
 
 function handleDeleteProduct(prodId) {
@@ -3690,14 +3812,14 @@ function handleAdminProductFilter() {
   if (!tbody) return;
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-semibold">No products found matching the selected brand/category filters.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-semibold">No products found matching the selected brand/category filters.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(p => `
     <tr class="hover:bg-slate-50 transition">
       <td class="p-3 flex items-center gap-3">
-        <img src="${(p.images && p.images[0]) || p.image}" alt="${p.name}" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
+        <img src="${(p.images && p.images[0]) || p.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80'}" alt="${p.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700&auto=format&fit=crop&q=80';" class="w-11 h-11 object-cover rounded-xl border border-slate-200 shrink-0 bg-white">
         <div class="min-w-0">
           <p class="font-bold text-slate-900 line-clamp-1">${p.name}</p>
           <span class="text-[10px] text-slate-400 font-mono">${p.id}</span>
@@ -3705,6 +3827,13 @@ function handleAdminProductFilter() {
       </td>
       <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
       <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
+      <td class="p-3">
+        <div class="flex flex-col gap-1 items-start">
+          <span class="bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
+          ${(p.ram || p.specs?.ram) ? `<span class="bg-purple-50 border border-purple-200 text-purple-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💾 ${p.ram || p.specs?.ram}</span>` : ''}
+          ${(p.storage || p.specs?.storage) ? `<span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💽 ${p.storage || p.specs?.storage}</span>` : ''}
+        </div>
+      </td>
       <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
       <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
       <td class="p-3">

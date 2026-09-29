@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lapro-v12';
+const CACHE_NAME = 'lapro-v13';
 const ASSETS = [
   './',
   './index.html',
