@@ -3290,22 +3290,23 @@ const DROPDOWN_OPTIONS = {
     "Other Generation"
   ],
   screenSizes: [
-    "14.0 Inch (14.0\" FHD Display)",
-    "15.6 Inch (15.6\" FHD Display)",
-    "13.3 Inch (13.3\" Retina / FHD)",
-    "14.0 - 15.6 Inch",
-    "14.0 Inch Touch (14.0\" Touchscreen)",
-    "15.6 Inch Touch (15.6\" Touchscreen)",
-    "16.0 Inch (16.0\" QHD+ Display)",
-    "12.5 Inch (12.5\" Ultra-Compact)",
-    "13.6 Inch (13.6\" Liquid Retina)",
-    "14.2 Inch (14.2\" Liquid Retina XDR)",
-    "16.2 Inch (16.2\" Liquid Retina XDR)",
-    "17.3 Inch (17.3\" Creator / Gaming)",
-    "21.5 Inch (All-in-One Desktop)",
-    "24.0 Inch (All-in-One Desktop)",
-    "27.0 Inch (All-in-One / Pro Display)",
-    "N/A (Desktop / Mini PC / Accessories)",
+    "11.6 Inch",
+    "12.5 Inch",
+    "13.3 Inch",
+    "13.5 Inch",
+    "13.6 Inch",
+    "14.0 Inch",
+    "14.2 Inch",
+    "15.6 Inch",
+    "16.0 Inch",
+    "16.2 Inch",
+    "17.3 Inch",
+    "21.5 Inch",
+    "23.8 Inch",
+    "24.0 Inch",
+    "27.0 Inch",
+    "32.0 Inch",
+    "N/A (Desktop / Accessories)",
     "Other Screen Size"
   ],
   ram: [
@@ -3370,17 +3371,23 @@ const DROPDOWN_OPTIONS = {
 };
 
 function renderSelectOptions(list, selectedValue = "") {
-  const norm = (selectedValue || "").trim().toLowerCase();
+  let raw = (selectedValue || "").trim();
+  let cleanMatch = raw;
+  const inchMatch = raw.match(/(\d{1,2}(?:\.\d)?)\s*(?:inch|\"|'')/i);
+  if (inchMatch && list.some(o => o.includes("Inch"))) {
+    cleanMatch = `${inchMatch[1]} Inch`;
+  }
+  const norm = cleanMatch.toLowerCase();
   let matched = false;
 
   const rendered = list.map(opt => {
     const optLower = opt.toLowerCase();
     let isSelected = false;
     if (!matched && norm) {
-      if (optLower === norm) {
+      if (optLower === norm || optLower.startsWith(norm)) {
         isSelected = true;
         matched = true;
-      } else if (norm !== "none" && norm !== "n/a" && (optLower.startsWith(norm) || norm.startsWith(optLower))) {
+      } else if (norm !== "none" && norm !== "n/a" && (optLower.includes(norm) || norm.includes(optLower))) {
         isSelected = true;
         matched = true;
       }
@@ -3458,7 +3465,7 @@ function openAddProductModal() {
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
               <select id="new-prod-screensize" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, "14.0 Inch (14.0\" FHD Display)")}
+                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, "14.0 Inch")}
               </select>
             </div>
           </div>
@@ -3750,7 +3757,7 @@ function openEditProductModal(prodId) {
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
               <select id="edit-prod-screensize" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, p.screenSize || p.specs?.screenSize || p.specs?.display || "14.0 Inch (14.0\" FHD Display)")}
+                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, p.screenSize || p.specs?.screenSize || p.specs?.display || "14.0 Inch")}
               </select>
             </div>
           </div>
