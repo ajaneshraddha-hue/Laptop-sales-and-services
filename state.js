@@ -151,6 +151,19 @@ const DEFAULT_STATE = {
     { id: "cat-8", name: "Servers & Workstations", icon: "🖧", active: true },
     { id: "cat-9", name: "Software's", icon: "💿", active: true }
   ],
+  brands: [
+    { id: "brand-1", name: "Dell", logo: "🖥️", tag: "OptiPlex, Latitude & XPS", color: "text-cyan-400", bg: "hover:border-cyan-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-2", name: "HP", logo: "💻", tag: "EliteBook, ProDesk & ZBook", color: "text-blue-400", bg: "hover:border-blue-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-3", name: "Lenovo", logo: "💼", tag: "ThinkPad, ThinkCentre & Legion", color: "text-red-400", bg: "hover:border-red-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-4", name: "Apple", logo: "🍎", tag: "MacBook Air, Pro & Mac Mini", color: "text-slate-200", bg: "hover:border-slate-400 hover:bg-slate-800/80", active: true },
+    { id: "brand-5", name: "ASUS", logo: "⚡", tag: "ROG, TUF & ZenBook", color: "text-purple-400", bg: "hover:border-purple-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-6", name: "Acer", logo: "🚀", tag: "Aspire, Nitro & Predator", color: "text-emerald-400", bg: "hover:border-emerald-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-7", name: "MSI", logo: "🐉", tag: "Gaming & Modern Series", color: "text-red-500", bg: "hover:border-red-600 hover:bg-slate-800/80", active: true },
+    { id: "brand-8", name: "Microsoft", logo: "🪟", tag: "Surface Pro & Laptop", color: "text-blue-300", bg: "hover:border-blue-400 hover:bg-slate-800/80", active: true },
+    { id: "brand-9", name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", color: "text-teal-400", bg: "hover:border-teal-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-10", name: "Logitech", logo: "🖱️", tag: "Keyboards, Mice & Video", color: "text-amber-400", bg: "hover:border-amber-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-11", name: "Kingston", logo: "💾", tag: "High Speed RAM & SSDs", color: "text-rose-400", bg: "hover:border-rose-500 hover:bg-slate-800/80", active: true }
+  ],
   faqs: [
     { id: "faq-1", q: "Do you provide doorstep laptop pickup & drop repairs?", a: "Yes, Lapro Solutions provides free doorstep pickup and drop-off services for laptop repairs across Bangalore." },
     { id: "faq-2", q: "What is your warranty period on spare parts?", a: "All screen panels, keyboards, batteries, and motherboard components replaced carry a 1-Year Assured Warranty." },
@@ -179,6 +192,9 @@ class StateManager {
       }
       if (!parsed.categories || parsed.categories.length === 0) {
         parsed.categories = DEFAULT_STATE.categories;
+      }
+      if (!parsed.brands || parsed.brands.length === 0) {
+        parsed.brands = DEFAULT_STATE.brands;
       }
       if (!parsed.registeredAdmins) {
         parsed.registeredAdmins = DEFAULT_STATE.registeredAdmins;
@@ -221,6 +237,7 @@ class StateManager {
         serviceTickets: this.state.serviceTickets,
         products: this.state.products,
         categories: this.state.categories,
+        brands: this.state.brands,
         notifications: this.state.notifications
       };
       await fetch("/api/state", {
@@ -298,6 +315,9 @@ class StateManager {
 
       if (payload.state.categories && payload.state.categories.length > 0) {
         this.state.categories = payload.state.categories;
+      }
+      if (payload.state.brands && payload.state.brands.length > 0) {
+        this.state.brands = payload.state.brands;
       }
       if (payload.state.registeredUsers) {
         this.state.registeredUsers = payload.state.registeredUsers;
@@ -626,6 +646,67 @@ class StateManager {
     if (!cat) return { success: false, message: "Category not found." };
     this.state.categories = this.state.categories.filter(c => c.id !== cat.id && c.name !== cat.name);
     this.addNotification(`Category "${cat.name}" deleted.`);
+    this.saveState(true);
+    return { success: true };
+  }
+
+  // ======================== BRAND ECOSYSTEM CRUD (ADMIN) ========================
+  addBrand(name, logo = "🏷️", tag = "Certified IT Products", color = "text-cyan-400", bg = "hover:border-cyan-500 hover:bg-slate-800/80") {
+    const trimmed = (name || "").trim();
+    if (!trimmed) return { success: false, message: "Brand name cannot be empty." };
+    if (!this.state.brands) this.state.brands = [];
+    if (this.state.brands.some(b => (b.name || "").toLowerCase() === trimmed.toLowerCase())) {
+      return { success: false, message: "Brand ecosystem already exists." };
+    }
+    const newBrand = {
+      id: "brand-" + Date.now(),
+      name: trimmed,
+      logo: (logo || "🏷️").trim(),
+      tag: (tag || "Certified IT Hardware & Laptops").trim(),
+      color: color || "text-cyan-400",
+      bg: bg || "hover:border-cyan-500 hover:bg-slate-800/80",
+      active: true
+    };
+    this.state.brands.push(newBrand);
+    this.addNotification(`Brand Ecosystem "${trimmed}" created.`);
+    this.saveState(true);
+    return { success: true, brand: newBrand };
+  }
+
+  updateBrand(id, name, logo, tag, color, bg) {
+    if (!this.state.brands) this.state.brands = [];
+    const brand = this.state.brands.find(b => b.id === id || b.name === id);
+    if (!brand) return { success: false, message: "Brand not found." };
+    const oldName = brand.name;
+    const newName = (name || "").trim();
+    if (!newName) return { success: false, message: "Brand name cannot be empty." };
+
+    brand.name = newName;
+    if (logo) brand.logo = logo.trim();
+    if (tag) brand.tag = tag.trim();
+    if (color) brand.color = color;
+    if (bg) brand.bg = bg;
+
+    // Also update any products tagged with old brand name
+    if (oldName !== newName) {
+      this.state.products.forEach(p => {
+        if (p.brand && p.brand.toLowerCase() === oldName.toLowerCase()) {
+          p.brand = newName;
+        }
+      });
+    }
+
+    this.addNotification(`Brand "${oldName}" updated to "${newName}".`);
+    this.saveState(true);
+    return { success: true, brand };
+  }
+
+  deleteBrand(id) {
+    if (!this.state.brands) this.state.brands = [];
+    const brand = this.state.brands.find(b => b.id === id || b.name === id);
+    if (!brand) return { success: false, message: "Brand not found." };
+    this.state.brands = this.state.brands.filter(b => b.id !== brand.id && b.name !== brand.name);
+    this.addNotification(`Brand "${brand.name}" removed from ecosystems.`);
     this.saveState(true);
     return { success: true };
   }

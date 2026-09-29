@@ -79,6 +79,19 @@ const INITIAL_SHARED_STATE = {
     { id: "cat-8", name: "Servers & Workstations", icon: "🖧", active: true },
     { id: "cat-9", name: "Software's", icon: "💿", active: true }
   ],
+  brands: [
+    { id: "brand-1", name: "Dell", logo: "🖥️", tag: "OptiPlex, Latitude & XPS", color: "text-cyan-400", bg: "hover:border-cyan-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-2", name: "HP", logo: "💻", tag: "EliteBook, ProDesk & ZBook", color: "text-blue-400", bg: "hover:border-blue-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-3", name: "Lenovo", logo: "💼", tag: "ThinkPad, ThinkCentre & Legion", color: "text-red-400", bg: "hover:border-red-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-4", name: "Apple", logo: "🍎", tag: "MacBook Air, Pro & Mac Mini", color: "text-slate-200", bg: "hover:border-slate-400 hover:bg-slate-800/80", active: true },
+    { id: "brand-5", name: "ASUS", logo: "⚡", tag: "ROG, TUF & ZenBook", color: "text-purple-400", bg: "hover:border-purple-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-6", name: "Acer", logo: "🚀", tag: "Aspire, Nitro & Predator", color: "text-emerald-400", bg: "hover:border-emerald-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-7", name: "MSI", logo: "🐉", tag: "Gaming & Modern Series", color: "text-red-500", bg: "hover:border-red-600 hover:bg-slate-800/80", active: true },
+    { id: "brand-8", name: "Microsoft", logo: "🪟", tag: "Surface Pro & Laptop", color: "text-blue-300", bg: "hover:border-blue-400 hover:bg-slate-800/80", active: true },
+    { id: "brand-9", name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", color: "text-teal-400", bg: "hover:border-teal-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-10", name: "Logitech", logo: "🖱️", tag: "Keyboards, Mice & Video", color: "text-amber-400", bg: "hover:border-amber-500 hover:bg-slate-800/80", active: true },
+    { id: "brand-11", name: "Kingston", logo: "💾", tag: "High Speed RAM & SSDs", color: "text-rose-400", bg: "hover:border-rose-500 hover:bg-slate-800/80", active: true }
+  ],
   orders: [
     {
       id: "ORD1001",
@@ -226,6 +239,9 @@ function mergeSharedState(existingState, incomingState) {
   const standardProds = mergedProds.filter(p => !p || !p.id || !p.id.startsWith("prod-"));
   merged.products = [...customProds, ...standardProds];
 
+  merged.categories = mergeRecords(existingState.categories, incomingState.categories, cat => cat.id || cat.name);
+  merged.brands = mergeRecords(existingState.brands, incomingState.brands, brand => brand.id || brand.name);
+
   merged.notifications = mergeRecords(existingState.notifications, incomingState.notifications, notification => notification.id).slice(-50);
   return merged;
 }
@@ -238,6 +254,7 @@ function sharedRecordsOnly(state) {
     serviceTickets: state.serviceTickets || [],
     products: state.products || [],
     categories: state.categories || [],
+    brands: state.brands || [],
     notifications: state.notifications || []
   };
 }

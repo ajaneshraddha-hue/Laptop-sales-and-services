@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Eliminate page/modal blinking: NEVER re-render underlying view if modal or input is active
     const isModalOpen = (document.getElementById("product-modal-container")?.children?.length > 0) ||
                         (document.getElementById("admin-category-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("admin-brand-modal-container")?.children?.length > 0) ||
                         (document.getElementById("admin-customer-modal-container")?.children?.length > 0) ||
                         (document.getElementById("admin-order-modal-container")?.children?.length > 0) ||
                         (document.getElementById("admin-ticket-modal-container")?.children?.length > 0) ||
@@ -615,23 +616,28 @@ function renderHomeView(container, state) {
         <button onclick="appState.setBrandFilter('All')" class="text-xs font-bold text-cyan-400 hover:underline">All Brands →</button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        ${[
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        ${((state.brands && state.brands.length > 0) ? state.brands.filter(b => b.active !== false) : [
           { name: "Dell", logo: "🖥️", tag: "OptiPlex & Latitude", bg: "hover:border-cyan-500 hover:bg-slate-800/80", color: "text-cyan-400" },
           { name: "HP", logo: "💻", tag: "EliteBook & ProDesk", bg: "hover:border-blue-500 hover:bg-slate-800/80", color: "text-blue-400" },
           { name: "Lenovo", logo: "💼", tag: "ThinkPad & Legion", bg: "hover:border-red-500 hover:bg-slate-800/80", color: "text-red-400" },
           { name: "Apple", logo: "🍎", tag: "MacBook Air & Pro", bg: "hover:border-slate-400 hover:bg-slate-800/80", color: "text-slate-200" },
           { name: "ASUS", logo: "⚡", tag: "ROG, TUF & ZenBook", bg: "hover:border-purple-500 hover:bg-slate-800/80", color: "text-purple-400" },
-          { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-emerald-500 hover:bg-slate-800/80", color: "text-emerald-400" }
-        ].map(b => {
+          { name: "Acer", logo: "🚀", tag: "Aspire, Nitro & Predator", bg: "hover:border-emerald-500 hover:bg-slate-800/80", color: "text-emerald-400" },
+          { name: "MSI", logo: "🐉", tag: "Gaming & Modern Series", bg: "hover:border-red-600 hover:bg-slate-800/80", color: "text-red-500" },
+          { name: "Microsoft", logo: "🪟", tag: "Surface Pro & Laptop", bg: "hover:border-blue-400 hover:bg-slate-800/80", color: "text-blue-300" },
+          { name: "TP-Link", logo: "🌐", tag: "Gigabit & PoE Network", bg: "hover:border-teal-500 hover:bg-slate-800/80", color: "text-teal-400" },
+          { name: "Logitech", logo: "🖱️", tag: "Keyboards, Mice & Video", bg: "hover:border-amber-500 hover:bg-slate-800/80", color: "text-amber-400" },
+          { name: "Kingston", logo: "💾", tag: "High Speed RAM & SSDs", bg: "hover:border-rose-500 hover:bg-slate-800/80", color: "text-rose-400" }
+        ]).map(b => {
           const count = products.filter(p => (p.brand || "").toLowerCase() === b.name.toLowerCase()).length;
           return `
-            <div onclick="appState.setBrandFilter('${b.name}')" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 cursor-pointer transition shadow-lg hover:shadow-cyan-500/10 flex flex-col items-center text-center group ${b.bg}">
+            <div onclick="appState.setBrandFilter('${b.name}')" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 cursor-pointer transition shadow-lg hover:shadow-cyan-500/10 flex flex-col items-center text-center group ${b.bg || 'hover:border-cyan-500 hover:bg-slate-800/80'}">
               <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition duration-300">
-                ${b.logo}
+                ${b.logo || '🏷️'}
               </div>
-              <span class="font-extrabold text-sm text-white group-hover:${b.color} transition">${b.name}</span>
-              <span class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${b.tag}</span>
+              <span class="font-extrabold text-sm text-white group-hover:${b.color || 'text-cyan-400'} transition">${b.name}</span>
+              <span class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${b.tag || 'Certified IT Hardware'}</span>
               <span class="mt-2 text-[10px] font-bold text-cyan-300 bg-cyan-950/60 px-2.5 py-0.5 rounded-full border border-cyan-600/30">
                 ${count} in stock
               </span>
@@ -919,10 +925,11 @@ function renderCatalogView(container, state) {
     });
   }
 
-  // Dynamic brands from active product inventory
+  // Dynamic brands from active product inventory and admin-added brand ecosystems
   const uniqueBrands = Array.from(new Set(allProducts.map(p => (p.brand || "").trim()).filter(Boolean)));
+  const stateBrandNames = (state.brands || []).filter(b => b.active !== false).map(b => b.name);
   const standardBrandList = ["Dell", "HP", "Lenovo", "Apple", "ASUS", "Acer", "MSI", "Microsoft", "Kingston", "TP-Link", "Logitech"];
-  const allBrandSet = new Set([...standardBrandList, ...uniqueBrands]);
+  const allBrandSet = new Set([...stateBrandNames, ...standardBrandList, ...uniqueBrands]);
   const availableBrands = ["All", ...Array.from(allBrandSet).filter(b => b && b.toLowerCase() !== "samsung")];
 
   let categoryTitle = filters.category === "Crazy Deals" 
@@ -2353,6 +2360,7 @@ function renderAdminDashboardView(container, state) {
         ${[
           { id: "dashboard", label: "📊 Earnings Dashboard", count: null },
           { id: "products", label: "📦 Product Inventory", count: products.length },
+          { id: "brands", label: "⚡ Brand Ecosystems", count: (state.brands || []).length },
           { id: "orders", label: "📑 Orders", count: orders.length },
           { id: "payments", label: "💳 Payment Review", count: paymentReviews.length },
           { id: "customers", label: "👥 Customers", count: customers.length },
@@ -2367,6 +2375,9 @@ function renderAdminDashboardView(container, state) {
 
         <div class="pt-4 border-t border-slate-100 space-y-1">
           <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 py-1">Quick Links</div>
+          <button onclick="openAddBrandModal()" class="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
+            <span>➕</span> Add Brand Ecosystem
+          </button>
           <button onclick="openAddCategoryModal()" class="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
             <span>➕</span> Add New Category
           </button>
@@ -2961,7 +2972,62 @@ function renderAdminTabContent(tab, state) {
     `;
   }
 
-  // ==================== 6. CATEGORY MANAGEMENT ====================
+  // ==================== 6. BRAND ECOSYSTEM MANAGEMENT ====================
+  if (tab === "brands") {
+    const brandsList = state.brands || [];
+    return `
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900">Brand Ecosystem Management (${brandsList.length} Brands)</h3>
+            <p class="text-xs text-slate-400">Add, edit, and organize brand ecosystems displayed on customer home page, filters & product forms</p>
+          </div>
+          <button onclick="openAddBrandModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> Add New Brand
+          </button>
+        </div>
+
+        <div class="overflow-x-auto px-4 pb-4">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Brand Name</th>
+                <th class="p-3">Icon / Logo</th>
+                <th class="p-3">Tagline / Ecosystem Scope</th>
+                <th class="p-3">In-Stock Inventory</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${brandsList.map(b => {
+                const prodCount = products.filter(p => (p.brand || '').toLowerCase() === b.name.toLowerCase()).length;
+                return `
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-bold text-slate-900 flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-lg">${b.logo || '🏷️'}</div>
+                      <div>
+                        <span class="text-sm font-black text-slate-900">${b.name}</span>
+                        ${b.active === false ? '<span class="ml-2 text-[9px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded">Hidden</span>' : ''}
+                      </div>
+                    </td>
+                    <td class="p-3 font-mono text-base">${b.logo || '🏷️'}</td>
+                    <td class="p-3 font-medium text-slate-600">${b.tag || 'Certified IT Products'}</td>
+                    <td class="p-3 font-bold text-slate-700"><span class="bg-slate-100 text-blue-700 px-2.5 py-1 rounded-full font-mono text-xs font-bold">${prodCount} Products</span></td>
+                    <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                      <button onclick="openEditBrandModal('${b.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">✏️ Edit</button>
+                      <button onclick="handleDeleteBrand('${b.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg transition text-[11px]">🗑️ Delete</button>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== 7. CATEGORY MANAGEMENT ====================
   if (tab === "categories") {
     return `
       <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
@@ -3441,9 +3507,12 @@ function openAddProductModal() {
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block font-bold text-slate-300 uppercase">Brand <span class="text-red-400">*</span></label>
+                <button type="button" onclick="openAddBrandModal('inline-product-add')" class="text-[10px] text-cyan-400 hover:underline font-bold">+ New Brand</button>
+              </div>
               <select id="new-prod-brand" required class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.brands, "Dell")}
+                ${renderSelectOptions(Array.from(new Set([...(appState.state.brands || []).map(b => b.name), ...DROPDOWN_OPTIONS.brands])).filter(b => b.toLowerCase() !== "samsung"), "Dell")}
               </select>
             </div>
           </div>
@@ -3733,9 +3802,12 @@ function openEditProductModal(prodId) {
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block font-bold text-slate-300 uppercase">Brand <span class="text-red-400">*</span></label>
+                <button type="button" onclick="openAddBrandModal('inline-product-edit')" class="text-[10px] text-cyan-400 hover:underline font-bold">+ New Brand</button>
+              </div>
               <select id="edit-prod-brand" required class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
-                ${renderSelectOptions(DROPDOWN_OPTIONS.brands, p.brand || "Dell")}
+                ${renderSelectOptions(Array.from(new Set([...(appState.state.brands || []).map(b => b.name), ...DROPDOWN_OPTIONS.brands, p.brand])).filter(b => b && b.toLowerCase() !== "samsung"), p.brand || "Dell")}
               </select>
             </div>
           </div>
@@ -4139,6 +4211,186 @@ function handleDeleteCategory(catId) {
 
 function closeCategoryModal() {
   const container = document.getElementById("admin-category-modal-container");
+  if (container) container.innerHTML = "";
+}
+
+// ======================== ADMIN BRAND ECOSYSTEM CRUD MODALS ========================
+function openAddBrandModal(source = "tab") {
+  const container = document.getElementById("admin-brand-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-700 text-white">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+          <h3 class="font-black text-base text-white flex items-center gap-2"><span>⚡</span> Add New Brand Ecosystem</h3>
+          <button onclick="closeBrandModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleCreateBrandSubmit(event, '${source}')" autocomplete="off" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Brand Name <span class="text-red-400">*</span></label>
+            <input type="text" id="new-brand-name" placeholder="e.g. Razer, Alienware, Gigabyte, Sony, LG" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Brand Emoji / Icon Logo</label>
+            <input type="text" id="new-brand-logo" placeholder="e.g. ⚡, 🐍, 💻, 🖥️, 🎮" value="🏷️" class="w-full rounded-xl p-3 font-mono text-base focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Tagline / Ecosystem Scope</label>
+            <input type="text" id="new-brand-tag" placeholder="e.g. Blade Gaming Laptops & Accessories" class="w-full rounded-xl p-3 text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Accent Theme Color</label>
+            <select id="new-brand-color" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <option value="text-cyan-400|hover:border-cyan-500 hover:bg-slate-800/80">Cyan Electric</option>
+              <option value="text-blue-400|hover:border-blue-500 hover:bg-slate-800/80">Blue Enterprise</option>
+              <option value="text-purple-400|hover:border-purple-500 hover:bg-slate-800/80">Purple Gaming</option>
+              <option value="text-emerald-400|hover:border-emerald-500 hover:bg-slate-800/80">Emerald Pro</option>
+              <option value="text-red-400|hover:border-red-500 hover:bg-slate-800/80">Red Performance</option>
+              <option value="text-amber-400|hover:border-amber-500 hover:bg-slate-800/80">Amber Gold</option>
+              <option value="text-slate-200|hover:border-slate-400 hover:bg-slate-800/80">Silver Minimal</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeBrandModal()" class="flex-1 border border-slate-700 text-slate-300 font-bold py-2.5 rounded-xl hover:bg-slate-800 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition shadow">Save Brand</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleCreateBrandSubmit(event, source = "tab") {
+  event.preventDefault();
+  const name = document.getElementById("new-brand-name").value;
+  const logo = document.getElementById("new-brand-logo").value || "🏷️";
+  const tag = document.getElementById("new-brand-tag").value || "Certified IT Hardware";
+  const colorVal = document.getElementById("new-brand-color").value || "text-cyan-400|hover:border-cyan-500 hover:bg-slate-800/80";
+  const [color, bg] = colorVal.split("|");
+
+  const res = appState.addBrand(name, logo, tag, color, bg);
+  if (res.success) {
+    closeBrandModal();
+    if (source === "inline-product-add") {
+      const selectEl = document.getElementById("new-prod-brand");
+      if (selectEl) {
+        const opt = document.createElement("option");
+        opt.value = res.brand.name;
+        opt.textContent = res.brand.name;
+        opt.selected = true;
+        selectEl.appendChild(opt);
+      }
+    } else if (source === "inline-product-edit") {
+      const selectEl = document.getElementById("edit-prod-brand");
+      if (selectEl) {
+        const opt = document.createElement("option");
+        opt.value = res.brand.name;
+        opt.textContent = res.brand.name;
+        opt.selected = true;
+        selectEl.appendChild(opt);
+      }
+    } else {
+      setAdminTab("brands");
+    }
+    showToast(`Brand "${name}" added to ecosystems!`, "✅", "success");
+  } else {
+    showToast(res.message, "⚠️", "error");
+  }
+}
+
+function openEditBrandModal(brandId) {
+  const brand = (appState.state.brands || []).find(b => b.id === brandId);
+  if (!brand) return;
+
+  const container = document.getElementById("admin-brand-modal-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl fade-in border border-slate-700 text-white">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+          <h3 class="font-black text-base text-white flex items-center gap-2"><span>✏️</span> Edit Brand Ecosystem: ${brand.name}</h3>
+          <button onclick="closeBrandModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+        </div>
+
+        <form onsubmit="handleEditBrandSubmit(event, '${brand.id}')" autocomplete="off" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Brand Name <span class="text-red-400">*</span></label>
+            <input type="text" id="edit-brand-name" value="${brand.name}" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Brand Emoji / Icon Logo</label>
+            <input type="text" id="edit-brand-logo" value="${brand.logo || '🏷️'}" class="w-full rounded-xl p-3 font-mono text-base focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Tagline / Ecosystem Scope</label>
+            <input type="text" id="edit-brand-tag" value="${brand.tag || ''}" class="w-full rounded-xl p-3 text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Accent Theme Color</label>
+            <select id="edit-brand-color" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <option value="text-cyan-400|hover:border-cyan-500 hover:bg-slate-800/80" ${brand.color === 'text-cyan-400' ? 'selected' : ''}>Cyan Electric</option>
+              <option value="text-blue-400|hover:border-blue-500 hover:bg-slate-800/80" ${brand.color === 'text-blue-400' ? 'selected' : ''}>Blue Enterprise</option>
+              <option value="text-purple-400|hover:border-purple-500 hover:bg-slate-800/80" ${brand.color === 'text-purple-400' ? 'selected' : ''}>Purple Gaming</option>
+              <option value="text-emerald-400|hover:border-emerald-500 hover:bg-slate-800/80" ${brand.color === 'text-emerald-400' ? 'selected' : ''}>Emerald Pro</option>
+              <option value="text-red-400|hover:border-red-500 hover:bg-slate-800/80" ${brand.color === 'text-red-400' ? 'selected' : ''}>Red Performance</option>
+              <option value="text-amber-400|hover:border-amber-500 hover:bg-slate-800/80" ${brand.color === 'text-amber-400' ? 'selected' : ''}>Amber Gold</option>
+              <option value="text-slate-200|hover:border-slate-400 hover:bg-slate-800/80" ${brand.color === 'text-slate-200' ? 'selected' : ''}>Silver Minimal</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button type="button" onclick="closeBrandModal()" class="flex-1 border border-slate-700 text-slate-300 font-bold py-2.5 rounded-xl hover:bg-slate-800 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition shadow">Update Brand</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleEditBrandSubmit(event, brandId) {
+  event.preventDefault();
+  const name = document.getElementById("edit-brand-name").value;
+  const logo = document.getElementById("edit-brand-logo").value;
+  const tag = document.getElementById("edit-brand-tag").value;
+  const colorVal = document.getElementById("edit-brand-color").value;
+  const [color, bg] = colorVal.split("|");
+
+  const res = appState.updateBrand(brandId, name, logo, tag, color, bg);
+  if (res.success) {
+    closeBrandModal();
+    setAdminTab("brands");
+    showToast(`Brand "${name}" updated successfully!`, "✅", "success");
+  } else {
+    showToast(res.message, "⚠️", "error");
+  }
+}
+
+function handleDeleteBrand(brandId) {
+  const brand = (appState.state.brands || []).find(b => b.id === brandId);
+  if (!brand) return;
+
+  openConfirmModal({
+    title: "Delete Brand Ecosystem?",
+    message: `Are you sure you want to remove "${brand.name}" from ecosystems? Products in inventory will remain safe.`,
+    icon: "⚡",
+    confirmText: "Yes, Delete Brand",
+    cancelText: "Cancel",
+    confirmClass: "bg-red-600 hover:bg-red-700 text-white",
+    onConfirm: () => {
+      appState.deleteBrand(brandId);
+      setAdminTab("brands");
+      showToast(`Brand "${brand.name}" deleted.`, "🗑️", "info");
+    }
+  });
+}
+
+function closeBrandModal() {
+  const container = document.getElementById("admin-brand-modal-container");
   if (container) container.innerHTML = "";
 }
 
