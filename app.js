@@ -476,7 +476,7 @@ function renderDarkProductCard(p, state) {
             <span class="text-[10px] text-amber-300 font-bold flex items-center gap-0.5">★ 5.0</span>
           </div>
           <h3 onclick="appState.setView('product', { product: '${p.id}' })" class="font-bold text-xs text-white group-hover:text-cyan-300 cursor-pointer line-clamp-2 mb-1.5 leading-snug transition">${p.name}</h3>
-          <p class="text-[11px] text-slate-400 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.ram || p.specs?.ram ? '• 💾 ' + (p.ram || p.specs?.ram) : ''} ${p.storage || p.specs?.storage ? '• 💽 ' + (p.storage || p.specs?.storage) : ''} ${p.screenSize || p.specs?.screenSize || p.specs?.display ? '• 🖥️ ' + (p.screenSize || p.specs?.screenSize || p.specs?.display) : ''} ${p.generation ? '• ' + p.generation : ''}</p>
+          <p class="text-[11px] text-slate-400 mb-2 font-medium line-clamp-1">${p.processor || ''} ${p.screenSize || p.specs?.screenSize || p.specs?.display ? '• 🖥️ ' + (p.screenSize || p.specs?.screenSize || p.specs?.display) : ''} ${p.generation ? '• ' + p.generation : ''}</p>
         </div>
 
         <div>
@@ -2654,7 +2654,7 @@ function renderAdminTabContent(tab, state) {
                 <th class="p-3">Product</th>
                 <th class="p-3">Category</th>
                 <th class="p-3">Brand</th>
-                <th class="p-3">Key Specs (Display / RAM / Storage)</th>
+                <th class="p-3">Screen Size</th>
                 <th class="p-3">Selling Price</th>
                 <th class="p-3">Stock</th>
                 <th class="p-3">Type</th>
@@ -2673,12 +2673,8 @@ function renderAdminTabContent(tab, state) {
                   </td>
                   <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
                   <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
-                  <td class="p-3">
-                    <div class="flex flex-col gap-1 items-start">
-                      <span class="bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
-                      ${(p.ram || p.specs?.ram) ? `<span class="bg-purple-50 border border-purple-200 text-purple-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💾 ${p.ram || p.specs?.ram}</span>` : ''}
-                      ${(p.storage || p.specs?.storage) ? `<span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💽 ${p.storage || p.specs?.storage}</span>` : ''}
-                    </div>
+                  <td class="p-3 font-bold text-cyan-800">
+                    <span class="bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
                   </td>
                   <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
                   <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
@@ -3827,12 +3823,8 @@ function handleAdminProductFilter() {
       </td>
       <td class="p-3 font-semibold text-slate-700">${p.category || 'Laptops'}</td>
       <td class="p-3 font-semibold text-slate-800">${p.brand || 'Lapro'}</td>
-      <td class="p-3">
-        <div class="flex flex-col gap-1 items-start">
-          <span class="bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
-          ${(p.ram || p.specs?.ram) ? `<span class="bg-purple-50 border border-purple-200 text-purple-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💾 ${p.ram || p.specs?.ram}</span>` : ''}
-          ${(p.storage || p.specs?.storage) ? `<span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1">💽 ${p.storage || p.specs?.storage}</span>` : ''}
-        </div>
+      <td class="p-3 font-bold text-cyan-800">
+        <span class="bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1">🖥️ ${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0"'}</span>
       </td>
       <td class="p-3 font-bold text-teal-700 font-mono">₹ ${Number(p.price || 0).toLocaleString('en-IN')}</td>
       <td class="p-3 font-mono font-bold ${p.stockLeft <= 3 ? 'text-red-600' : 'text-slate-800'}">${p.stockLeft || 0} units</td>
