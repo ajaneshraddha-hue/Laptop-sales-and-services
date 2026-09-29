@@ -45,7 +45,7 @@
       font-family: inherit;
     }
     input::placeholder, textarea::placeholder {
-      color: #64748b;
+      color: #64748b !important;
     }
     /* Dark Theme Modal & Form Inputs */
     .dark-input, input.text-white, select.text-white, textarea.text-white,
@@ -61,6 +61,17 @@
     .dark-input option, select.text-white option, .bg-slate-900 select option, .bg-slate-950 select option {
       background-color: #0f172a !important;
       color: #ffffff !important;
+    }
+
+    /* Override browser autofill background & text color */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+      caret-color: #ffffff !important;
+      transition: background-color 5000s ease-in-out 0s;
     }
 
     header {
@@ -422,13 +433,17 @@
 
       <!-- Customer Login Form -->
       <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" autocomplete="off" class="space-y-4">
+        <!-- Chrome autofill decoy traps -->
+        <input type="text" name="fakeusernameremembered" style="display:none" tabindex="-1" autocomplete="username">
+        <input type="password" name="fakepasswordremembered" style="display:none" tabindex="-1" autocomplete="current-password">
+
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
-          <input type="email" id="login-email" name="cust_login_email" autocomplete="off" required placeholder="Enter your registered email" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
+          <input type="email" id="login-email" name="lapro_customer_login_email" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required placeholder="Enter your registered email" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
-          <input type="password" id="login-pass" name="cust_login_pass" autocomplete="new-password" required placeholder="Enter your password" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
+          <input type="password" id="login-pass" name="lapro_customer_login_pass" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required placeholder="Enter your password" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div class="flex justify-between items-center text-xs">
           <label class="flex items-center gap-1.5 text-slate-400 cursor-pointer">
@@ -441,21 +456,25 @@
 
       <!-- Customer Register Form -->
       <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" autocomplete="off" class="space-y-3.5 hidden">
+        <!-- Chrome autofill decoy traps -->
+        <input type="text" name="fake_reg_user" style="display:none" tabindex="-1" autocomplete="username">
+        <input type="password" name="fake_reg_pass" style="display:none" tabindex="-1" autocomplete="new-password">
+
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name <span class="text-red-400">*</span></label>
-          <input type="text" id="reg-name" name="cust_reg_name" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your full name">
+          <input type="text" id="reg-name" name="lapro_cust_reg_fullname" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your full name" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
-          <input type="email" id="reg-email" name="cust_reg_email" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your email address">
+          <input type="email" id="reg-email" name="lapro_cust_reg_emailaddr" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your email address" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Mobile Number <span class="text-red-400">*</span></label>
-          <input type="tel" id="reg-phone" name="cust_reg_phone" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter 10-digit mobile number">
+          <input type="tel" id="reg-phone" name="lapro_cust_reg_phonenum" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter 10-digit mobile number" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
-          <input type="password" id="reg-pass" name="cust_reg_pass" autocomplete="new-password" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Create a secure password">
+          <input type="password" id="reg-pass" name="lapro_cust_reg_password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Create a secure password" style="color: #ffffff !important; background-color: #020617 !important;">
         </div>
         <div class="flex items-center gap-1.5 text-xs py-1">
           <input type="checkbox" id="reg-consent" required class="rounded bg-slate-950 border-slate-700 text-cyan-500">
@@ -564,12 +583,14 @@
   </a>
 
   <!-- Loaded Javascript Modules -->
-  <script src="products.js"></script>
-  <script src="state.js"></script>
-  <script src="app.js"></script>
+  <script src="products.js?v=20260929_2"></script>
+  <script src="state.js?v=20260929_2"></script>
+  <script src="app.js?v=20260929_2"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(function(){});
+      navigator.serviceWorker.register('./sw.js?v=20260929_2').then(function(reg) {
+        reg.update();
+      }).catch(function(){});
     }
   </script>
 </body>
