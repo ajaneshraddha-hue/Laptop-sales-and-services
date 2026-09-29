@@ -3264,31 +3264,43 @@ const DROPDOWN_OPTIONS = {
     "Lenovo",
     "Apple",
     "ASUS",
-    "Samsung",
     "Acer",
+    "Samsung",
+    "MSI",
+    "Microsoft",
+    "Toshiba",
+    "Sony",
+    "LG",
     "Kingston",
     "TP-Link",
     "Logitech",
-    "Microsoft",
-    "Lapro Certified"
+    "Lapro Certified",
+    "Other Brand"
   ],
   processors: [
+    "Intel Core i3",
     "Intel Core i5",
     "Intel Core i7",
-    "Intel Core i3",
     "Intel Core i9",
+    "Intel Xeon",
+    "Intel Celeron / Pentium",
+    "AMD Ryzen 3",
     "AMD Ryzen 5",
     "AMD Ryzen 7",
-    "AMD Ryzen 3",
     "AMD Ryzen 9",
     "Apple M1",
+    "Apple M1 Pro / Max",
     "Apple M2",
+    "Apple M2 Pro / Max",
     "Apple M3",
-    "Intel Xeon",
-    "Intel Celeron / Pentium"
+    "Apple M3 Pro / Max",
+    "Apple M4",
+    "Other Processor"
   ],
   generations: [
     "N/A / Standard",
+    "4th Gen",
+    "5th Gen",
     "6th Gen",
     "7th Gen",
     "8th Gen",
@@ -3299,23 +3311,32 @@ const DROPDOWN_OPTIONS = {
     "13th Gen",
     "14th Gen",
     "Apple Silicon (M-Series)",
+    "AMD Ryzen 3000 Series",
+    "AMD Ryzen 4000 Series",
     "AMD Ryzen 5000 Series",
     "AMD Ryzen 6000 Series",
     "AMD Ryzen 7000 Series",
-    "AMD Ryzen 8000 Series"
+    "AMD Ryzen 8000 Series",
+    "Other Generation"
   ],
   screenSizes: [
     "14.0 Inch (14.0\" FHD Display)",
     "15.6 Inch (15.6\" FHD Display)",
     "13.3 Inch (13.3\" Retina / FHD)",
+    "14.0 - 15.6 Inch",
     "14.0 Inch Touch (14.0\" Touchscreen)",
-    "16.0 Inch (16.0\" WQXGA Display)",
+    "15.6 Inch Touch (15.6\" Touchscreen)",
+    "16.0 Inch (16.0\" QHD+ Display)",
     "12.5 Inch (12.5\" Ultra-Compact)",
+    "13.6 Inch (13.6\" Liquid Retina)",
+    "14.2 Inch (14.2\" Liquid Retina XDR)",
+    "16.2 Inch (16.2\" Liquid Retina XDR)",
     "17.3 Inch (17.3\" Creator / Gaming)",
     "21.5 Inch (All-in-One Desktop)",
     "24.0 Inch (All-in-One Desktop)",
     "27.0 Inch (All-in-One / Pro Display)",
-    "N/A (Desktop / Mini PC / Accessories)"
+    "N/A (Desktop / Mini PC / Accessories)",
+    "Other Screen Size"
   ],
   ram: [
     "4GB DDR4",
@@ -3327,52 +3348,78 @@ const DROPDOWN_OPTIONS = {
     "16GB DDR5",
     "32GB DDR5",
     "64GB DDR5",
+    "128GB DDR5",
     "8GB Unified Memory",
     "16GB Unified Memory",
+    "18GB Unified Memory",
+    "24GB Unified Memory",
     "32GB Unified Memory",
-    "4GB DDR3 / DDR4",
-    "8GB DDR3"
+    "36GB Unified Memory",
+    "48GB Unified Memory",
+    "64GB Unified Memory",
+    "128GB Unified Memory",
+    "4GB DDR3",
+    "8GB DDR3",
+    "16GB DDR3",
+    "Other RAM"
   ],
   hdd: [
     "None (No HDD)",
     "500GB HDD",
     "1TB HDD",
     "2TB HDD",
-    "4TB HDD"
+    "4TB HDD",
+    "Other HDD"
   ],
   ssd: [
+    "None (No SSD)",
+    "128GB PCIe NVMe SSD",
     "256GB PCIe NVMe SSD",
     "512GB PCIe NVMe SSD",
     "1TB PCIe NVMe SSD",
     "2TB PCIe NVMe SSD",
-    "128GB SSD",
-    "4TB NVMe SSD",
-    "None (No SSD)"
+    "4TB PCIe NVMe SSD",
+    "8TB PCIe NVMe SSD",
+    "128GB SATA SSD",
+    "256GB SATA SSD",
+    "512GB SATA SSD",
+    "1TB SATA SSD",
+    "Other SSD"
   ],
   warranties: [
     "1 Year Doorstep Warranty",
     "6 Months Doorstep Warranty",
     "90 Days Doorstep Warranty",
+    "30 Days Testing Warranty",
     "2 Year Doorstep Warranty",
     "3 Year Enterprise Warranty",
-    "30 Days Testing Warranty"
+    "1 Year Apple Care+ / Brand Warranty",
+    "Brand Warranty Remaining",
+    "Other Warranty"
   ]
 };
 
 function renderSelectOptions(list, selectedValue = "") {
-  const norm = (selectedValue || "").trim();
+  const norm = (selectedValue || "").trim().toLowerCase();
   let matched = false;
+
   const rendered = list.map(opt => {
+    const optLower = opt.toLowerCase();
     let isSelected = false;
-    if (norm && (opt.toLowerCase() === norm.toLowerCase() || (norm.toLowerCase().includes(opt.toLowerCase()) && opt !== "None (No HDD)" && opt !== "None (No SSD)" && opt !== "N/A / Standard"))) {
-      isSelected = true;
-      matched = true;
+    if (!matched && norm) {
+      if (optLower === norm) {
+        isSelected = true;
+        matched = true;
+      } else if (norm !== "none" && norm !== "n/a" && (optLower.startsWith(norm) || norm.startsWith(optLower))) {
+        isSelected = true;
+        matched = true;
+      }
     }
     return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
   }).join("");
 
-  if (norm && !matched && !norm.startsWith("None") && norm !== "N/A") {
-    return `<option value="${norm}" selected>${norm}</option>` + rendered;
+  if (selectedValue && !matched) {
+    return `<option value="${selectedValue}" selected>${selectedValue}</option>` + rendered;
   }
   return rendered;
 }
@@ -3402,13 +3449,13 @@ function openAddProductModal() {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Category <span class="text-red-400">*</span></label>
-              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${categories.map(c => `<option value="${c.name}" ${c.name === 'Laptops' ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Subcategory</label>
-              <select id="new-prod-subcategory" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-subcategory" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 <option value="Business Laptops">Business Laptops</option>
                 <option value="Consumer Laptops">Consumer Laptops</option>
                 <option value="Gaming Laptops">Gaming Laptops</option>
@@ -3418,7 +3465,7 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
-              <select id="new-prod-brand" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-brand" required class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.brands, "Dell")}
               </select>
             </div>
@@ -3428,19 +3475,19 @@ function openAddProductModal() {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
-              <select id="new-prod-processor" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-processor" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.processors, "Intel Core i5")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
-              <select id="new-prod-generation" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-generation" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.generations, "11th Gen")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
-              <select id="new-prod-screensize" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-screensize" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, "14.0 Inch (14.0\" FHD Display)")}
               </select>
             </div>
@@ -3450,19 +3497,19 @@ function openAddProductModal() {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
-              <select id="new-prod-ram" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-ram" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.ram, "16GB DDR4")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Hard Disk / HDD</label>
-              <select id="new-prod-hdd" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-hdd" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.hdd, "None (No HDD)")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
-              <select id="new-prod-ssd" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-ssd" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.ssd, "512GB PCIe NVMe SSD")}
               </select>
             </div>
@@ -3487,7 +3534,7 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
-              <select id="new-prod-warranty" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-warranty" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, "1 Year Doorstep Warranty")}
               </select>
             </div>
@@ -3698,19 +3745,19 @@ function openEditProductModal(prodId) {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Category <span class="text-red-400">*</span></label>
-              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${categories.map(c => `<option value="${c.name}" ${p.category === c.name ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Subcategory</label>
-              <select id="edit-prod-subcategory" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-subcategory" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${(SUBCATEGORIES_BY_CATEGORY[p.category || 'Laptops'] || ['General']).map(sub => `<option value="${sub}" ${(p.subcategory === sub) ? 'selected' : ''}>${sub}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
-              <select id="edit-prod-brand" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-brand" required class="modal-select w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.brands, p.brand || "Dell")}
               </select>
             </div>
@@ -3720,19 +3767,19 @@ function openEditProductModal(prodId) {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
-              <select id="edit-prod-processor" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-processor" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.processors, p.processor || p.specs?.processor || "Intel Core i5")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
-              <select id="edit-prod-generation" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-generation" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.generations, p.generation || p.specs?.generation || "N/A / Standard")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
-              <select id="edit-prod-screensize" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-screensize" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, p.screenSize || p.specs?.screenSize || p.specs?.display || "14.0 Inch (14.0\" FHD Display)")}
               </select>
             </div>
@@ -3742,19 +3789,19 @@ function openEditProductModal(prodId) {
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
-              <select id="edit-prod-ram" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-ram" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.ram, p.ram || p.specs?.ram || "16GB DDR4")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Hard Disk / HDD</label>
-              <select id="edit-prod-hdd" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-hdd" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.hdd, currentHDD || "None (No HDD)")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
-              <select id="edit-prod-ssd" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-ssd" required class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.ssd, currentSSD || "512GB PCIe NVMe SSD")}
               </select>
             </div>
@@ -3779,7 +3826,7 @@ function openEditProductModal(prodId) {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
-              <select id="edit-prod-warranty" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-warranty" class="modal-select w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
                 ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, p.specs?.warranty || p.warranty || "1 Year Doorstep Warranty")}
               </select>
             </div>
