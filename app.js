@@ -2168,14 +2168,14 @@ function renderAdminLoginView(container, state) {
         </div>
 
         <!-- Admin Login Form -->
-        <form id="admin-form-login" onsubmit="handleAdminLoginSubmit(event)" class="space-y-4 text-xs">
+        <form id="admin-form-login" onsubmit="handleAdminLoginSubmit(event)" autocomplete="off" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Private Admin Email</label>
-            <input type="email" id="admin-login-email" placeholder="admin@laprosolutions.com" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 font-mono">
+            <input type="email" id="admin-login-email" name="admin_email_field" placeholder="Enter admin email address" autocomplete="off" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-blue-500 font-mono">
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Private Master Password</label>
-            <input type="password" id="admin-login-pass" placeholder="••••••••••••" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500">
+            <input type="password" id="admin-login-pass" name="admin_pass_field" placeholder="Enter master password" autocomplete="new-password" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-blue-500">
           </div>
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition shadow-lg shadow-blue-600/30">
             Authenticate & Open Dashboard
@@ -2183,22 +2183,22 @@ function renderAdminLoginView(container, state) {
         </form>
 
         <!-- Admin Register Form -->
-        <form id="admin-form-reg" onsubmit="handleAdminRegisterSubmit(event)" class="space-y-3.5 text-xs hidden">
+        <form id="admin-form-reg" onsubmit="handleAdminRegisterSubmit(event)" autocomplete="off" class="space-y-3.5 text-xs hidden">
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Admin Full Name</label>
-            <input type="text" id="admin-reg-name" placeholder="e.g. Operations Manager" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
+            <input type="text" id="admin-reg-name" placeholder="Enter manager or admin name" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Admin Email</label>
-            <input type="email" id="admin-reg-email" placeholder="e.g. manager@laprosolutions.com" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
+            <input type="email" id="admin-reg-email" placeholder="Enter corporate admin email" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Set Password</label>
-            <input type="password" id="admin-reg-pass" placeholder="Create admin password" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
+            <input type="password" id="admin-reg-pass" placeholder="Create private admin password" autocomplete="new-password" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-2.5 focus:outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Master Admin Secret Key</label>
-            <input type="password" id="admin-reg-secret" placeholder="Enter master admin secret key" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-blue-500 font-mono">
+            <input type="password" id="admin-reg-secret" placeholder="Enter master security key" autocomplete="new-password" required class="w-full bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-2.5 focus:outline-none focus:border-blue-500 font-mono">
           </div>
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition shadow-lg">
             Create Authorized Admin Account
@@ -3219,19 +3219,19 @@ function openAddProductModal() {
         <form onsubmit="handleCreateProductSubmit(event)" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name <span class="text-red-500">*</span></label>
-            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
                 ${categories.map(c => `<option value="${c.name}" ${c.name === 'Laptops' ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
-              <select id="new-prod-subcategory" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+              <select id="new-prod-subcategory" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
                 <option value="Business Laptops">Business Laptops</option>
                 <option value="Consumer Laptops">Consumer Laptops</option>
                 <option value="Gaming Laptops">Gaming Laptops</option>
@@ -3241,7 +3241,7 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
             </div>
           </div>
 
@@ -3249,7 +3249,7 @@ function openAddProductModal() {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
-              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
               <datalist id="processor-list-options">
                 <option value="Intel Core i5">
                 <option value="Intel Core i7">
@@ -3264,7 +3264,7 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
+              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
               <datalist id="gen-list-options">
                 <option value="8th Gen">
                 <option value="9th Gen">
@@ -3284,22 +3284,22 @@ function openAddProductModal() {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-price" placeholder="24990" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              <input type="number" id="new-prod-price" placeholder="24990" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
-              <input type="number" id="new-prod-origprice" placeholder="49990" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              <input type="number" id="new-prod-origprice" placeholder="49990" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left / Quantity <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-stock" value="5" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <input type="number" id="new-prod-stock" value="5" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
-              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
           </div>
 
@@ -3450,25 +3450,25 @@ function openEditProductModal(prodId) {
         <form onsubmit="handleEditProductSubmit(event, '${p.id}')" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Product Title <span class="text-red-500">*</span></label>
-            <input type="text" id="edit-prod-name" value="${p.name}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <input type="text" id="edit-prod-name" value="${p.name}" placeholder="Enter product title" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
                 ${categories.map(c => `<option value="${c.name}" ${p.category === c.name ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
-              <select id="edit-prod-subcategory" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+              <select id="edit-prod-subcategory" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
                 ${(SUBCATEGORIES_BY_CATEGORY[p.category || 'Laptops'] || ['General']).map(sub => `<option value="${sub}" ${(p.subcategory === sub) ? 'selected' : ''}>${sub}</option>`).join("")}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
             </div>
           </div>
 
@@ -3476,7 +3476,7 @@ function openEditProductModal(prodId) {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
-              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" placeholder="e.g. Intel Core i5" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
               <datalist id="processor-list-options">
                 <option value="Intel Core i5">
                 <option value="Intel Core i7">
@@ -3491,7 +3491,7 @@ function openEditProductModal(prodId) {
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
+              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" placeholder="e.g. 11th Gen" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
             </div>
           </div>
 
@@ -3499,22 +3499,22 @@ function openEditProductModal(prodId) {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-price" value="${p.price}" required class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              <input type="number" id="edit-prod-price" value="${p.price}" placeholder="Selling Price" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
-              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" placeholder="MRP / List Price" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" placeholder="Stock Units" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
             </div>
             <div>
               <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
-              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" placeholder="e.g. 1 Year Doorstep Warranty" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
             </div>
           </div>
 
@@ -3522,7 +3522,7 @@ function openEditProductModal(prodId) {
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
             <div>
               <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1">Product Images (Local File Upload)</label>
-              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2 text-xs cursor-pointer">
             </div>
             
             <div id="product-img-previews"></div>
@@ -3530,7 +3530,7 @@ function openEditProductModal(prodId) {
             <div class="pt-1 border-t border-slate-200">
               <label class="block font-bold text-slate-600 text-[10px] uppercase mb-1">Or Add Image by Web URL / Link</label>
               <div class="flex gap-2">
-                <input type="url" id="edit-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-white border border-slate-300 rounded-xl p-2 text-xs">
+                <input type="url" id="edit-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2 text-xs">
                 <button type="button" onclick="addCustomImageUrl('edit-prod-image-url')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-3 py-2 rounded-xl transition">Add URL</button>
               </div>
             </div>
