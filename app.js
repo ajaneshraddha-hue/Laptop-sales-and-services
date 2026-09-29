@@ -17,8 +17,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Listen for state changes to refresh elements
   document.addEventListener("statechanged", (e) => {
     updateHeaderControls(e.detail);
-    renderView(e.detail.currentView, e.detail);
-    updateComparisonBar(e.detail);
+    
+    // Eliminate page/modal blinking: NEVER re-render underlying view if modal or input is active
+    const isModalOpen = (document.getElementById("product-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("admin-category-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("admin-customer-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("admin-order-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("admin-ticket-modal-container")?.children?.length > 0) ||
+                        (document.getElementById("confirm-modal-container")?.children?.length > 0) ||
+                        document.querySelector(".fixed.inset-0:not(.hidden)");
+
+    const activeEl = document.activeElement;
+    const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+
+    if (!isModalOpen && !isTyping) {
+      renderView(e.detail.currentView, e.detail);
+      updateComparisonBar(e.detail);
+    }
   });
 
   // Close notifications dropdown on click outside
@@ -65,13 +80,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Background polling to keep customer portal and admin portal in live sync
   setInterval(async () => {
-    // Only background sync if user is not actively typing in an input
+    const isModalOpen = (document.getElementById("product-modal-container")?.children?.length > 0) ||
+                        document.querySelector(".fixed.inset-0:not(.hidden)");
     const activeEl = document.activeElement;
     const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
-    if (!isTyping) {
+    if (!isTyping && !isModalOpen) {
       await appState.syncFromServer();
     }
-  }, 10000);
+  }, 30000);
 });
 
 // Update static nav states, badge values, and profile buttons
@@ -2395,13 +2411,6 @@ function renderAdminDashboardView(container, state) {
         ${renderAdminTabContent(activeAdminTab, state)}
       </div>
     </div>
-
-    <!-- ADMIN MODAL CONTAINERS -->
-    <div id="product-modal-container"></div>
-    <div id="admin-category-modal-container"></div>
-    <div id="admin-customer-modal-container"></div>
-    <div id="admin-order-modal-container"></div>
-    <div id="admin-ticket-modal-container"></div>
   `;
 
   container.innerHTML = html;
@@ -3248,6 +3257,126 @@ function handleAutoDetectProductMeta(titleVal) {
   }
 }
 
+const DROPDOWN_OPTIONS = {
+  brands: [
+    "Dell",
+    "HP",
+    "Lenovo",
+    "Apple",
+    "ASUS",
+    "Samsung",
+    "Acer",
+    "Kingston",
+    "TP-Link",
+    "Logitech",
+    "Microsoft",
+    "Lapro Certified"
+  ],
+  processors: [
+    "Intel Core i5",
+    "Intel Core i7",
+    "Intel Core i3",
+    "Intel Core i9",
+    "AMD Ryzen 5",
+    "AMD Ryzen 7",
+    "AMD Ryzen 3",
+    "AMD Ryzen 9",
+    "Apple M1",
+    "Apple M2",
+    "Apple M3",
+    "Intel Xeon",
+    "Intel Celeron / Pentium"
+  ],
+  generations: [
+    "N/A / Standard",
+    "6th Gen",
+    "7th Gen",
+    "8th Gen",
+    "9th Gen",
+    "10th Gen",
+    "11th Gen",
+    "12th Gen",
+    "13th Gen",
+    "14th Gen",
+    "Apple Silicon (M-Series)",
+    "AMD Ryzen 5000 Series",
+    "AMD Ryzen 6000 Series",
+    "AMD Ryzen 7000 Series",
+    "AMD Ryzen 8000 Series"
+  ],
+  screenSizes: [
+    "14.0 Inch (14.0\" FHD Display)",
+    "15.6 Inch (15.6\" FHD Display)",
+    "13.3 Inch (13.3\" Retina / FHD)",
+    "14.0 Inch Touch (14.0\" Touchscreen)",
+    "16.0 Inch (16.0\" WQXGA Display)",
+    "12.5 Inch (12.5\" Ultra-Compact)",
+    "17.3 Inch (17.3\" Creator / Gaming)",
+    "21.5 Inch (All-in-One Desktop)",
+    "24.0 Inch (All-in-One Desktop)",
+    "27.0 Inch (All-in-One / Pro Display)",
+    "N/A (Desktop / Mini PC / Accessories)"
+  ],
+  ram: [
+    "4GB DDR4",
+    "8GB DDR4",
+    "16GB DDR4",
+    "32GB DDR4",
+    "64GB DDR4",
+    "8GB DDR5",
+    "16GB DDR5",
+    "32GB DDR5",
+    "64GB DDR5",
+    "8GB Unified Memory",
+    "16GB Unified Memory",
+    "32GB Unified Memory",
+    "4GB DDR3 / DDR4",
+    "8GB DDR3"
+  ],
+  hdd: [
+    "None (No HDD)",
+    "500GB HDD",
+    "1TB HDD",
+    "2TB HDD",
+    "4TB HDD"
+  ],
+  ssd: [
+    "256GB PCIe NVMe SSD",
+    "512GB PCIe NVMe SSD",
+    "1TB PCIe NVMe SSD",
+    "2TB PCIe NVMe SSD",
+    "128GB SSD",
+    "4TB NVMe SSD",
+    "None (No SSD)"
+  ],
+  warranties: [
+    "1 Year Doorstep Warranty",
+    "6 Months Doorstep Warranty",
+    "90 Days Doorstep Warranty",
+    "2 Year Doorstep Warranty",
+    "3 Year Enterprise Warranty",
+    "30 Days Testing Warranty"
+  ]
+};
+
+function renderSelectOptions(list, selectedValue = "") {
+  const norm = (selectedValue || "").trim();
+  let matched = false;
+  const rendered = list.map(opt => {
+    let isSelected = false;
+    if (norm && (opt.toLowerCase() === norm.toLowerCase() || (norm.toLowerCase().includes(opt.toLowerCase()) && opt !== "None (No HDD)" && opt !== "None (No SSD)" && opt !== "N/A / Standard"))) {
+      isSelected = true;
+      matched = true;
+    }
+    return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
+  }).join("");
+
+  if (norm && !matched && !norm.startsWith("None") && norm !== "N/A") {
+    return `<option value="${norm}" selected>${norm}</option>` + rendered;
+  }
+  return rendered;
+}
+
 // ======================== ADMIN PRODUCT CRUD MODALS ========================
 function openAddProductModal() {
   const container = document.getElementById("product-modal-container");
@@ -3258,7 +3387,7 @@ function openAddProductModal() {
 
   container.innerHTML = `
     <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
+      <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
           <h3 class="font-black text-base text-white flex items-center gap-2"><span>➕</span> Add New Product to Inventory</h3>
           <button onclick="closeProductModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
@@ -3267,7 +3396,7 @@ function openAddProductModal() {
         <form onsubmit="handleCreateProductSubmit(event)" autocomplete="off" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-300 uppercase mb-1">Product Title / Name <span class="text-red-400">*</span></label>
-            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+            <input type="text" id="new-prod-name" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
           </div>
 
           <div class="grid grid-cols-3 gap-3">
@@ -3289,93 +3418,53 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-brand" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.brands, "Dell")}
+              </select>
             </div>
           </div>
 
-          <!-- Processor, Generation & Screen Size Selection (User Specified Fields) -->
+          <!-- Processor, Generation & Screen Size Selection (Dropdowns for all) -->
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="processor-list-options">
-              <datalist id="processor-list-options">
-                <option value="Intel Core i5">
-                <option value="Intel Core i7">
-                <option value="Intel Core i9">
-                <option value="Intel Core i3">
-                <option value="AMD Ryzen 5">
-                <option value="AMD Ryzen 7">
-                <option value="AMD Ryzen 9">
-                <option value="Apple M1 / M2 / M3">
-                <option value="Intel Xeon">
-              </datalist>
+              <select id="new-prod-processor" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.processors, "Intel Core i5")}
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="new-prod-generation" placeholder="e.g. 11th Gen" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="gen-list-options">
-              <datalist id="gen-list-options">
-                <option value="8th Gen">
-                <option value="9th Gen">
-                <option value="10th Gen">
-                <option value="11th Gen">
-                <option value="12th Gen">
-                <option value="13th Gen">
-                <option value="14th Gen">
-                <option value="Apple Silicon">
-                <option value="Zen 3">
-                <option value="Zen 4">
-              </datalist>
+              <select id="new-prod-generation" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.generations, "11th Gen")}
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-screensize" placeholder="e.g. 14.0 Inch / 15.6 Inch" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="screensize-list-options">
-              <datalist id="screensize-list-options">
-                <option value="14.0 Inch (14.0&quot; FHD Display)">
-                <option value="15.6 Inch (15.6&quot; FHD Display)">
-                <option value="13.3 Inch (13.3&quot; Retina / FHD)">
-                <option value="14.0 Inch Touch (14.0&quot; FHD Touchscreen)">
-                <option value="16.0 Inch (16.0&quot; WQXGA Display)">
-                <option value="12.5 Inch (12.5&quot; Ultra-Compact)">
-                <option value="17.3 Inch (17.3&quot; Creator / Gaming)">
-                <option value="24.0 Inch (All-in-One Desktop)">
-                <option value="27.0 Inch (All-in-One / Pro Display)">
-              </datalist>
+              <select id="new-prod-screensize" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, "14.0 Inch (14.0\" FHD Display)")}
+              </select>
             </div>
           </div>
 
-          <!-- RAM & Storage Options -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- RAM, Hard Disk (HDD) and Storage (SSD) Selection -->
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-ram" placeholder="e.g. 16GB DDR4" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="ram-list-options">
-              <datalist id="ram-list-options">
-                <option value="8GB DDR4">
-                <option value="16GB DDR4">
-                <option value="32GB DDR4">
-                <option value="64GB DDR4">
-                <option value="8GB DDR5">
-                <option value="16GB DDR5">
-                <option value="32GB DDR5">
-                <option value="8GB Unified Memory">
-                <option value="16GB Unified Memory">
-                <option value="32GB Unified Memory">
-                <option value="4GB DDR3 / DDR4">
-              </datalist>
+              <select id="new-prod-ram" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.ram, "16GB DDR4")}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Hard Disk / HDD</label>
+              <select id="new-prod-hdd" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.hdd, "None (No HDD)")}
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
-              <input type="text" id="new-prod-storage" placeholder="e.g. 512GB PCIe NVMe SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="storage-list-options">
-              <datalist id="storage-list-options">
-                <option value="256GB PCIe NVMe SSD">
-                <option value="512GB PCIe NVMe SSD">
-                <option value="1TB PCIe NVMe SSD">
-                <option value="2TB PCIe NVMe SSD">
-                <option value="128GB SSD">
-                <option value="256GB SSD + 1TB HDD">
-                <option value="512GB SSD + 1TB HDD">
-                <option value="1TB HDD">
-                <option value="2TB HDD">
-              </datalist>
+              <select id="new-prod-ssd" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.ssd, "512GB PCIe NVMe SSD")}
+              </select>
             </div>
           </div>
 
@@ -3398,7 +3487,9 @@ function openAddProductModal() {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
-              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="new-prod-warranty" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, "1 Year Doorstep Warranty")}
+              </select>
             </div>
           </div>
 
@@ -3474,7 +3565,8 @@ function handleCreateProductSubmit(event) {
   const genEl = document.getElementById("new-prod-generation");
   const screenEl = document.getElementById("new-prod-screensize");
   const ramEl = document.getElementById("new-prod-ram");
-  const storageEl = document.getElementById("new-prod-storage");
+  const hddEl = document.getElementById("new-prod-hdd");
+  const ssdEl = document.getElementById("new-prod-ssd");
   const crazyEl = document.getElementById("new-prod-crazy");
   const newEl = document.getElementById("new-prod-new");
   const urlImage = document.getElementById("new-prod-image-url")?.value;
@@ -3489,14 +3581,27 @@ function handleCreateProductSubmit(event) {
 
   const priceVal = Number(priceEl ? priceEl.value : 0) || 0;
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
-  const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
-  const generationVal = (genEl ? genEl.value : "").trim() || "";
-  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch";
+  const processorVal = (procEl ? procEl.value : "").trim() || "Intel Core i5";
+  const generationVal = (genEl ? genEl.value : "").trim() || "N/A / Standard";
+  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch (14.0\" FHD Display)";
   const ramVal = (ramEl ? ramEl.value : "").trim() || "16GB DDR4";
-  const storageVal = (storageEl ? storageEl.value : "").trim() || "512GB NVMe SSD";
+  const hddVal = (hddEl ? hddEl.value : "").trim() || "None (No HDD)";
+  const ssdVal = (ssdEl ? ssdEl.value : "").trim() || "512GB PCIe NVMe SSD";
+  
+  const hasSSD = ssdVal && !ssdVal.startsWith("None");
+  const hasHDD = hddVal && !hddVal.startsWith("None");
+  let combinedStorage = "512GB NVMe SSD";
+  if (hasSSD && hasHDD) {
+    combinedStorage = `${ssdVal} + ${hddVal}`;
+  } else if (hasSSD) {
+    combinedStorage = ssdVal;
+  } else if (hasHDD) {
+    combinedStorage = hddVal;
+  }
+
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
-  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
+  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Dell");
   const nameVal = (nameEl ? nameEl.value : "New Product").trim() || "New Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
   const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
@@ -3519,7 +3624,9 @@ function handleCreateProductSubmit(event) {
     generation: generationVal,
     screenSize: screenSizeVal,
     ram: ramVal,
-    storage: storageVal,
+    storage: combinedStorage,
+    ssd: hasSSD ? ssdVal : "",
+    hdd: hasHDD ? hddVal : "",
     price: priceVal,
     originalPrice: origPriceVal,
     stockLeft: stockVal,
@@ -3530,14 +3637,16 @@ function handleCreateProductSubmit(event) {
       screenSize: screenSizeVal,
       display: screenSizeVal,
       ram: ramVal,
-      storage: storageVal,
+      storage: combinedStorage,
+      ssd: hasSSD ? ssdVal : "",
+      hdd: hasHDD ? hddVal : "",
       warranty: warrantyVal
     },
     images: finalImages,
     image: finalImages[0],
     isCrazyDeal: Boolean(crazyEl?.checked),
     isNew: Boolean(newEl ? newEl.checked : true),
-    features: [processorVal, ramVal, storageVal, screenSizeVal, "1 Year Warranty"].filter(Boolean)
+    features: [processorVal, ramVal, combinedStorage, screenSizeVal, "1 Year Warranty"].filter(Boolean)
   };
 
   const created = appState.addProduct(newProduct);
@@ -3556,9 +3665,25 @@ function openEditProductModal(prodId) {
   tempUploadedImages = [...(p.images || [p.image || ""])].filter(Boolean);
   const categories = appState.state.categories || [];
 
+  // Parse existing SSD and HDD values if present
+  let currentSSD = p.ssd || p.specs?.ssd || "";
+  let currentHDD = p.hdd || p.specs?.hdd || "";
+  if (!currentSSD && !currentHDD) {
+    const rawStorage = p.storage || p.specs?.storage || "";
+    if (rawStorage.includes("SSD") && rawStorage.includes("HDD")) {
+      const parts = rawStorage.split("+").map(s => s.trim());
+      currentSSD = parts.find(s => s.includes("SSD")) || "";
+      currentHDD = parts.find(s => s.includes("HDD")) || "";
+    } else if (rawStorage.includes("HDD")) {
+      currentHDD = rawStorage;
+    } else {
+      currentSSD = rawStorage;
+    }
+  }
+
   container.innerHTML = `
     <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
+      <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
           <h3 class="font-black text-base text-white flex items-center gap-2"><span>✏️</span> Edit Product: <span class="font-mono text-cyan-400 text-xs">${p.id}</span></h3>
           <button onclick="closeProductModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
@@ -3585,46 +3710,53 @@ function openEditProductModal(prodId) {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
-              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" placeholder="e.g. Dell, HP, Lenovo" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-brand" required class="w-full rounded-xl p-3 font-bold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.brands, p.brand || "Dell")}
+              </select>
             </div>
           </div>
 
-          <!-- Processor, Generation & Screen Size Selection (User Specified Fields) -->
+          <!-- Processor, Generation & Screen Size Selection (Dropdowns for all) -->
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
-              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" placeholder="e.g. Intel Core i5" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="processor-list-options">
-              <datalist id="processor-list-options">
-                <option value="Intel Core i5">
-                <option value="Intel Core i7">
-                <option value="Intel Core i9">
-                <option value="Intel Core i3">
-                <option value="AMD Ryzen 5">
-                <option value="AMD Ryzen 7">
-                <option value="AMD Ryzen 9">
-                <option value="Apple M1 / M2 / M3">
-                <option value="Intel Xeon">
-              </datalist>
+              <select id="edit-prod-processor" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.processors, p.processor || p.specs?.processor || "Intel Core i5")}
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" placeholder="e.g. 11th Gen" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="gen-list-options">
+              <select id="edit-prod-generation" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.generations, p.generation || p.specs?.generation || "N/A / Standard")}
+              </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size</label>
-              <input type="text" id="edit-prod-screensize" value="${p.screenSize || p.specs?.screenSize || p.specs?.display || '14.0 Inch'}" placeholder="e.g. 14.0 Inch / 15.6 Inch" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="screensize-list-options">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Screen Size <span class="text-red-400">*</span></label>
+              <select id="edit-prod-screensize" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.screenSizes, p.screenSize || p.specs?.screenSize || p.specs?.display || "14.0 Inch (14.0\" FHD Display)")}
+              </select>
             </div>
           </div>
 
-          <!-- RAM & Storage Options -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- RAM, Hard Disk (HDD) and Storage (SSD) Selection -->
+          <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">RAM / Memory <span class="text-red-400">*</span></label>
-              <input type="text" id="edit-prod-ram" value="${p.ram || p.specs?.ram || ''}" placeholder="e.g. 16GB DDR4" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="ram-list-options">
+              <select id="edit-prod-ram" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.ram, p.ram || p.specs?.ram || "16GB DDR4")}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-300 uppercase mb-1">Hard Disk / HDD</label>
+              <select id="edit-prod-hdd" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.hdd, currentHDD || "None (No HDD)")}
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Storage / SSD <span class="text-red-400">*</span></label>
-              <input type="text" id="edit-prod-storage" value="${p.storage || p.specs?.storage || ''}" placeholder="e.g. 512GB PCIe NVMe SSD" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;" list="storage-list-options">
+              <select id="edit-prod-ssd" required class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.ssd, currentSSD || "512GB PCIe NVMe SSD")}
+              </select>
             </div>
           </div>
 
@@ -3647,7 +3779,9 @@ function openEditProductModal(prodId) {
             </div>
             <div>
               <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
-              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" placeholder="e.g. 1 Year Doorstep Warranty" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+              <select id="edit-prod-warranty" class="w-full rounded-xl p-3 font-semibold text-xs focus:outline-none" style="color: #ffffff !important; background-color: #020617 !important; border: 1px solid #334155 !important;">
+                ${renderSelectOptions(DROPDOWN_OPTIONS.warranties, p.specs?.warranty || p.warranty || "1 Year Doorstep Warranty")}
+              </select>
             </div>
           </div>
 
@@ -3706,7 +3840,8 @@ function handleEditProductSubmit(event, prodId) {
   const genEl = document.getElementById("edit-prod-generation");
   const screenEl = document.getElementById("edit-prod-screensize");
   const ramEl = document.getElementById("edit-prod-ram");
-  const storageEl = document.getElementById("edit-prod-storage");
+  const hddEl = document.getElementById("edit-prod-hdd");
+  const ssdEl = document.getElementById("edit-prod-ssd");
   const crazyEl = document.getElementById("edit-prod-crazy");
   const newEl = document.getElementById("edit-prod-new");
   const urlEl = document.getElementById("edit-prod-image-url");
@@ -3721,14 +3856,27 @@ function handleEditProductSubmit(event, prodId) {
 
   const priceVal = Number(priceEl ? priceEl.value : 0) || 0;
   const origPriceVal = Number(origPriceEl ? origPriceEl.value : 0) || priceVal;
-  const processorVal = (procEl ? procEl.value : "").trim() || "Standard Specs";
-  const generationVal = (genEl ? genEl.value : "").trim() || "";
-  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch";
+  const processorVal = (procEl ? procEl.value : "").trim() || "Intel Core i5";
+  const generationVal = (genEl ? genEl.value : "").trim() || "N/A / Standard";
+  const screenSizeVal = (screenEl ? screenEl.value : "").trim() || "14.0 Inch (14.0\" FHD Display)";
   const ramVal = (ramEl ? ramEl.value : "").trim() || "16GB DDR4";
-  const storageVal = (storageEl ? storageEl.value : "").trim() || "512GB NVMe SSD";
+  const hddVal = (hddEl ? hddEl.value : "").trim() || "None (No HDD)";
+  const ssdVal = (ssdEl ? ssdEl.value : "").trim() || "512GB PCIe NVMe SSD";
+
+  const hasSSD = ssdVal && !ssdVal.startsWith("None");
+  const hasHDD = hddVal && !hddVal.startsWith("None");
+  let combinedStorage = "512GB NVMe SSD";
+  if (hasSSD && hasHDD) {
+    combinedStorage = `${ssdVal} + ${hddVal}`;
+  } else if (hasSSD) {
+    combinedStorage = ssdVal;
+  } else if (hasHDD) {
+    combinedStorage = hddVal;
+  }
+
   let categoryVal = (catEl ? catEl.value : "Laptops").trim() || "Laptops";
   let subcategoryVal = (subcatEl ? subcatEl.value : "General").trim() || "General";
-  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Lapro");
+  const brandVal = normalizeBrandName(brandEl ? brandEl.value : "Dell");
   const nameVal = (nameEl ? nameEl.value : "").trim() || "Product";
   const stockVal = Number(stockEl ? stockEl.value : 10) || 10;
   const warrantyVal = (warrantyEl ? warrantyEl.value : "1 Year Doorstep Warranty").trim() || "1 Year Doorstep Warranty";
@@ -3742,7 +3890,9 @@ function handleEditProductSubmit(event, prodId) {
     generation: generationVal,
     screenSize: screenSizeVal,
     ram: ramVal,
-    storage: storageVal,
+    storage: combinedStorage,
+    ssd: hasSSD ? ssdVal : "",
+    hdd: hasHDD ? hddVal : "",
     price: priceVal,
     originalPrice: origPriceVal,
     stockLeft: stockVal,
@@ -3757,7 +3907,9 @@ function handleEditProductSubmit(event, prodId) {
       screenSize: screenSizeVal,
       display: screenSizeVal,
       ram: ramVal,
-      storage: storageVal,
+      storage: combinedStorage,
+      ssd: hasSSD ? ssdVal : "",
+      hdd: hasHDD ? hddVal : "",
       warranty: warrantyVal
     }
   };
@@ -3765,7 +3917,7 @@ function handleEditProductSubmit(event, prodId) {
   appState.updateProduct(prodId, updatedData);
   closeProductModal();
   setAdminTab("products");
-  showToast(`Product updated with new specs (RAM: ${ramVal}, Storage: ${storageVal}, Screen: ${screenSizeVal})!`, "✅", "success");
+  showToast(`Product updated with new configuration!`, "✅", "success");
 }
 
 function handleDeleteProduct(prodId) {

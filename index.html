@@ -582,10 +582,18 @@
     <span class="tracking-wide">Book on WhatsApp</span>
   </a>
 
+  <!-- Persistent Admin & CRUD Modal Containers (Outside #main-content to eliminate blinking) -->
+  <div id="product-modal-container"></div>
+  <div id="admin-category-modal-container"></div>
+  <div id="admin-customer-modal-container"></div>
+  <div id="admin-order-modal-container"></div>
+  <div id="admin-ticket-modal-container"></div>
+  <div id="confirm-modal-container"></div>
+
   <!-- Loaded Javascript Modules -->
-  <script src="products.js?v=20260929_4"></script>
-  <script src="state.js?v=20260929_4"></script>
-  <script src="app.js?v=20260929_4"></script>
+  <script src="products.js?v=20260929_5"></script>
+  <script src="state.js?v=20260929_5"></script>
+  <script src="app.js?v=20260929_5"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js?v=20260929_4').then(function(reg) {

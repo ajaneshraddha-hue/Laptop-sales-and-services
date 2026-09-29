@@ -416,6 +416,8 @@ class StateManager {
     const screenVal = productData.screenSize || (productData.specs && productData.specs.screenSize) || "14.0 - 15.6 Inch";
     const ramVal = productData.ram || (productData.specs && productData.specs.ram) || "16GB DDR4";
     const storageVal = productData.storage || (productData.specs && productData.specs.storage) || "512GB NVMe SSD";
+    const ssdVal = productData.ssd || (productData.specs && productData.specs.ssd) || "";
+    const hddVal = productData.hdd || (productData.specs && productData.specs.hdd) || "";
 
     const newProduct = {
       id: newId,
@@ -442,6 +444,8 @@ class StateManager {
       generation: genVal,
       ram: ramVal,
       storage: storageVal,
+      ssd: ssdVal,
+      hdd: hddVal,
       os: osVal,
       specs: {
         ...(productData.specs || {}),
@@ -449,6 +453,8 @@ class StateManager {
         generation: genVal,
         ram: ramVal,
         storage: storageVal,
+        ssd: ssdVal,
+        hdd: hddVal,
         os: osVal,
         screenSize: screenVal,
         display: screenVal,
@@ -493,6 +499,8 @@ class StateManager {
       const screenVal = updatedData.screenSize !== undefined ? updatedData.screenSize : (orig.screenSize || (orig.specs && orig.specs.screenSize) || "14.0 - 15.6 Inch");
       const ramVal = updatedData.ram !== undefined ? updatedData.ram : (orig.ram || (orig.specs && orig.specs.ram) || "16GB DDR4");
       const storageVal = updatedData.storage !== undefined ? updatedData.storage : (orig.storage || (orig.specs && orig.specs.storage) || "512GB NVMe SSD");
+      const ssdVal = updatedData.ssd !== undefined ? updatedData.ssd : (orig.ssd || (orig.specs && orig.specs.ssd) || "");
+      const hddVal = updatedData.hdd !== undefined ? updatedData.hdd : (orig.hdd || (orig.specs && orig.specs.hdd) || "");
 
       const updatedProd = {
         ...orig,
@@ -504,6 +512,8 @@ class StateManager {
         screenSize: screenVal,
         ram: ramVal,
         storage: storageVal,
+        ssd: ssdVal,
+        hdd: hddVal,
         specs: {
           ...(orig.specs || {}),
           ...(updatedData.specs || {}),
@@ -511,6 +521,8 @@ class StateManager {
           generation: gen,
           ram: ramVal,
           storage: storageVal,
+          ssd: ssdVal,
+          hdd: hddVal,
           os: osVal,
           screenSize: screenVal,
           display: screenVal,
