@@ -211,6 +211,20 @@ function handleGlobalSearch(event) {
 function openAuthModal(tab = "login") {
   const modal = document.getElementById("auth-modal");
   if (modal) {
+    // Clear any previous or autofilled credentials
+    const loginEmail = document.getElementById("login-email");
+    const loginPass = document.getElementById("login-pass");
+    const regName = document.getElementById("reg-name");
+    const regEmail = document.getElementById("reg-email");
+    const regPhone = document.getElementById("reg-phone");
+    const regPass = document.getElementById("reg-pass");
+    if (loginEmail) loginEmail.value = "";
+    if (loginPass) loginPass.value = "";
+    if (regName) regName.value = "";
+    if (regEmail) regEmail.value = "";
+    if (regPhone) regPhone.value = "";
+    if (regPass) regPass.value = "";
+
     modal.classList.remove("hidden");
     modal.classList.add("flex");
     toggleAuthTab(tab);
@@ -3209,29 +3223,29 @@ function openAddProductModal() {
   const categories = appState.state.categories || [];
 
   container.innerHTML = `
-    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
-        <div class="flex justify-between items-center pb-3 border-b mb-4">
-          <h3 class="font-black text-base text-slate-900">➕ Add New Product to Inventory</h3>
-          <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+          <h3 class="font-black text-base text-white flex items-center gap-2"><span>➕</span> Add New Product to Inventory</h3>
+          <button onclick="closeProductModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
         </div>
 
-        <form onsubmit="handleCreateProductSubmit(event)" class="space-y-4 text-xs">
+        <form onsubmit="handleCreateProductSubmit(event)" autocomplete="off" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title / Name <span class="text-red-500">*</span></label>
-            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <label class="block font-bold text-slate-300 uppercase mb-1">Product Title / Name <span class="text-red-400">*</span></label>
+            <input type="text" id="new-prod-name" oninput="handleAutoDetectProductMeta(this.value)" placeholder="e.g. Dell Latitude 5420, 14.0 i5 10th Gen, 16GB RAM, 512GB SSD" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
           </div>
 
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Category <span class="text-red-400">*</span></label>
+              <select id="new-prod-category" onchange="handleModalCategoryChange(this.value, 'new-prod-subcategory')" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-bold text-xs">
                 ${categories.map(c => `<option value="${c.name}" ${c.name === 'Laptops' ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
-              <select id="new-prod-subcategory" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Subcategory</label>
+              <select id="new-prod-subcategory" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
                 <option value="Business Laptops">Business Laptops</option>
                 <option value="Consumer Laptops">Consumer Laptops</option>
                 <option value="Gaming Laptops">Gaming Laptops</option>
@@ -3240,16 +3254,16 @@ function openAddProductModal() {
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
+              <input type="text" id="new-prod-brand" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-bold text-xs">
             </div>
           </div>
 
           <!-- Processor & Generation Selection (User Specified Fields) -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
-              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
+              <input type="text" id="new-prod-processor" placeholder="e.g. Intel Core i5, Intel Core i7, AMD Ryzen 7, Apple M2" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs" list="processor-list-options">
               <datalist id="processor-list-options">
                 <option value="Intel Core i5">
                 <option value="Intel Core i7">
@@ -3263,8 +3277,8 @@ function openAddProductModal() {
               </datalist>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
+              <input type="text" id="new-prod-generation" placeholder="e.g. 10th Gen, 11th Gen, 12th Gen, 13th Gen, Zen 4" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs" list="gen-list-options">
               <datalist id="gen-list-options">
                 <option value="8th Gen">
                 <option value="9th Gen">
@@ -3283,54 +3297,59 @@ function openAddProductModal() {
           <!-- Pricing -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-price" placeholder="24990" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Selling Price (₹) <span class="text-red-400">*</span></label>
+              <input type="number" id="new-prod-price" placeholder="24990" required class="w-full bg-slate-950 border border-slate-700 text-emerald-400 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono font-black text-sm">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
-              <input type="number" id="new-prod-origprice" placeholder="49990" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              <label class="block font-bold text-slate-300 uppercase mb-1">MRP / List Price (₹)</label>
+              <input type="number" id="new-prod-origprice" placeholder="49990" class="w-full bg-slate-950 border border-slate-700 text-slate-300 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono text-xs">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left / Quantity <span class="text-red-500">*</span></label>
-              <input type="number" id="new-prod-stock" value="5" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Stock Left / Quantity <span class="text-red-400">*</span></label>
+              <input type="number" id="new-prod-stock" value="5" required class="w-full bg-slate-950 border border-slate-700 text-cyan-400 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono font-bold text-xs">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
-              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
+              <input type="text" id="new-prod-warranty" value="1 Year Doorstep Warranty" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
             </div>
           </div>
 
           <!-- Multi-Image Local File Upload -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <label class="block font-bold text-slate-800 uppercase text-[11px]">Product Images (Local File Upload)</label>
-            <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs cursor-pointer">
+          <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div>
+              <label class="block font-bold text-slate-300 uppercase text-[11px] mb-1">Product Images (Local File Upload)</label>
+              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs cursor-pointer">
+            </div>
             <div id="product-img-previews">
               <p class="text-slate-400 text-xs italic">Select one or multiple images from your computer.</p>
             </div>
 
-            <div class="pt-2">
-              <label class="block font-semibold text-slate-600 text-[10px] uppercase mb-0.5">Or Fallback Image URL</label>
-              <input type="url" id="new-prod-image-url" placeholder="https://..." class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs">
+            <div class="pt-2 border-t border-slate-800">
+              <label class="block font-semibold text-slate-400 text-[10px] uppercase mb-1">Or Add Image by Web URL / Link</label>
+              <div class="flex gap-2">
+                <input type="url" id="new-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-slate-900 border border-slate-700 text-white placeholder:text-slate-600 rounded-xl p-2.5 text-xs">
+                <button type="button" onclick="addCustomImageUrl('new-prod-image-url')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition">Add URL</button>
+              </div>
             </div>
           </div>
 
           <div class="flex items-center gap-4 pt-1">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="new-prod-crazy" class="rounded text-orange-600">
-              <span class="font-bold text-orange-600">🔥 Feature in Crazy Deals</span>
+              <input type="checkbox" id="new-prod-crazy" class="rounded bg-slate-950 border-slate-700 text-orange-500">
+              <span class="font-bold text-orange-400">🔥 Feature in Crazy Deals</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="new-prod-new" checked class="rounded text-blue-600">
-              <span class="font-bold text-blue-600">NEW Tag</span>
+              <input type="checkbox" id="new-prod-new" checked class="rounded bg-slate-950 border-slate-700 text-cyan-500">
+              <span class="font-bold text-cyan-400">NEW Tag</span>
             </label>
           </div>
 
           <div class="pt-3 flex gap-3">
-            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Add to Catalog</button>
+            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-700 text-slate-300 font-bold py-3 rounded-xl hover:bg-slate-800 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black py-3 rounded-xl transition shadow-lg">Save Product to Inventory</button>
           </div>
         </form>
       </div>
@@ -3440,43 +3459,43 @@ function openEditProductModal(prodId) {
   const categories = appState.state.categories || [];
 
   container.innerHTML = `
-    <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-200">
-        <div class="flex justify-between items-center pb-3 border-b mb-4">
-          <h3 class="font-black text-base text-slate-900">✏️ Edit Product: ${p.id}</h3>
-          <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl fade-in max-h-[90vh] overflow-y-auto border border-slate-700 text-white">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+          <h3 class="font-black text-base text-white flex items-center gap-2"><span>✏️</span> Edit Product: <span class="font-mono text-cyan-400 text-xs">${p.id}</span></h3>
+          <button onclick="closeProductModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
         </div>
 
-        <form onsubmit="handleEditProductSubmit(event, '${p.id}')" class="space-y-4 text-xs">
+        <form onsubmit="handleEditProductSubmit(event, '${p.id}')" autocomplete="off" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Product Title <span class="text-red-500">*</span></label>
-            <input type="text" id="edit-prod-name" value="${p.name}" placeholder="Enter product title" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <label class="block font-bold text-slate-300 uppercase mb-1">Product Title <span class="text-red-400">*</span></label>
+            <input type="text" id="edit-prod-name" value="${p.name || ''}" placeholder="Enter product title" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
           </div>
 
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Category <span class="text-red-500">*</span></label>
-              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Category <span class="text-red-400">*</span></label>
+              <select id="edit-prod-category" onchange="handleModalCategoryChange(this.value, 'edit-prod-subcategory')" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-bold text-xs">
                 ${categories.map(c => `<option value="${c.name}" ${p.category === c.name ? 'selected' : ''}>${c.icon || '📦'} ${c.name}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Subcategory</label>
-              <select id="edit-prod-subcategory" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Subcategory</label>
+              <select id="edit-prod-subcategory" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
                 ${(SUBCATEGORIES_BY_CATEGORY[p.category || 'Laptops'] || ['General']).map(sub => `<option value="${sub}" ${(p.subcategory === sub) ? 'selected' : ''}>${sub}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Brand <span class="text-red-500">*</span></label>
-              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Brand <span class="text-red-400">*</span></label>
+              <input type="text" id="edit-prod-brand" value="${p.brand || ''}" placeholder="e.g. Dell, HP, Lenovo" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-bold text-xs">
             </div>
           </div>
 
           <!-- Processor & Generation Selection (User Specified Fields) -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Processor <span class="text-red-500">*</span></label>
-              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" placeholder="e.g. Intel Core i5" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="processor-list-options">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Processor <span class="text-red-400">*</span></label>
+              <input type="text" id="edit-prod-processor" value="${p.processor || p.specs?.processor || ''}" placeholder="e.g. Intel Core i5" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs" list="processor-list-options">
               <datalist id="processor-list-options">
                 <option value="Intel Core i5">
                 <option value="Intel Core i7">
@@ -3490,66 +3509,66 @@ function openEditProductModal(prodId) {
               </datalist>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Generation / Series</label>
-              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" placeholder="e.g. 11th Gen" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold" list="gen-list-options">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Generation / Series</label>
+              <input type="text" id="edit-prod-generation" value="${p.generation || p.specs?.generation || ''}" placeholder="e.g. 11th Gen" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs" list="gen-list-options">
             </div>
           </div>
 
           <!-- Pricing -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Selling Price (₹) <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-price" value="${p.price}" placeholder="Selling Price" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold text-teal-700">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Selling Price (₹) <span class="text-red-400">*</span></label>
+              <input type="number" id="edit-prod-price" value="${p.price}" placeholder="Selling Price" required class="w-full bg-slate-950 border border-slate-700 text-emerald-400 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono font-black text-sm">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">MRP / List Price (₹)</label>
-              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" placeholder="MRP / List Price" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+              <label class="block font-bold text-slate-300 uppercase mb-1">MRP / List Price (₹)</label>
+              <input type="number" id="edit-prod-origprice" value="${p.originalPrice || p.price}" placeholder="MRP / List Price" class="w-full bg-slate-950 border border-slate-700 text-slate-300 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono text-xs">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Stock Left <span class="text-red-500">*</span></label>
-              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" placeholder="Stock Units" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono font-bold">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Stock Left <span class="text-red-400">*</span></label>
+              <input type="number" id="edit-prod-stock" value="${p.stockLeft}" placeholder="Stock Units" required class="w-full bg-slate-950 border border-slate-700 text-cyan-400 placeholder:text-slate-600 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-mono font-bold text-xs">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 uppercase mb-1">Warranty</label>
-              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" placeholder="e.g. 1 Year Doorstep Warranty" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+              <label class="block font-bold text-slate-300 uppercase mb-1">Warranty</label>
+              <input type="text" id="edit-prod-warranty" value="${p.specs?.warranty || p.warranty || '1 Year Warranty'}" placeholder="e.g. 1 Year Doorstep Warranty" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl p-3 focus:outline-none focus:border-cyan-400 font-semibold text-xs">
             </div>
           </div>
 
           <!-- Multi-Image Local File Upload & URL -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
             <div>
-              <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1">Product Images (Local File Upload)</label>
-              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl p-2 text-xs cursor-pointer">
+              <label class="block font-bold text-slate-300 uppercase text-[11px] mb-1">Product Images (Local File Upload)</label>
+              <input type="file" multiple accept="image/*" onchange="handleProductFilesSelect(event)" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs cursor-pointer">
             </div>
             
             <div id="product-img-previews"></div>
 
-            <div class="pt-1 border-t border-slate-200">
-              <label class="block font-bold text-slate-600 text-[10px] uppercase mb-1">Or Add Image by Web URL / Link</label>
+            <div class="pt-2 border-t border-slate-800">
+              <label class="block font-bold text-slate-400 text-[10px] uppercase mb-1">Or Add Image by Web URL / Link</label>
               <div class="flex gap-2">
-                <input type="url" id="edit-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2 text-xs">
-                <button type="button" onclick="addCustomImageUrl('edit-prod-image-url')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-3 py-2 rounded-xl transition">Add URL</button>
+                <input type="url" id="edit-prod-image-url" placeholder="https://images.unsplash.com/..." class="flex-1 bg-slate-900 border border-slate-700 text-white placeholder:text-slate-600 rounded-xl p-2.5 text-xs">
+                <button type="button" onclick="addCustomImageUrl('edit-prod-image-url')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition">Add URL</button>
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-4 pt-1">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="edit-prod-crazy" ${p.isCrazyDeal ? 'checked' : ''} class="rounded text-orange-600">
-              <span class="font-bold text-orange-600">🔥 Feature in Crazy Deals</span>
+              <input type="checkbox" id="edit-prod-crazy" ${p.isCrazyDeal ? 'checked' : ''} class="rounded bg-slate-950 border-slate-700 text-orange-500">
+              <span class="font-bold text-orange-400">🔥 Feature in Crazy Deals</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="edit-prod-new" ${p.isNew ? 'checked' : ''} class="rounded text-blue-600">
-              <span class="font-bold text-blue-600">NEW Tag</span>
+              <input type="checkbox" id="edit-prod-new" ${p.isNew ? 'checked' : ''} class="rounded bg-slate-950 border-slate-700 text-cyan-500">
+              <span class="font-bold text-cyan-400">NEW Tag</span>
             </label>
           </div>
 
           <div class="pt-3 flex gap-3">
-            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow">Save Changes</button>
+            <button type="button" onclick="closeProductModal()" class="flex-1 border border-slate-700 text-slate-300 font-bold py-3 rounded-xl hover:bg-slate-800 transition">Cancel</button>
+            <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black py-3 rounded-xl transition shadow-lg">Save Changes to Database</button>
           </div>
         </form>
       </div>
@@ -3830,22 +3849,22 @@ function openAddCustomerModal() {
           <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
         </div>
 
-        <form onsubmit="handleCreateCustomerSubmit(event)" class="space-y-4 text-xs">
+        <form onsubmit="handleCreateCustomerSubmit(event)" autocomplete="off" class="space-y-4 text-xs">
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Full Name <span class="text-red-500">*</span></label>
-            <input type="text" id="new-cust-name" placeholder="e.g. Ramesh Kumar" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
+            <input type="text" id="new-cust-name" placeholder="Enter full name" autocomplete="off" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Email Address <span class="text-red-500">*</span></label>
-            <input type="email" id="new-cust-email" placeholder="ramesh@example.com" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
+            <input type="email" id="new-cust-email" placeholder="customer@email.com" autocomplete="off" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-mono">
           </div>
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number <span class="text-red-500">*</span></label>
-            <input type="tel" id="new-cust-phone" placeholder="+91 98450 00000" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            <input type="tel" id="new-cust-phone" placeholder="Enter 10-digit mobile number" autocomplete="off" required class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">Delivery Address</label>
-            <input type="text" id="new-cust-address" placeholder="e.g. 45, 1st Cross, Indiranagar, Bangalore" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:border-blue-600">
+            <input type="text" id="new-cust-address" placeholder="Enter doorstep delivery address" autocomplete="off" class="w-full bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 rounded-xl p-2.5 focus:outline-none focus:border-blue-600 font-semibold">
           </div>
 
           <div class="pt-2 flex gap-3">

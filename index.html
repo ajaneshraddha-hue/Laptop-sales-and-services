@@ -40,32 +40,27 @@
 
     h1, h2, h3, h4, button, input, select, textarea { font-family: inherit; }
 
-    /* Fix input text visibility in light modals vs dark containers */
+    /* Clean, reliable input & select text styling */
     input, select, textarea {
-      color: #0f172a;
-    }
-    .bg-white input, .bg-white select, .bg-white textarea,
-    .bg-slate-50 input, .bg-slate-50 select, .bg-slate-50 textarea,
-    .bg-slate-100 input, .bg-slate-100 select, .bg-slate-100 textarea,
-    #product-modal-container input, #product-modal-container select, #product-modal-container textarea,
-    #admin-category-modal-container input, #admin-category-modal-container select,
-    #confirm-modal-container input, #confirm-modal-container select {
-      color: #0f172a !important;
-      background-color: #ffffff !important;
-    }
-    .bg-slate-950 input, .bg-slate-950 select, .bg-slate-950 textarea,
-    .bg-slate-900 input, .bg-slate-900 select, .bg-slate-900 textarea,
-    header input, header select,
-    input.text-white, select.text-white {
-      color: #ffffff !important;
-      background-color: #0f172a !important;
+      font-family: inherit;
     }
     input::placeholder, textarea::placeholder {
-      color: #94a3b8 !important;
+      color: #64748b;
     }
-    select option {
-      color: #0f172a !important;
-      background: #ffffff !important;
+    /* Dark Theme Modal & Form Inputs */
+    .dark-input, input.text-white, select.text-white, textarea.text-white,
+    .bg-slate-900 input, .bg-slate-900 select, .bg-slate-900 textarea,
+    .bg-slate-950 input, .bg-slate-950 select, .bg-slate-950 textarea {
+      color: #ffffff !important;
+      background-color: #020617 !important;
+      border-color: #334155 !important;
+    }
+    .dark-input::placeholder, input.text-white::placeholder {
+      color: #64748b !important;
+    }
+    .dark-input option, select.text-white option, .bg-slate-900 select option, .bg-slate-950 select option {
+      background-color: #0f172a !important;
+      color: #ffffff !important;
     }
 
     header {
@@ -426,14 +421,14 @@
       </div>
 
       <!-- Customer Login Form -->
-      <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" class="space-y-4">
+      <form id="form-login" onsubmit="handleCustomerLoginSubmit(event)" autocomplete="off" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
-          <input type="email" id="login-email" required placeholder="Enter your email address" class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
+          <input type="email" id="login-email" name="cust_login_email" autocomplete="off" required placeholder="Enter your registered email" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
-          <input type="password" id="login-pass" required placeholder="Enter password" class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
+          <input type="password" id="login-pass" name="cust_login_pass" autocomplete="new-password" required placeholder="Enter your password" class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400">
         </div>
         <div class="flex justify-between items-center text-xs">
           <label class="flex items-center gap-1.5 text-slate-400 cursor-pointer">
@@ -445,22 +440,22 @@
       </form>
 
       <!-- Customer Register Form -->
-      <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" class="space-y-3.5 hidden">
+      <form id="form-register" onsubmit="handleCustomerRegisterSubmit(event)" autocomplete="off" class="space-y-3.5 hidden">
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name <span class="text-red-400">*</span></label>
-          <input type="text" id="reg-name" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. Ramesh Kumar">
+          <input type="text" id="reg-name" name="cust_reg_name" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your full name">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address <span class="text-red-400">*</span></label>
-          <input type="email" id="reg-email" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. ramesh.kumar@gmail.com">
+          <input type="email" id="reg-email" name="cust_reg_email" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter your email address">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Mobile Number <span class="text-red-400">*</span></label>
-          <input type="tel" id="reg-phone" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="e.g. +91 98765 43210">
+          <input type="tel" id="reg-phone" name="cust_reg_phone" autocomplete="off" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Enter 10-digit mobile number">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password <span class="text-red-400">*</span></label>
-          <input type="password" id="reg-pass" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Create strong password">
+          <input type="password" id="reg-pass" name="cust_reg_pass" autocomplete="new-password" required class="w-full bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-400" placeholder="Create a secure password">
         </div>
         <div class="flex items-center gap-1.5 text-xs py-1">
           <input type="checkbox" id="reg-consent" required class="rounded bg-slate-950 border-slate-700 text-cyan-500">
